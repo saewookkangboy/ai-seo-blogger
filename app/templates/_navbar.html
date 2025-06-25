@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Blog Generator(w/ AI)</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">콘텐츠 생성</a></li>
+        <li class="nav-item"><a class="nav-link {% if '/history' in request.path %}active{% endif %}" href="/history">생성 기록</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link {% if '/admin' in request.path %}active{% endif %}" href="/admin"><i class="bi bi-gear"></i> 관리</a></li>
+        {% if request.session and request.session.get('admin_authenticated') %}
+        <li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> 로그아웃</a></li>
+        {% else %}
+        <li class="nav-item"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> 로그인</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav> 

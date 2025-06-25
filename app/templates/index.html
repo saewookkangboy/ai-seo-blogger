@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SEO Blog Post Generator</title>
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/common.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, html { font-family: 'IBM Plex Sans KR', sans-serif !important; }
+        body { background-color: #f8f9fa; }
+        .container { max-width: 960px; }
+        .card { margin-bottom: 1.5rem; }
+        #result-container {
+            border: 1px solid #dee2e6;
+            border-radius: .375rem;
+            padding: 1.5rem;
+            background-color: #fff;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .keyword-badge {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .progress-container {
+            display: none;
+            margin: 1rem 0;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: #e9ecef;
+            border-radius: 0.375rem;
+            margin: 0 0.25rem;
+        }
+        .step.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .step.completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .service-status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+            animation: pulse 2s infinite;
+        }
+        .service-status-indicator.warning {
+            background-color: #ffc107;
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+        }
+        .service-status-indicator.danger {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+    </style>
+</head>
+<body>
+    {% include '_navbar.html' %}
+    <div class="container" style="padding-top: 84px; padding-bottom: 120px;">
+        <div class="row mb-4 g-3 align-items-stretch">
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <a href="/admin#stats-panel" class="text-white text-decoration-underline" style="cursor:pointer;"><span style="font-size:1.1em;">📊</span> 누적 통계</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered mb-0 w-100 text-center align-middle">
+                            <tr class="table-light">
+                                <th>크롤링 건수</th>
+                                <th>원고 초안 작성</th>
+                                <th>오류 건수</th>
+                                <th>키워드 추출</th>
+                                <th>상위 키워드(3개)</th>
+                            </tr>
+                            <tr>
+                                <td id="total-crawling">-</td>
+                                <td id="total-posts">-</td>
+                                <td id="total-errors">-</td>
+                                <td id="total-keywords">-</td>
+                                <td id="top-keywords" style="white-space:pre-line;">-</td>
+                            </tr>
+                        </table>
+                        <div class="alert alert-primary mt-2 mb-0 py-2 small text-center">시스템 동작 이후, 직접 실행한 통계만 누적하여 제공합니다</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-graph-up-arrow"></i> API 호출 건수
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div id="service-status" class="service-status-indicator me-2" title="서비스 상태"></div>
+                            <span id="status-text" class="small">정상</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <div class="mb-2 w-100 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold"><i class="bi bi-robot"></i> OpenAI</span>
+                            <span id="openai-count" class="fs-5 text-primary">-</span>
+                        </div>
+                        <div class="mb-2 w-100 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold"><i class="bi bi-translate"></i> DeepL</span>
+                            <span id="deepl-count" class="fs-5 text-success">-</span>
+                        </div>
+                        <div class="mb-2 w-100 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold"><i class="bi bi-stars"></i> Gemini</span>
+                            <span id="gemini-count" class="fs-5 text-warning">-</span>
+                        </div>
+                        <div class="text-muted small mt-2">(누적 호출 수, 실시간 집계)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><span style="font-size:1.1em;">📝</span> 블로그 포스트 생성</h5>
+                <!-- RULE/AI MODE 선택 UI 시작 -->
+                <div class="mb-3">
+                    <label class="form-check-label me-3">
+                        <input class="form-check-input" type="checkbox" name="rules" value="AI_SEO"> AI SEO
+                    </label>
+                    <label class="form-check-label me-3">
+                        <input class="form-check-input" type="checkbox" name="rules" value="AI_SEARCH"> AI SEARCH
+                    </label>
+                    <label class="form-check-label me-3">
+                        <input class="form-check-input" type="checkbox" name="rules" value="AIEO"> AIEO
+                    </label>
+                    <label for="ai_mode" class="form-label ms-3 me-2">AI MODE:</label>
+                    <select class="form-select d-inline-block w-auto" name="ai_mode" id="ai_mode">
+                        <option value="">선택 안함</option>
+                        <option value="뉴스">뉴스</option>
+                        <option value="리뷰">리뷰</option>
+                        <option value="가이드">가이드</option>
+                        <option value="요약">요약</option>
+                        <option value="블로그">블로그</option>
+                    </select>
+                    <label class="form-check-label ms-3">
+                        <input class="form-check-input" type="checkbox" id="policy_auto" name="policy_auto" value="1"> 균형 잡힌 관점(Policy) 자동 적용
+                    </label>
+                </div>
+                <!-- RULE/AI MODE 선택 UI 끝 -->
+                <!-- 탭 메뉴 UI -->
+                <ul class="nav nav-tabs" id="inputTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-tab-pane" type="button" role="tab"><i class="bi bi-link-45deg"></i> URL로 입력</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab"><i class="bi bi-textarea-t"></i> 텍스트로 입력</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="url-text-tab" data-bs-toggle="tab" data-bs-target="#url-text-tab-pane" type="button" role="tab"><i class="bi bi-link-45deg"></i> URL+텍스트 입력</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="kor-content-tab" data-bs-toggle="tab" data-bs-target="#kor-content-tab-pane" type="button" role="tab"><i class="bi bi-translate"></i> KOR 콘텐츠 입력</button>
+                    </li>
+                </ul>
+                <!-- 탭 콘텐츠 -->
+                <div class="tab-content pt-3" id="inputTabContent">
+                    <div class="tab-pane fade show active" id="url-tab-pane" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="url_input" class="form-label">참고 아티클 URL:</label>
+                            <textarea id="url_input" class="form-control" rows="3" placeholder="분석하고 싶은 해외 아티클의 URL을 입력하세요..."></textarea>
+                        </div>
+                        <div class="alert alert-info small">이 탭은 <b>DeepL 번역 API</b>를 사용합니다.</div>
+                    </div>
+                    <div class="tab-pane fade" id="text-tab-pane" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="text_input" class="form-label">번역 및 요약할 원문 텍스트:</label>
+                            <textarea id="text_input" class="form-control" rows="8" placeholder="여기에 직접 텍스트를 붙여넣으세요..."></textarea>
+                        </div>
+                        <div class="alert alert-info small">이 탭은 <b>DeepL 번역 API</b>를 사용합니다.</div>
+                    </div>
+                    <div class="tab-pane fade" id="url-text-tab-pane" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="url_text_url_input" class="form-label">참고 아티클 URL:</label>
+                            <textarea id="url_text_url_input" class="form-control" rows="2" placeholder="URL을 입력하세요..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="url_text_text_input" class="form-label">추가 텍스트 입력:</label>
+                            <textarea id="url_text_text_input" class="form-control" rows="4" placeholder="추가로 번역/요약할 텍스트를 입력하세요..."></textarea>
+                        </div>
+                        <div class="alert alert-info small">이 탭은 <b>Gemini 번역 API</b>를 사용하며, 생성 결과는 <b>1000~2000자 이내</b>로 제한됩니다.</div>
+                    </div>
+                    <div class="tab-pane fade" id="kor-content-tab-pane" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="kor_content_url_input" class="form-label">KOR 콘텐츠 URL (선택):</label>
+                            <textarea id="kor_content_url_input" class="form-control" rows="2" placeholder="한국어 콘텐츠의 URL을 입력하세요..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="kor_content_text_input" class="form-label">KOR 콘텐츠 텍스트 (선택):</label>
+                            <textarea id="kor_content_text_input" class="form-control" rows="6" placeholder="한국어 콘텐츠를 직접 입력하거나 붙여넣으세요..."></textarea>
+                        </div>
+                        <div class="alert alert-info small">이 탭은 <b>Gemini 번역 API</b>를 사용하며, 생성 결과는 <b>1000~2000자 이내</b>로 제한됩니다.<br>번역 없이 요약 및 AI RULE/가이드라인이 반영됩니다.</div>
+                    </div>
+                </div>
+                <div class="d-inline-flex gap-2">
+                    <button id="generate-btn" class="btn btn-primary" onclick="handleGenerate()">
+                        <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        생성하기
+                    </button>
+                    <button id="cancel-btn" class="btn btn-outline-danger" type="button" onclick="handleCancel()">중단하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 진행률 표시 -->
+        <div class="progress-container" id="progress-container">
+            <div class="step-indicator">
+                <div class="step" id="step-1">1. 크롤링</div>
+                <div class="step" id="step-2">2. 번역</div>
+                <div class="step" id="step-3">3. 키워드 추출</div>
+                <div class="step" id="step-4">4. 콘텐츠 생성</div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">생성 결과</h5>
+                    <div>
+                        <button id="copy-btn" class="btn btn-secondary btn-sm d-none me-2" onclick="copyResult()">콘텐츠 복사</button>
+                        <button id="download-btn" class="btn btn-success btn-sm d-none" onclick="downloadResult()">HTML 다운로드</button>
+                    </div>
+                </div>
+                <div>
+                    <strong>AI 추천 키워드:</strong>
+                    <div id="keywords-container" class="mt-2">
+                        <span class="text-muted">콘텐츠 생성 시 자동으로 추출됩니다.</span>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <strong>메타 설명:</strong>
+                    <div id="meta-description-container" class="mt-1">
+                        <span class="text-muted">콘텐츠 생성 시 자동으로 생성됩니다.</span>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <strong>단어 수:</strong>
+                    <span id="word-count-container" class="text-muted">-</span>
+                </div>
+                <div class="mt-2 d-flex justify-content-end">
+                    <button id="seo-check-btn" class="btn btn-outline-info btn-sm" type="button" onclick="showSeoAppliedModal()">SEO 적용 여부 보기</button>
+                </div>
+                <hr>
+                <div id="result-container">
+                    <p class="text-muted">여기에 생성된 블로그 포스트 초고가 표시됩니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let currentStep = 0;
+        const totalSteps = 4;
+
+        function updateProgress(step) {
+            currentStep = step;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = (step / totalSteps) * 100;
+            progressBar.style.width = progressPercent + '%';
+            
+            // 단계별 상태 업데이트
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepElement = document.getElementById(`step-${i}`);
+                if (i < step) {
+                    stepElement.className = 'step completed';
+                } else if (i === step) {
+                    stepElement.className = 'step active';
+                } else {
+                    stepElement.className = 'step';
+                }
+            }
+        }
+
+        async function copyResult() {
+            const resultContainer = document.getElementById('result-container');
+            // 생성 기록 모달과 동일한 스타일의 wrapper로 감싸서 복사
+            const contentToCopy = `<div class=\"modal-body\" style=\"font-family:'IBM Plex Sans KR',sans-serif;background:#fff;padding:1.5rem;border-radius:.375rem;min-height:200px;max-height:600px;overflow-y:auto;\">${resultContainer.innerHTML}</div>`;
+            try {
+                // HTML 콘텐츠를 포함하는 Blob 객체를 생성
+                const blob = new Blob([contentToCopy], { type: 'text/html' });
+                // Blob을 포함하는 ClipboardItem 객체 생성
+                const clipboardItem = new ClipboardItem({ 'text/html': blob });
+                // Rich Text 형식으로 클립보드에 쓰기
+                await navigator.clipboard.write([clipboardItem]);
+                const copyBtn = document.getElementById('copy-btn');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '복사 완료!';
+                copyBtn.classList.remove('btn-secondary');
+                copyBtn.classList.add('btn-success');
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('btn-success');
+                    copyBtn.classList.add('btn-secondary');
+                }, 2000);
+            } catch (err) {
+                console.error('클립보드 복사 실패:', err);
+                alert('복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+            }
+        }
+
+        function downloadResult() {
+            const resultContainer = document.getElementById('result-container');
+            const content = resultContainer.innerHTML;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'blog-post.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // --- 실시간 집계 타이머 관리 변수 추가 ---
+        let apiUsageInterval = null;
+        let apiUsageStartTime = null;
+
+        // --- API 호출 건수 업데이트 함수 ---
+        function updateApiUsageCounts() {
+            fetch('/api/v1/stats/api-usage')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('openai-count').textContent = data.openai ?? '-';
+                    document.getElementById('deepl-count').textContent = data.deepl ?? '-';
+                    document.getElementById('gemini-count').textContent = data.gemini ?? '-';
+                    
+                    // 서비스 상태 업데이트
+                    updateServiceStatus(data);
+                })
+                .catch(error => {
+                    console.error('API 호출 건수 조회 실패:', error);
+                    updateServiceStatus({ openai: 0, deepl: 0, gemini: 0 }, 'error');
+                });
+        }
+
+        // --- 서비스 상태 업데이트 함수 ---
+        function updateServiceStatus(data, errorType = null) {
+            const statusIndicator = document.getElementById('service-status');
+            const statusText = document.getElementById('status-text');
+            
+            if (errorType === 'error') {
+                // API 조회 실패 시
+                statusIndicator.className = 'service-status-indicator danger';
+                statusText.textContent = '연결 오류';
+                statusText.className = 'small text-danger';
+                return;
+            }
+            
+            // API 호출 건수 기반 상태 판단
+            const totalCalls = (data.openai || 0) + (data.deepl || 0) + (data.gemini || 0);
+            
+            if (totalCalls === 0) {
+                // API 호출이 없음 (서비스 미사용)
+                statusIndicator.className = 'service-status-indicator warning';
+                statusText.textContent = '대기 중';
+                statusText.className = 'small text-warning';
+            } else if (totalCalls >= 1 && totalCalls <= 100000) {
+                // 정상 사용 중
+                statusIndicator.className = 'service-status-indicator';
+                statusText.textContent = '정상';
+                statusText.className = 'small text-success';
+            } else if (totalCalls >= 100001 && totalCalls <= 1000000) {
+                // 높은 사용량
+                statusIndicator.className = 'service-status-indicator warning';
+                statusText.textContent = '높은 사용량';
+                statusText.className = 'small text-warning';
+            } else {
+                // 매우 높은 사용량
+                statusIndicator.className = 'service-status-indicator danger';
+                statusText.textContent = '과부하';
+                statusText.className = 'small text-danger';
+            }
+        }
+
+        // --- 실시간 집계 타이머 시작 함수 ---
+        function startApiUsageInterval() {
+            if (apiUsageInterval) clearInterval(apiUsageInterval);
+            apiUsageStartTime = Date.now();
+            updateApiUsageCounts();
+            apiUsageInterval = setInterval(() => {
+                // 1분(60초) 경과 시 타이머 중단
+                if (Date.now() - apiUsageStartTime > 60000) {
+                    clearInterval(apiUsageInterval);
+                    apiUsageInterval = null;
+                    return;
+                }
+                updateApiUsageCounts();
+            }, 5000);
+        }
+
+        // AbortController 전역 선언
+        let currentAbortController = null;
+
+        function handleGenerate() {
+            const activeTab = document.querySelector('#inputTab .nav-link.active');
+            if (activeTab.id === 'url-text-tab') {
+                generatePostGemini();
+            } else if (activeTab.id === 'url-tab') {
+                generatePostByUrl();
+            } else if (activeTab.id === 'kor-content-tab') {
+                generateKorContent();
+            } else {
+                generatePostByText();
+            }
+        }
+
+        // RULE/AI MODE 선택값 추출 함수
+        function getSelectedRulesAndMode() {
+            const ruleCheckboxes = document.querySelectorAll('input[name="rules"]:checked');
+            const rules = Array.from(ruleCheckboxes).map(cb => cb.value);
+            const aiMode = document.getElementById('ai_mode').value;
+            const policyAuto = document.getElementById('policy_auto').checked;
+            return { rules, ai_mode: aiMode, policy_auto: policyAuto };
+        }
+
+        // URL 입력 탭용 함수
+        async function generatePostByUrl() {
+            const url = document.getElementById('url_input').value.trim();
+            const resultDiv = document.getElementById('result-container');
+            const keywordsDiv = document.getElementById('keywords-container');
+            const metaDescriptionDiv = document.getElementById('meta-description-container');
+            const wordCountDiv = document.getElementById('word-count-container');
+            const generateBtn = document.getElementById('generate-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const { rules, ai_mode, policy_auto } = getSelectedRulesAndMode();
+
+            if (!url) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            generateBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            copyBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            progressContainer.style.display = 'block';
+            resultDiv.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 100px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="ms-3">콘텐츠를 생성 중입니다...</p></div>';
+            keywordsDiv.innerHTML = '<span class="text-muted">키워드를 추출하고 있습니다...</span>';
+            metaDescriptionDiv.innerHTML = '<span class="text-muted">메타 설명을 생성하고 있습니다...</span>';
+            wordCountDiv.textContent = '계산 중...';
+            updateProgress(1);
+            // AbortController 생성 및 저장
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+            try {
+                const response = await fetch('/api/v1/generate-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, rules, ai_mode, policy_auto }),
+                    signal: currentAbortController.signal
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+                }
+                let content = data.post;
+                resultDiv.innerHTML = content;
+                keywordsDiv.innerHTML = data.keywords ? data.keywords.split(',').map(k => `<span class="badge bg-secondary keyword-badge">${k.trim()}</span>`).join(' ') : '<span class="text-muted">키워드 없음</span>';
+                metaDescriptionDiv.innerHTML = data.meta_description ? `<span class="text-dark">${data.meta_description}</span>` : '<span class="text-muted">메타 설명 없음</span>';
+                wordCountDiv.textContent = data.word_count ? data.word_count.toLocaleString() + '단어' : '-';
+                copyBtn.classList.remove('d-none');
+                downloadBtn.classList.remove('d-none');
+                updateProgress(4);
+                if (typeof updateApiUsageCounts === 'function') {
+                    updateApiUsageCounts();
+                    startApiUsageInterval();
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    resultDiv.innerHTML = '<div class="alert alert-warning">요청이 중단되었습니다.</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger" role="alert"><strong>오류 발생:</strong> ${error.message}</div>`;
+                }
+                keywordsDiv.innerHTML = `<span class="text-danger">키워드를 가져오지 못했습니다.</span>`;
+                metaDescriptionDiv.innerHTML = `<span class="text-danger">메타 설명을 가져오지 못했습니다.</span>`;
+                wordCountDiv.textContent = '오류';
+            } finally {
+                generateBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                currentAbortController = null;
+            }
+        }
+
+        // 텍스트 입력 탭용 함수
+        async function generatePostByText() {
+            const text = document.getElementById('text_input').value.trim();
+            const resultDiv = document.getElementById('result-container');
+            const keywordsDiv = document.getElementById('keywords-container');
+            const metaDescriptionDiv = document.getElementById('meta-description-container');
+            const wordCountDiv = document.getElementById('word-count-container');
+            const generateBtn = document.getElementById('generate-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const { rules, ai_mode, policy_auto } = getSelectedRulesAndMode();
+
+            if (!text) {
+                alert('텍스트를 입력해주세요.');
+                return;
+            }
+            generateBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            copyBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            progressContainer.style.display = 'block';
+            resultDiv.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 100px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="ms-3">콘텐츠를 생성 중입니다...</p></div>';
+            keywordsDiv.innerHTML = '<span class="text-muted">키워드를 추출하고 있습니다...</span>';
+            metaDescriptionDiv.innerHTML = '<span class="text-muted">메타 설명을 생성하고 있습니다...</span>';
+            wordCountDiv.textContent = '계산 중...';
+            updateProgress(1);
+            // AbortController 생성 및 저장
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+            try {
+                const response = await fetch('/api/v1/generate-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, rules, ai_mode, policy_auto }),
+                    signal: currentAbortController.signal
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+                }
+                let content = data.post;
+                resultDiv.innerHTML = content;
+                keywordsDiv.innerHTML = data.keywords ? data.keywords.split(',').map(k => `<span class="badge bg-secondary keyword-badge">${k.trim()}</span>`).join(' ') : '<span class="text-muted">키워드 없음</span>';
+                metaDescriptionDiv.innerHTML = data.meta_description ? `<span class="text-dark">${data.meta_description}</span>` : '<span class="text-muted">메타 설명 없음</span>';
+                wordCountDiv.textContent = data.word_count ? data.word_count.toLocaleString() + '단어' : '-';
+                copyBtn.classList.remove('d-none');
+                downloadBtn.classList.remove('d-none');
+                updateProgress(4);
+                if (typeof updateApiUsageCounts === 'function') {
+                    updateApiUsageCounts();
+                    startApiUsageInterval();
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    resultDiv.innerHTML = '<div class="alert alert-warning">요청이 중단되었습니다.</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger" role="alert"><strong>오류 발생:</strong> ${error.message}</div>`;
+                }
+                keywordsDiv.innerHTML = `<span class="text-danger">키워드를 가져오지 못했습니다.</span>`;
+                metaDescriptionDiv.innerHTML = `<span class="text-danger">메타 설명을 가져오지 못했습니다.</span>`;
+                wordCountDiv.textContent = '오류';
+            } finally {
+                generateBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                currentAbortController = null;
+            }
+        }
+
+        async function generatePostGemini() {
+            const url = document.getElementById('url_text_url_input').value.trim();
+            const text = document.getElementById('url_text_text_input').value.trim();
+            const resultDiv = document.getElementById('result-container');
+            const keywordsDiv = document.getElementById('keywords-container');
+            const metaDescriptionDiv = document.getElementById('meta-description-container');
+            const wordCountDiv = document.getElementById('word-count-container');
+            const generateBtn = document.getElementById('generate-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const { rules, ai_mode, policy_auto } = getSelectedRulesAndMode();
+
+            if (!url && !text) {
+                alert('URL 또는 텍스트를 입력해주세요.');
+                return;
+            }
+            generateBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            copyBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            progressContainer.style.display = 'block';
+            resultDiv.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 100px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="ms-3">Gemini API로 콘텐츠를 생성 중입니다...</p></div>';
+            keywordsDiv.innerHTML = '<span class="text-muted">키워드를 추출하고 있습니다...</span>';
+            metaDescriptionDiv.innerHTML = '<span class="text-muted">메타 설명을 생성하고 있습니다...</span>';
+            wordCountDiv.textContent = '계산 중...';
+            updateProgress(1);
+            // AbortController 생성 및 저장
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+            try {
+                const response = await fetch('/api/v1/generate-post-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, text, rules, ai_mode, policy_auto }),
+                    signal: currentAbortController.signal
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+                }
+                // 결과 표시 (1000~2000자 이내로 자르기)
+                let content = data.post;
+                if (content.length > 2000) content = content.slice(0, 2000);
+                if (content.length > 1000) {
+                    resultDiv.innerHTML = content;
+                } else {
+                    resultDiv.innerHTML = '<span class="text-danger">생성 결과가 너무 짧습니다. 다시 시도해 주세요.</span>';
+                }
+                // 키워드, 메타 설명, 단어 수 등 표시
+                keywordsDiv.innerHTML = data.keywords ? data.keywords.split(',').map(k => `<span class="badge bg-secondary keyword-badge">${k.trim()}</span>`).join(' ') : '<span class="text-muted">키워드 없음</span>';
+                metaDescriptionDiv.innerHTML = data.meta_description ? `<span class="text-dark">${data.meta_description}</span>` : '<span class="text-muted">메타 설명 없음</span>';
+                wordCountDiv.textContent = data.word_count ? data.word_count.toLocaleString() + '단어' : '-';
+                copyBtn.classList.remove('d-none');
+                downloadBtn.classList.remove('d-none');
+                updateProgress(4);
+                if (typeof updateApiUsageCounts === 'function') {
+                    updateApiUsageCounts();
+                    startApiUsageInterval();
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    resultDiv.innerHTML = '<div class="alert alert-warning">요청이 중단되었습니다.</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger" role="alert"><strong>오류 발생:</strong> ${error.message}</div>`;
+                }
+                keywordsDiv.innerHTML = `<span class="text-danger">키워드를 가져오지 못했습니다.</span>`;
+                metaDescriptionDiv.innerHTML = `<span class="text-danger">메타 설명을 가져오지 못했습니다.</span>`;
+                wordCountDiv.textContent = '오류';
+            } finally {
+                generateBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                currentAbortController = null;
+            }
+        }
+
+        async function generateKorContent() {
+            const url = document.getElementById('kor_content_url_input').value.trim();
+            const text = document.getElementById('kor_content_text_input').value.trim();
+            const resultDiv = document.getElementById('result-container');
+            const keywordsDiv = document.getElementById('keywords-container');
+            const metaDescriptionDiv = document.getElementById('meta-description-container');
+            const wordCountDiv = document.getElementById('word-count-container');
+            const generateBtn = document.getElementById('generate-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const { rules, ai_mode, policy_auto } = getSelectedRulesAndMode();
+            if (!url && !text) {
+                alert('URL 또는 텍스트를 입력해주세요.');
+                return;
+            }
+            generateBtn.disabled = true;
+            btnSpinner.classList.remove('d-none');
+            copyBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            progressContainer.style.display = 'block';
+            resultDiv.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 100px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="ms-3">KOR 콘텐츠 요약 및 가이드라인 적용 중...</p></div>';
+            keywordsDiv.innerHTML = '<span class="text-muted">키워드를 추출하고 있습니다...</span>';
+            metaDescriptionDiv.innerHTML = '<span class="text-muted">메타 설명을 생성하고 있습니다...</span>';
+            wordCountDiv.textContent = '계산 중...';
+            updateProgress(1);
+            // AbortController 생성 및 저장
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+            try {
+                const response = await fetch('/api/v1/generate-post-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, text, rules, ai_mode, policy_auto }),
+                    signal: currentAbortController.signal
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+                }
+                let content = data.post;
+                if (content.length > 2000) content = content.slice(0, 2000);
+                if (content.length > 1000) {
+                    resultDiv.innerHTML = content;
+                } else {
+                    resultDiv.innerHTML = '<span class="text-danger">생성 결과가 너무 짧습니다. 다시 시도해 주세요.</span>';
+                }
+                keywordsDiv.innerHTML = data.keywords ? data.keywords.split(',').map(k => `<span class="badge bg-secondary keyword-badge">${k.trim()}</span>`).join(' ') : '<span class="text-muted">키워드 없음</span>';
+                metaDescriptionDiv.innerHTML = data.meta_description ? `<span class="text-dark">${data.meta_description}</span>` : '<span class="text-muted">메타 설명 없음</span>';
+                wordCountDiv.textContent = data.word_count ? data.word_count.toLocaleString() + '단어' : '-';
+                copyBtn.classList.remove('d-none');
+                downloadBtn.classList.remove('d-none');
+                updateProgress(4);
+                if (typeof updateApiUsageCounts === 'function') {
+                    updateApiUsageCounts();
+                    startApiUsageInterval();
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    resultDiv.innerHTML = '<div class="alert alert-warning">요청이 중단되었습니다.</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger" role="alert"><strong>오류 발생:</strong> ${error.message}</div>`;
+                }
+                keywordsDiv.innerHTML = `<span class="text-danger">키워드를 가져오지 못했습니다.</span>`;
+                metaDescriptionDiv.innerHTML = `<span class="text-danger">메타 설명을 가져오지 못했습니다.</span>`;
+                wordCountDiv.textContent = '오류';
+            } finally {
+                generateBtn.disabled = false;
+                btnSpinner.classList.add('d-none');
+                currentAbortController = null;
+            }
+        }
+
+        function showSeoAppliedModal() {
+            // RULE/가이드라인 정의 (프론트에 하드코딩, 백엔드와 동기화 필요)
+            const RULE_GUIDES = {
+                'AI_SEO': [
+                    '제목에 주요 키워드 포함', '메타 설명 155자 이내', '본문에 키워드 2~3회', '헤딩 태그 구조화', '내부/외부 링크', '이미지 alt 태그'
+                ],
+                'AI_SEARCH': [
+                    '검색 의도 반영', 'FAQ/Q&A 포함', '예시/케이스 제시', '명확한 답변', '연관 질문 포함'
+                ],
+                'AIEO': [
+                    '트렌드 키워드 자동 삽입', '인기 토픽 반영', 'LSI 키워드 포함', '관심사 반영'
+                ],
+                'POLICY': [
+                    '장단점/강약점/이점-단점 명확히', '비교 요약표', '중립적 언어', '비교 언어(최고/이상적 등)', '고려사항/가치없음/가기전 섹션'
+                ],
+                'AI_MODE': {
+                    '뉴스': ['최신 정보', '객관적/간결한 문체', '출처 명시'],
+                    '리뷰': ['장단점', '실제 경험', '별점 등'],
+                    '가이드': ['단계별 설명', 'How-to', '체크리스트'],
+                    '요약': ['핵심만 간결', '불필요한 내용 생략'],
+                    '블로그': ['개인적 경험/인사이트', '독자 소통', '테크니컬 SEO(robots.txt, sitemap, 구조화, 모바일, HTTPS 등)']
+                }
+            };
+            const ruleCheckboxes = document.querySelectorAll('input[name="rules"]:checked');
+            const rules = Array.from(ruleCheckboxes).map(cb => cb.value);
+            const aiMode = document.getElementById('ai_mode').value;
+            const policyAuto = document.getElementById('policy_auto') ? document.getElementById('policy_auto').checked : false;
+            let msg = '<strong>적용된 옵션 및 가이드라인</strong><ul style="margin-bottom:0">';
+            if (rules.length > 0) {
+                rules.forEach(rule => {
+                    msg += `<li><b>${rule}</b>: <span class='text-secondary small'>${(RULE_GUIDES[rule]||[]).join(', ')}</span></li>`;
+                });
+            }
+            if (aiMode && RULE_GUIDES['AI_MODE'][aiMode]) {
+                msg += `<li><b>AI MODE: ${aiMode}</b>: <span class='text-secondary small'>${RULE_GUIDES['AI_MODE'][aiMode].join(', ')}</span></li>`;
+            }
+            if (policyAuto) {
+                msg += `<li><b>균형 잡힌 관점(Policy)</b>: <span class='text-secondary small'>${RULE_GUIDES['POLICY'].join(', ')}</span></li>`;
+            }
+            if (rules.length === 0 && !aiMode && !policyAuto) {
+                msg += '<li>적용된 옵션 없음</li>';
+            }
+            msg += '</ul>';
+            showSimpleModal('SEO 적용 여부', msg);
+        }
+
+        // 간단한 모달 생성 함수
+        function showSimpleModal(title, html) {
+            let modal = document.getElementById('seo-applied-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'seo-applied-modal';
+                modal.innerHTML = `
+                <div class="modal fade" tabindex="-1" id="seoAppliedModalReal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">${html}</div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+                document.body.appendChild(modal);
+            } else {
+                modal.querySelector('.modal-title').innerHTML = title;
+                modal.querySelector('.modal-body').innerHTML = html;
+            }
+            // Bootstrap 모달 표시
+            const realModal = new bootstrap.Modal(document.getElementById('seoAppliedModalReal'));
+            realModal.show();
+        }
+
+        function handleCancel() {
+            // 요청 중단
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            // UI 리셋
+            const generateBtn = document.getElementById('generate-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const resultDiv = document.getElementById('result-container');
+            const keywordsDiv = document.getElementById('keywords-container');
+            const metaDescriptionDiv = document.getElementById('meta-description-container');
+            const wordCountDiv = document.getElementById('word-count-container');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const progressContainer = document.getElementById('progress-container');
+            generateBtn.disabled = false;
+            btnSpinner.classList.add('d-none');
+            resultDiv.innerHTML = '<p class="text-muted">중단되었습니다.</p>';
+            keywordsDiv.innerHTML = '<span class="text-muted">-</span>';
+            metaDescriptionDiv.innerHTML = '<span class="text-muted">-</span>';
+            wordCountDiv.textContent = '-';
+            copyBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            progressContainer.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/v1/stats/daily')
+                .then(res => res.json())
+                .then(data => {
+                    // 누적값 계산
+                    const totalCrawling = data.crawling.reduce((a, b) => a + b, 0);
+                    const totalPosts = data.posts.reduce((a, b) => a + b, 0);
+                    // 누적 오류 건수 계산 (crawling_stats.json의 recent_attempts에서 success: false인 개수)
+                    fetch('/crawling_stats.json')
+                        .then(res2 => res2.json())
+                        .then(stats => {
+                            const totalErrors = (stats.recent_attempts || []).filter(x => x.success === false).length;
+                            document.getElementById('total-crawling').textContent = totalCrawling;
+                            document.getElementById('total-posts').textContent = totalPosts;
+                            document.getElementById('total-errors').textContent = totalErrors;
+                        });
+                });
+            // 누적 키워드/상위 키워드 fetch
+            fetch('/api/v1/stats/keywords-summary')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('total-keywords').textContent = data.total_keywords ?? '-';
+                    // 2줄로 표시: 쉼표로 분리 후 줄바꿈
+                    if (data.top_keywords) {
+                        document.getElementById('top-keywords').textContent = data.top_keywords.split(',').map(k => k.trim()).join('\n');
+                    } else {
+                        document.getElementById('top-keywords').textContent = '-';
+                    }
+                });
+            // 최초 1회만 API 호출 건수 표시
+            updateApiUsageCounts();
+        });
+    </script>
+
+    <!-- 고정형 copyright footer -->
+    <footer class="footer position-fixed w-100 text-center bg-dark text-white py-2" style="left:0;bottom:0;z-index:1050;box-shadow:0 -2px 8px rgba(0,0,0,0.08);font-size:0.97rem;letter-spacing:0.01em;">
+        <span style="opacity:0.85;">
+            &copy; made by <strong>chunghyo</strong>, 2026 &nbsp;|&nbsp; email : <a href="mailto:chunghyo@troe.kr" class="text-warning text-decoration-none">chunghyo@troe.kr</a>
+        </span>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생성 기록 - AI Blog Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/common.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, html { font-family: 'IBM Plex Sans KR', sans-serif !important; }
+        body { background-color: #f8f9fa; }
+        .container { max-width: 960px; }
+        .card { margin-bottom: 1.5rem; }
+        #result-container {
+            border: 1px solid #dee2e6;
+            border-radius: .375rem;
+            padding: 1.5rem;
+            background-color: #fff;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .keyword-badge {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .progress-container {
+            display: none;
+            margin: 1rem 0;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: #e9ecef;
+            border-radius: 0.375rem;
+            margin: 0 0.25rem;
+        }
+        .step.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .step.completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .section-title { margin-top: 2rem; margin-bottom: 1rem; }
+        .post-card {
+            transition: transform 0.2s;
+            margin-bottom: 18px;
+        }
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h5.card-title {
+            font-weight: 600;
+        }
+        .meta-description, .card-text .meta-desc, .card-text .original-url, .card-text strong, .card-text span.text-muted {
+            font-weight: 300 !important;
+        }
+        .card-text > strong {
+            font-weight: 300 !important;
+        }
+        #posts-container {
+            background: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 16px 0 16px 0;
+        }
+        /* #page-nav { display: none !important; } */
+    </style>
+</head>
+<body>
+    {% include '_navbar.html' %}
+    <div class="container" style="padding-top: 84px; padding-bottom: 120px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><span style="font-size:1.2em;">⏰</span> 생성된 포스트 기록</h1>
+            <div>
+                <button class="btn btn-outline-primary" onclick="refreshPosts()">
+                    <i class="bi bi-arrow-clockwise"></i> 새로고침
+                </button>
+            </div>
+        </div>
+
+        <!-- 검색 기능 -->
+        <div class="search-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="제목, 키워드, 내용으로 검색...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchPosts()">
+                            <i class="bi bi-search"></i> 검색
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <!-- <select class="form-select me-2" id="pageSizeSelect" style="width: auto; display: none;" onchange="changePageSize()">
+                            <option value="5">5개씩</option>
+                            <option value="10">10개씩</option>
+                            <option value="20">20개씩</option>
+                            <option value="50">50개씩</option>
+                        </select> -->
+                        <select class="form-select" id="sortSelect" style="width: auto;" onchange="sortPosts()">
+                            <option value="newest">최신순</option>
+                            <option value="oldest">오래된순</option>
+                            <option value="keywords">키워드 순</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 전체 생성 기록 수 표시 -->
+        <div id="total-count" class="mb-2 text-end text-muted small"></div>
+
+        <!-- 포스트 목록 -->
+        <div id="posts-container">
+            <!-- 가상 스크롤로 렌더링됩니다 -->
+        </div>
+        <div id="page-nav" class="mt-3"></div>
+
+        <!-- 포스트가 없는 경우 (이 부분은 JS에서 처리하므로 삭제 또는 주석 처리 가능) -->
+        {% if not posts %}
+        <div class="alert alert-info">생성된 포스트가 없습니다.</div>
+        {% endif %}
+
+        <div id="modals-container">
+            <!-- 자바스크립트로 동적 생성됩니다 -->
+        </div>
+    </div>
+    
+    <script>
+        const initialPosts = {{ posts_json|safe }};
+        let allPosts = initialPosts;
+        let currentPage = 1;
+        const pageSize = 5;
+
+        // 키워드별 등장 횟수 집계
+        let keywordCounts = {};
+        initialPosts.forEach(post => {
+            if (post.keywords) {
+                post.keywords.split(',').forEach(k => {
+                    const kw = k.trim();
+                    if (kw) keywordCounts[kw] = (keywordCounts[kw]||0)+1;
+                });
+            }
+        });
+
+        function renderPagedPosts(page = 1) {
+            currentPage = page;
+            const container = document.getElementById('posts-container');
+            const startIdx = (page - 1) * pageSize;
+            const endIdx = startIdx + pageSize;
+            const pagedPosts = allPosts.slice(startIdx, endIdx);
+            let html = '';
+            for (let i = 0; i < pagedPosts.length; i++) {
+                html += renderPostCard(pagedPosts[i]);
+            }
+            container.innerHTML = html;
+            document.getElementById('modals-container').innerHTML = pagedPosts.map(post => renderPostModal(post)).join('');
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const nav = document.getElementById('page-nav');
+            const totalPages = Math.ceil(allPosts.length / pageSize);
+            if (totalPages <= 1) {
+                nav.innerHTML = '';
+                nav.style.display = 'none';
+                return;
+            }
+            nav.style.display = 'block';
+            let html = '<nav><ul class="pagination justify-content-center">';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<li class="page-item${i === currentPage ? ' active' : ''}"><a class="page-link" href="#" onclick="goToPage(${i});return false;">${i}</a></li>`;
+            }
+            html += '</ul></nav>';
+            nav.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            renderPagedPosts(page);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('keyword');
+            if (q) {
+                document.getElementById('searchInput').value = q;
+                searchPosts();
+            } else {
+                renderPagedPosts(1);
+            }
+            setTimeout(()=>{
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }, 500);
+        });
+
+        // 포스트 카드 HTML 생성
+        function renderPostCard(post) {
+            const dateStr = post.created_at ? new Date(post.created_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+            const wordCountStr = post.word_count ? `<span class="ms-3"><i class="bi bi-file-text"></i> ${post.word_count}단어</span>` : '';
+            const keywordsStr = post.keywords ? `<div class="mb-2"><strong>키워드:</strong> ${post.keywords.split(',').map(k => {
+                const kw = k.trim();
+                const count = keywordCounts[kw] || 1;
+                return `<span class="badge bg-secondary keyword-badge" data-bs-toggle="tooltip" title="누적 ${count}회">${kw}</span>`;
+            }).join(' ')}</div>` : '';
+            const metaDescStr = post.meta_description ? `<div class="mb-2"><strong>메타 설명:</strong> <span class="meta-description text-muted">${post.meta_description}</span></div>` : '';
+            const urlStr = (post.original_url && post.original_url !== "텍스트 직접 입력")
+                ? `<a href="${post.original_url}" target="_blank" rel="noopener noreferrer">${post.original_url}</a>`
+                : `<span class="original-url text-muted">텍스트 직접 입력</span>`;
+            
+            return `
+            <div class="card post-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">${post.title}</h5>
+                            <p class="card-text text-muted mb-2"><i class="bi bi-calendar3"></i> ${dateStr}${wordCountStr}</p>
+                            ${keywordsStr}${metaDescStr}
+                            <p class="card-text"><strong>원문:</strong> ${urlStr}</p>
+                        </div>
+                        <div class="ms-3 d-flex flex-column align-items-center justify-content-center" style="min-width:90px;">
+                            <button class="btn btn-primary btn-sm mb-2" onclick="viewPost(${post.id})"><i class="bi bi-eye"></i> 보기</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePost(${post.id})"><i class="bi bi-trash"></i> 삭제</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // 포스트 모달 HTML 생성
+        function renderPostModal(post) {
+            // '```html' 문구가 있으면 제거
+            let cleanContent = post.content_html ? post.content_html.replace(/^```html\s*/i, '') : '';
+            return `
+            <div class="modal fade" id="postModal${post.id}" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${post.title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">${cleanContent}</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="copyPostContent(${post.id})"><i class="bi bi-clipboard"></i> 복사</button>
+                            <button type="button" class="btn btn-primary" onclick="downloadPostContent(${post.id})"><i class="bi bi-download"></i> 다운로드</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // 이벤트 핸들러 및 기타 함수들
+        function viewPost(postId) {
+            const modal = new bootstrap.Modal(document.getElementById(`postModal${postId}`));
+            modal.show();
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('정말로 이 포스트를 삭제하시겠습니까?')) return;
+            try {
+                const response = await fetch(`/api/v1/posts/${postId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(`삭제 실패: ${data.detail}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function searchPosts() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                allPosts = initialPosts;
+                renderPagedPosts(1);
+                return;
+            }
+            try {
+                const response = await fetch(`/api/v1/search?keyword=${encodeURIComponent(keyword)}`);
+                const posts = await response.json();
+                allPosts = posts;
+                renderPagedPosts(1);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        }
+
+        function sortPosts() {
+            const sortType = document.getElementById('sortSelect').value;
+            if (sortType === 'newest') {
+                allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            } else if (sortType === 'oldest') {
+                allPosts.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            } else if (sortType === 'keywords') {
+                allPosts.sort((a, b) => (a.keywords || '').localeCompare(b.keywords || ''));
+            }
+            renderPagedPosts(1);
+        }
+
+        function refreshPosts() {
+            location.reload();
+        }
+
+        function copyPostContent(postId) {
+            const modalBody = document.querySelector(`#postModal${postId} .modal-body`);
+            if (modalBody) {
+                navigator.clipboard.writeText(modalBody.innerText || '').then(() => {
+                    alert('포스트 텍스트가 클립보드에 복사되었습니다.');
+                });
+            }
+        }
+
+        function downloadPostContent(postId) {
+            const modalBody = document.querySelector(`#postModal${postId} .modal-body`);
+            if (modalBody) {
+                const blob = new Blob([modalBody.innerHTML], { type: 'text/html' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `post-${postId}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchPosts();
+        });
+    </script>
+    <!-- 고정형 copyright footer -->
+    <footer class="footer position-fixed w-100 text-center bg-dark text-white py-2" style="left:0;bottom:0;z-index:1050;box-shadow:0 -2px 8px rgba(0,0,0,0.08);font-size:0.97rem;letter-spacing:0.01em;">
+        <span style="opacity:0.85;">
+            &copy; made by <strong>chunghyo</strong>, 2026 &nbsp;|&nbsp; email : <a href="mailto:chunghyo@troe.kr" class="text-warning text-decoration-none">chunghyo@troe.kr</a>
+        </span>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+requests
+beautifulsoup4
+python-dotenv
+openai
+google-generativeai
+deepl
+jinja2
+sqlalchemy
+pydantic-settings
+pytest
+pytest-asyncio
+httpx
+selenium
+webdriver-manager
+openpyxl
