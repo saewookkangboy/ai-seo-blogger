@@ -14,6 +14,11 @@ sys.path.insert(0, str(project_root))
 
 def main():
     """메인 실행 함수"""
+    # 개발 환경 설정
+    if not os.getenv('DEBUG'):
+        os.environ['DEBUG'] = 'True'
+        print("🔧 개발 모드로 설정되었습니다.")
+    
     # 설정 모듈 임포트
     try:
         from app.config import settings

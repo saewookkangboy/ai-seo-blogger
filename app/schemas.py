@@ -6,8 +6,10 @@ class PostRequest(BaseModel):
     """블로그 포스트 생성 요청 모델"""
     url: Optional[str] = None
     text: Optional[str] = None
+    keywords: Optional[str] = None  # 키워드 필드 추가
     rules: Optional[List[str]] = None
     ai_mode: Optional[str] = None
+    content_length: Optional[str] = "3000"
     policy_auto: Optional[bool] = False
     
     @validator('url')
@@ -18,17 +20,40 @@ class PostRequest(BaseModel):
     
     @validator('text')
     def validate_text(cls, v):
-        if v and len(v.strip()) < 10:
-            raise ValueError('텍스트는 최소 10자 이상이어야 합니다.')
+        if v and len(v.strip()) < 5:
+            raise ValueError('텍스트는 최소 5자 이상이어야 합니다.')
         return v
+    
+    @validator('keywords')
+    def validate_keywords(cls, v):
+        if v and len(v.strip()) < 2:
+            raise ValueError('키워드는 최소 2자 이상이어야 합니다.')
+        return v
+
+class SEOAnalysisResult(BaseModel):
+    """SEO 분석 결과 모델"""
+    content_structure_score: int
+    content_structure_analysis: dict
+    eeat_score: int
+    eeat_analysis: dict
+    technical_optimization_score: int
+    technical_analysis: dict
+    external_mentions_score: int
+    external_analysis: dict
+    ai_citation_score: int
+    ai_citation_analysis: dict
+    geo_optimization_score: int
+    geo_analysis: dict
+    structured_data_score: int
+    structured_data_analysis: dict
+    improvement_recommendations: List[str]
+    overall_score: int
 
 class PostResponse(BaseModel):
     """블로그 포스트 생성 응답 모델"""
-    post: str
-    keywords: str
-    title: Optional[str] = None
-    meta_description: Optional[str] = None
-    word_count: Optional[int] = None
+    success: bool
+    message: str
+    data: dict
 
 class BlogPostResponse(BaseModel):
     """블로그 포스트 조회 응답 모델"""
@@ -38,8 +63,10 @@ class BlogPostResponse(BaseModel):
     keywords: Optional[str]
     content_html: str
     meta_description: Optional[str]
-    word_count: int
+    word_count: Optional[int] = 0
+    content_length: Optional[str] = "3000"
     created_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -75,7 +102,9 @@ class APIKeyOut(APIKeyBase):
             return None
         if isinstance(v, str):
             return v
-        return v.isoformat()
+        if hasattr(v, 'isoformat'):
+            return v.isoformat()
+        return str(v)
 
 # 키워드 블랙/화이트리스트 관련 스키마
 class KeywordListBase(BaseModel):
@@ -96,7 +125,9 @@ class KeywordListOut(KeywordListBase):
             return None
         if isinstance(v, str):
             return v
-        return v.isoformat()
+        if hasattr(v, 'isoformat'):
+            return v.isoformat()
+        return str(v)
 
 class KeywordListBulkIn(BaseModel):
     type: str
@@ -123,4 +154,42 @@ class PostImport(BaseModel):
     word_count: int = 0
 
 class BulkDeleteIn(BaseModel):
-    post_ids: list[int] 
+    post_ids: list[int]
+
+# Google Drive API 관련 스키마
+class GoogleDriveExportRequest(BaseModel):
+    """Google Drive 내보내기 요청 모델"""
+    folder_name: Optional[str] = None
+    include_content: Optional[bool] = True
+    include_stats: Optional[bool] = True
+
+class GoogleDriveBackupRequest(BaseModel):
+    """Google Drive 백업 요청 모델"""
+    schedule_type: str = "daily"  # daily, weekly, monthly
+    folder_name: Optional[str] = None
+
+class GoogleDriveResponse(BaseModel):
+    """Google Drive 응답 모델"""
+    success: bool
+    message: str
+    folder_id: Optional[str] = None
+    folder_name: Optional[str] = None
+    files_count: Optional[int] = None
+    timestamp: str
+
+class GoogleDriveFileInfo(BaseModel):
+    """Google Drive 파일 정보 모델"""
+    name: str
+    id: str
+    count: int
+    mime_type: Optional[str] = None
+    size: Optional[int] = None
+    created_time: Optional[str] = None
+
+class GoogleDriveExportResult(BaseModel):
+    """Google Drive 내보내기 결과 모델"""
+    success: bool
+    folder_id: str
+    folder_name: str
+    files: List[GoogleDriveFileInfo]
+    error: Optional[str] = None 

@@ -1,0 +1,544 @@
+<!-- 포스트 관리 섹션 -->
+<div id="posts-section" class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>포스트 관리</h1>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary" onclick="exportPosts()">
+                <i class="bi bi-download"></i> 내보내기
+            </button>
+            <button class="btn btn-outline-danger" onclick="bulkDeletePosts()">
+                <i class="bi bi-trash"></i> 일괄 삭제
+            </button>
+        </div>
+    </div>
+
+    <!-- 포스트 통계 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle p-3 me-3">
+                        <i class="bi bi-file-text text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="posts-total">-</h3>
+                        <small class="text-muted">총 포스트</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success rounded-circle p-3 me-3">
+                        <i class="bi bi-calendar-check text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="posts-today">-</h3>
+                        <small class="text-muted">오늘 생성</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning rounded-circle p-3 me-3">
+                        <i class="bi bi-graph-up text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="posts-avg-length">-</h3>
+                        <small class="text-muted">평균 길이</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info rounded-circle p-3 me-3">
+                        <i class="bi bi-tags text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="posts-keywords">-</h3>
+                        <small class="text-muted">사용 키워드</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 검색 및 필터 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="posts-search" placeholder="포스트 제목으로 검색...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="posts-filter-date">
+                        <option value="">전체 기간</option>
+                        <option value="today">오늘</option>
+                        <option value="week">이번 주</option>
+                        <option value="month">이번 달</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="posts-filter-length">
+                        <option value="">전체 길이</option>
+                        <option value="short">2000자 이하</option>
+                        <option value="medium">2000-4000자</option>
+                        <option value="long">4000자 이상</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="searchPosts()">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 포스트 목록 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">포스트 목록</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" onclick="refreshPosts()">
+                    <i class="bi bi-arrow-clockwise"></i> 새로고침
+                </button>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="select-all-posts">
+                    <label class="form-check-label" for="select-all-posts">
+                        전체 선택
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" id="select-all">
+                            </th>
+                            <th>제목</th>
+                            <th>키워드</th>
+                            <th>길이</th>
+                            <th>생성일</th>
+                            <th>상태</th>
+                            <th width="150">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="posts-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">로딩 중...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 페이지네이션 -->
+            <nav aria-label="포스트 페이지네이션">
+                <ul class="pagination justify-content-center" id="posts-pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- 포스트 상세보기 모달 -->
+<div class="modal fade" id="postDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-text"></i> 포스트 상세보기
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <h6>포스트 내용</h6>
+                            <div class="border rounded p-3 bg-light" id="modal-post-content" style="max-height: 400px; overflow-y: auto;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <h6>포스트 정보</h6>
+                            <table class="table table-sm">
+                                <tr><td>제목</td><td id="modal-post-title"></td></tr>
+                                <tr><td>키워드</td><td id="modal-post-keywords"></td></tr>
+                                <tr><td>단어 수</td><td id="modal-post-word-count"></td></tr>
+                                <tr><td>생성일</td><td id="modal-post-created"></td></tr>
+                                <tr><td>원본 URL</td><td id="modal-post-url"></td></tr>
+                            </table>
+                        </div>
+                        <div class="mb-3">
+                            <h6>SEO 분석</h6>
+                            <div id="modal-post-seo" class="border rounded p-3 bg-light">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="copyPostContent()">
+                    <i class="bi bi-clipboard"></i> 내용 복사
+                </button>
+                <button type="button" class="btn btn-success" onclick="downloadPostContent()">
+                    <i class="bi bi-download"></i> 다운로드
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 포스트 관리 관련 JavaScript
+
+let postsData = [];
+let currentPage = 1;
+let postsPerPage = 10;
+let selectedPosts = new Set();
+
+// 포스트 데이터 로드
+async function loadPostsData() {
+    try {
+        // 통계 데이터 로드
+        const statsResponse = await fetch('/api/v1/admin/posts/stats');
+        const stats = await statsResponse.json();
+        
+        document.getElementById('posts-total').textContent = stats.total_posts || 0;
+        document.getElementById('posts-today').textContent = stats.today_posts || 0;
+        document.getElementById('posts-avg-length').textContent = (stats.avg_length || 0) + '자';
+        document.getElementById('posts-keywords').textContent = stats.unique_keywords || 0;
+        
+        // 포스트 목록 로드
+        await loadPostsList();
+        
+    } catch (error) {
+        console.error('포스트 데이터 로드 오류:', error);
+        showToast('포스트 데이터 로드 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 포스트 목록 로드
+async function loadPostsList(page = 1) {
+    try {
+        const response = await fetch(`/api/v1/posts?page=${page}&limit=${postsPerPage}`);
+        const data = await response.json();
+        
+        postsData = data.posts || [];
+        currentPage = page;
+        
+        renderPostsTable();
+        renderPagination(data.total || 0);
+        
+    } catch (error) {
+        console.error('포스트 목록 로드 오류:', error);
+        showToast('포스트 목록 로드 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 포스트 테이블 렌더링
+function renderPostsTable() {
+    const tbody = document.getElementById('posts-table-body');
+    
+    if (postsData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                    포스트가 없습니다.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const html = postsData.map(post => `
+        <tr>
+            <td>
+                <input type="checkbox" class="form-check-input post-checkbox" 
+                       value="${post.id}" onchange="togglePostSelection(${post.id})">
+            </td>
+            <td>
+                <div class="fw-medium">${post.title}</div>
+                <small class="text-muted">${post.keywords}</small>
+            </td>
+            <td>
+                <span class="badge bg-primary">${post.keywords}</span>
+            </td>
+            <td>${post.word_count || 0}자</td>
+            <td>${new Date(post.created_at).toLocaleDateString()}</td>
+            <td>
+                <span class="badge bg-success">완료</span>
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="viewPost(${post.id})">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="editPost(${post.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="deletePost(${post.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    tbody.innerHTML = html;
+}
+
+// 페이지네이션 렌더링
+function renderPagination(total) {
+    const totalPages = Math.ceil(total / postsPerPage);
+    const pagination = document.getElementById('posts-pagination');
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // 이전 페이지
+    if (currentPage > 1) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPostsList(${currentPage - 1})">이전</a></li>`;
+    }
+    
+    // 페이지 번호
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === currentPage) {
+            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+        } else {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPostsList(${i})">${i}</a></li>`;
+        }
+    }
+    
+    // 다음 페이지
+    if (currentPage < totalPages) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPostsList(${currentPage + 1})">다음</a></li>`;
+    }
+    
+    pagination.innerHTML = html;
+}
+
+// 포스트 선택 토글
+function togglePostSelection(postId) {
+    if (selectedPosts.has(postId)) {
+        selectedPosts.delete(postId);
+    } else {
+        selectedPosts.add(postId);
+    }
+    updateSelectAllCheckbox();
+}
+
+// 전체 선택 체크박스 업데이트
+function updateSelectAllCheckbox() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.post-checkbox');
+    
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+    
+    selectAll.checked = allChecked;
+    selectAll.indeterminate = someChecked && !allChecked;
+}
+
+// 전체 선택/해제
+document.getElementById('select-all').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.post-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = this.checked;
+        if (this.checked) {
+            selectedPosts.add(parseInt(cb.value));
+        } else {
+            selectedPosts.delete(parseInt(cb.value));
+        }
+    });
+});
+
+// 포스트 검색
+function searchPosts() {
+    const searchTerm = document.getElementById('posts-search').value;
+    const dateFilter = document.getElementById('posts-filter-date').value;
+    const lengthFilter = document.getElementById('posts-filter-length').value;
+    
+    // 검색 로직 구현
+    console.log('검색 조건:', { searchTerm, dateFilter, lengthFilter });
+    loadPostsList(1); // 검색 결과로 첫 페이지 로드
+}
+
+// 포스트 새로고침
+function refreshPosts() {
+    loadPostsData();
+    showToast('포스트 목록이 새로고침되었습니다.', 'success');
+}
+
+// 포스트 상세보기
+async function viewPost(postId) {
+    try {
+        const response = await fetch(`/api/v1/posts/${postId}`);
+        const post = await response.json();
+        
+        // 모달 내용 채우기
+        document.getElementById('modal-post-title').textContent = post.title;
+        document.getElementById('modal-post-keywords').textContent = post.keywords;
+        document.getElementById('modal-post-word-count').textContent = post.word_count + '자';
+        document.getElementById('modal-post-created').textContent = new Date(post.created_at).toLocaleString();
+        document.getElementById('modal-post-url').textContent = post.source_url || 'N/A';
+        document.getElementById('modal-post-content').innerHTML = post.content.replace(/\n/g, '<br>');
+        
+        // SEO 분석 정보
+        const seoInfo = document.getElementById('modal-post-seo');
+        seoInfo.innerHTML = `
+            <div class="mb-2">
+                <strong>키워드 밀도:</strong> ${calculateKeywordDensity(post.content, post.keywords)}%
+            </div>
+            <div class="mb-2">
+                <strong>읽기 수준:</strong> ${calculateReadability(post.content)}
+            </div>
+            <div class="mb-2">
+                <strong>SEO 점수:</strong> <span class="badge bg-success">85/100</span>
+            </div>
+        `;
+        
+        // 모달 표시
+        const modal = new bootstrap.Modal(document.getElementById('postDetailModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('포스트 상세보기 오류:', error);
+        showToast('포스트 정보를 불러오는 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 포스트 편집
+function editPost(postId) {
+    showToast('포스트 편집 기능은 개발 중입니다.', 'info');
+}
+
+// 포스트 삭제
+async function deletePost(postId) {
+    if (!confirm('정말로 이 포스트를 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/posts/${postId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showToast('포스트가 삭제되었습니다.', 'success');
+            loadPostsData();
+        } else {
+            showToast('포스트 삭제 중 오류가 발생했습니다.', 'error');
+        }
+    } catch (error) {
+        console.error('포스트 삭제 오류:', error);
+        showToast('포스트 삭제 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 포스트 내보내기
+function exportPosts() {
+    const selectedIds = Array.from(selectedPosts);
+    if (selectedIds.length === 0) {
+        showToast('내보낼 포스트를 선택해주세요.', 'warning');
+        return;
+    }
+    
+    // 내보내기 로직 구현
+    showToast(`${selectedIds.length}개의 포스트를 내보내는 중...`, 'info');
+}
+
+// 일괄 삭제
+async function bulkDeletePosts() {
+    const selectedIds = Array.from(selectedPosts);
+    if (selectedIds.length === 0) {
+        showToast('삭제할 포스트를 선택해주세요.', 'warning');
+        return;
+    }
+    
+    if (!confirm(`정말로 ${selectedIds.length}개의 포스트를 삭제하시겠습니까?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/v1/admin/posts/bulk-delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ post_ids: selectedIds })
+        });
+        
+        if (response.ok) {
+            showToast(`${selectedIds.length}개의 포스트가 삭제되었습니다.`, 'success');
+            selectedPosts.clear();
+            loadPostsData();
+        } else {
+            showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+        }
+    } catch (error) {
+        console.error('일괄 삭제 오류:', error);
+        showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 포스트 내용 복사
+function copyPostContent() {
+    const content = document.getElementById('modal-post-content').textContent;
+    navigator.clipboard.writeText(content).then(() => {
+        showToast('포스트 내용이 클립보드에 복사되었습니다.', 'success');
+    });
+}
+
+// 포스트 내용 다운로드
+function downloadPostContent() {
+    const title = document.getElementById('modal-post-title').textContent;
+    const content = document.getElementById('modal-post-content').textContent;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('포스트 내용이 다운로드되었습니다.', 'success');
+}
+
+// 유틸리티 함수들
+function calculateKeywordDensity(content, keywords) {
+    // 키워드 밀도 계산 로직
+    return Math.round(Math.random() * 5 + 1); // 임시 구현
+}
+
+function calculateReadability(content) {
+    // 읽기 수준 계산 로직
+    const levels = ['초급', '중급', '고급'];
+    return levels[Math.floor(Math.random() * levels.length)]; // 임시 구현
+}
+
+function showToast(message, type = 'info') {
+    // 토스트 알림 표시 로직
+    console.log(`${type.toUpperCase()}: ${message}`);
+}
+</script> 

@@ -13,12 +13,19 @@ class BlogPost(Base):
     content_html = Column(Text, nullable=False)
     meta_description = Column(String(300))
     word_count = Column(Integer, default=0)
+    content_length = Column(String(10), default="3000")
+    category = Column(String(50), default="기타")
+    status = Column(String(20), default="draft")  # draft, published, archived
+    description = Column(String(500))
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (
         Index('idx_title_keywords', 'title', 'keywords'),
+        Index('idx_content_length', 'content_length'),
         Index('idx_created_at', 'created_at'),
+        Index('idx_category', 'category'),
+        Index('idx_status', 'status'),
     )
 
 # API Key 관리 테이블

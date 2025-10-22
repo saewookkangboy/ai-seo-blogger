@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SEO Blogger - 관리 대시보드</title>
+    
+    <!-- CSS 프레임워크 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 차트 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    
+    <!-- 실시간 업데이트 -->
+    <script src="https://cdn.jsdelivr.net/npm/eventsource@2.0.2/lib/eventsource.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --dark-color: #1f2937;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: #374151;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 200;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+        }
+
+        .sidebar-brand h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0 1.5rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .nav-item {
+            margin: 0.25rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: rgba(255,255,255,0.3);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .nav-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-weight: 500;
+        }
+
+        /* 메인 콘텐츠 */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+            padding: 2rem;
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .content-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: #fafbfc;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .stat-icon.primary { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
+        .stat-icon.success { background: linear-gradient(135deg, var(--success-color), #059669); }
+        .stat-icon.warning { background: linear-gradient(135deg, var(--warning-color), #d97706); }
+        .stat-icon.danger { background: linear-gradient(135deg, var(--danger-color), #dc2626); }
+        .stat-icon.info { background: linear-gradient(135deg, var(--info-color), #0891b2); }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-trend.up { color: var(--success-color); }
+        .stat-trend.down { color: var(--danger-color); }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: #6b7280;
+        }
+
+        .btn-outline:hover {
+            background: var(--light-bg);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* 테이블 스타일 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        /* 배지 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary { background: #dbeafe; color: #1e40af; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        /* 검색 및 필터 */
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            font-size: 0.875rem;
+            min-width: 150px;
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 토스트 알림 */
+        .toast-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast.success { border-left-color: var(--success-color); }
+        .toast.error { border-left-color: var(--danger-color); }
+        .toast.warning { border-left-color: var(--warning-color); }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input,
+            .filter-select {
+                min-width: auto;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* 실시간 업데이트 인디케이터 */
+        .realtime-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .realtime-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* 차트 컨테이너 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+
+        /* 모달 스타일 */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 토스트 컨테이너 -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- 실시간 업데이트 인디케이터 -->
+    <div class="realtime-indicator" id="realtime-indicator" style="display: none;">
+        <i class="bi bi-wifi"></i>
+        실시간 업데이트
+    </div>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="bi bi-robot"></i>
+                <h3>AI SEO Blogger</h3>
+            </div>
+            <p style="font-size: 0.875rem; opacity: 0.8; margin: 0;">
+                관리 대시보드
+            </p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">대시보드</div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link active" data-section="overview">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>개요</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="analytics">
+                        <i class="bi bi-graph-up"></i>
+                        <span>분석</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">콘텐츠 관리</div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="posts">
+                        <i class="bi bi-file-text"></i>
+                        <span>포스트</span>
+                        <span class="nav-badge" id="posts-count">-</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="keywords">
+                        <i class="bi bi-tags"></i>
+                        <span>키워드</span>
+                        <span class="nav-badge" id="keywords-count">-</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="news">
+                        <i class="bi bi-newspaper"></i>
+                        <span>뉴스 아카이브</span>
+                        <span class="nav-badge" id="news-count">-</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">시스템</div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="performance">
+                        <i class="bi bi-cpu"></i>
+                        <span>성능 모니터링</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="api">
+                        <i class="bi bi-robot"></i>
+                        <span>API 관리</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="logs">
+                        <i class="bi bi-journal-text"></i>
+                        <span>로그</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">설정</div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="settings">
+                        <i class="bi bi-gear"></i>
+                        <span>시스템 설정</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="updates">
+                        <i class="bi bi-clock-history"></i>
+                        <span>업데이트 이력</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-title" id="page-title">
+            <i class="bi bi-speedometer2"></i>
+            개요
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline btn-sm" onclick="refreshCurrentSection()">
+                <i class="bi bi-arrow-clockwise"></i>
+                새로고침
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='/'">
+                <i class="bi bi-house"></i>
+                홈으로
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <!-- 개요 섹션 -->
+        <div id="overview-section" class="content-section active">
+            <div class="content-header">
+                <h1 class="content-title">시스템 개요</h1>
+                <p class="content-subtitle">전체 시스템 현황을 한눈에 확인하세요</p>
+            </div>
+
+            <!-- 주요 통계 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i>
+                            +12%
+                        </div>
+                    </div>
+                    <div class="stat-number" id="total-posts">-</div>
+                    <div class="stat-label">총 포스트</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="bi bi-tags"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i>
+                            +8%
+                        </div>
+                    </div>
+                    <div class="stat-number" id="total-keywords">-</div>
+                    <div class="stat-label">총 키워드</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="stat-trend down">
+                            <i class="bi bi-arrow-down"></i>
+                            -3%
+                        </div>
+                    </div>
+                    <div class="stat-number" id="api-calls-today">-</div>
+                    <div class="stat-label">오늘 API 호출</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon info">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i>
+                            +5%
+                        </div>
+                    </div>
+                    <div class="stat-number" id="success-rate">-</div>
+                    <div class="stat-label">성공률</div>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="bi bi-graph-up"></i>
+                                일별 통계
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="dailyStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="bi bi-pie-chart"></i>
+                                키워드 분포
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="keywordDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최근 활동 -->
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="bi bi-clock"></i>
+                                최근 포스트
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-posts" class="loading">
+                                로딩 중...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                시스템 알림
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="system-alerts" class="loading">
+                                로딩 중...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 다른 섹션들은 동적으로 로드됩니다 -->
+        <div id="other-sections"></div>
+    </main>
+
+    <!-- 모바일 메뉴 토글 버튼 -->
+    <button class="btn btn-primary" id="mobile-menu-toggle" style="display: none; position: fixed; top: 1rem; left: 1rem; z-index: 300;">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 전역 변수
+        let currentSection = 'overview';
+        let charts = {};
+        let realtimeConnection = null;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdmin();
+            setupNavigation();
+            setupRealtimeUpdates();
+            loadOverviewData();
+        });
+
+        // 관리자 대시보드 초기화
+        function initializeAdmin() {
+            console.log('관리자 대시보드 초기화 시작');
+            
+            // 모바일 메뉴 토글
+            const mobileToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (window.innerWidth <= 1024) {
+                mobileToggle.style.display = 'block';
+            }
+            
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+
+            // 윈도우 리사이즈 이벤트
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 1024) {
+                    mobileToggle.style.display = 'block';
+                } else {
+                    mobileToggle.style.display = 'none';
+                    sidebar.classList.remove('show');
+                }
+            });
+        }
+
+        // 네비게이션 설정
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const section = this.dataset.section;
+                    if (section && section !== currentSection) {
+                        switchSection(section);
+                    }
+                });
+            });
+        }
+
+        // 섹션 전환
+        function switchSection(section) {
+            // 이전 섹션 비활성화
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // 새 섹션 활성화
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            
+            // 페이지 제목 업데이트
+            updatePageTitle(section);
+            
+            // 섹션별 데이터 로드
+            loadSectionData(section);
+            
+            currentSection = section;
+        }
+
+        // 페이지 제목 업데이트
+        function updatePageTitle(section) {
+            const titles = {
+                'overview': '개요',
+                'analytics': '분석',
+                'posts': '포스트 관리',
+                'keywords': '키워드 관리',
+                'news': '뉴스 아카이브',
+                'performance': '성능 모니터링',
+                'api': 'API 관리',
+                'logs': '로그',
+                'settings': '시스템 설정',
+                'updates': '업데이트 이력'
+            };
+            
+            const pageTitle = document.getElementById('page-title');
+            pageTitle.innerHTML = `<i class="bi bi-${getSectionIcon(section)}"></i> ${titles[section] || section}`;
+        }
+
+        // 섹션별 아이콘
+        function getSectionIcon(section) {
+            const icons = {
+                'overview': 'speedometer2',
+                'analytics': 'graph-up',
+                'posts': 'file-text',
+                'keywords': 'tags',
+                'news': 'newspaper',
+                'performance': 'cpu',
+                'api': 'robot',
+                'logs': 'journal-text',
+                'settings': 'gear',
+                'updates': 'clock-history'
+            };
+            return icons[section] || 'circle';
+        }
+
+        // 섹션별 데이터 로드
+        function loadSectionData(section) {
+            switch(section) {
+                case 'overview':
+                    loadOverviewData();
+                    break;
+                case 'analytics':
+                    loadAnalyticsData();
+                    break;
+                case 'posts':
+                    loadPostsData();
+                    break;
+                case 'keywords':
+                    loadKeywordsData();
+                    break;
+                case 'news':
+                    loadNewsData();
+                    break;
+                case 'performance':
+                    loadPerformanceData();
+                    break;
+                case 'api':
+                    loadApiData();
+                    break;
+                case 'logs':
+                    loadLogsData();
+                    break;
+                case 'settings':
+                    loadSettingsData();
+                    break;
+                case 'updates':
+                    loadUpdatesData();
+                    break;
+            }
+        }
+
+        // 개요 데이터 로드
+        async function loadOverviewData() {
+            try {
+                const [statsResponse, postsResponse, keywordsResponse] = await Promise.all([
+                    fetch('/api/v1/stats/dashboard'),
+                    fetch('/api/v1/posts?limit=5'),
+                    fetch('/api/v1/keywords?limit=10')
+                ]);
+
+                const stats = await statsResponse.json();
+                const posts = await postsResponse.json();
+                const keywords = await keywordsResponse.json();
+
+                updateOverviewStats(stats);
+                updateRecentPosts(posts);
+                updateKeywordDistribution(keywords);
+                createDailyStatsChart();
+                
+            } catch (error) {
+                console.error('개요 데이터 로드 오류:', error);
+                showToast('데이터 로드 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 통계 업데이트
+        function updateOverviewStats(stats) {
+            document.getElementById('total-posts').textContent = stats.total_posts || 0;
+            document.getElementById('total-keywords').textContent = stats.total_keywords || 0;
+            document.getElementById('api-calls-today').textContent = stats.api_calls_today || 0;
+            document.getElementById('success-rate').textContent = (stats.success_rate || 0) + '%';
+            
+            // 네비게이션 배지 업데이트
+            document.getElementById('posts-count').textContent = stats.total_posts || 0;
+            document.getElementById('keywords-count').textContent = stats.total_keywords || 0;
+        }
+
+        // 최근 포스트 업데이트
+        function updateRecentPosts(posts) {
+            const container = document.getElementById('recent-posts');
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<p class="text-muted">최근 포스트가 없습니다.</p>';
+                return;
+            }
+
+            const html = posts.map(post => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <div class="fw-medium">${post.title}</div>
+                        <small class="text-muted">${new Date(post.created_at).toLocaleDateString()}</small>
+                    </div>
+                    <span class="badge badge-primary">${post.word_count}자</span>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 키워드 분포 차트
+        function updateKeywordDistribution(keywords) {
+            const ctx = document.getElementById('keywordDistributionChart');
+            
+            if (charts.keywordDistribution) {
+                charts.keywordDistribution.destroy();
+            }
+
+            const categories = {};
+            keywords.forEach(keyword => {
+                const category = keyword.category || '기타';
+                categories[category] = (categories[category] || 0) + 1;
+            });
+
+            charts.keywordDistribution = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: [
+                            '#6366f1',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#06b6d4'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // 일별 통계 차트
+        function createDailyStatsChart() {
+            const ctx = document.getElementById('dailyStatsChart');
+            
+            if (charts.dailyStats) {
+                charts.dailyStats.destroy();
+            }
+
+            // 샘플 데이터 (실제로는 API에서 가져옴)
+            const data = {
+                labels: ['1일', '2일', '3일', '4일', '5일', '6일', '7일'],
+                datasets: [{
+                    label: '포스트 생성',
+                    data: [12, 19, 15, 25, 22, 30, 28],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'API 호출',
+                    data: [45, 52, 48, 65, 58, 72, 68],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            };
+
+            charts.dailyStats = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // 실시간 업데이트 설정
+        function setupRealtimeUpdates() {
+            // 실시간 업데이트 인디케이터 표시
+            const indicator = document.getElementById('realtime-indicator');
+            indicator.style.display = 'flex';
+
+            // 주기적으로 데이터 업데이트
+            setInterval(() => {
+                if (currentSection === 'overview') {
+                    loadOverviewData();
+                }
+            }, 30000); // 30초마다 업데이트
+        }
+
+        // 토스트 알림
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // 현재 섹션 새로고침
+        function refreshCurrentSection() {
+            loadSectionData(currentSection);
+            showToast('데이터가 새로고침되었습니다.', 'success');
+        }
+
+        // 다른 섹션들의 데이터 로드 함수들 (기본 구조)
+        function loadAnalyticsData() {
+            // 분석 데이터 로드
+            showToast('분석 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadPostsData() {
+            // 포스트 데이터 로드
+            showToast('포스트 관리 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadKeywordsData() {
+            // 키워드 데이터 로드
+            showToast('키워드 관리 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadNewsData() {
+            // 뉴스 데이터 로드
+            showToast('뉴스 아카이브 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadPerformanceData() {
+            // 성능 데이터 로드
+            showToast('성능 모니터링 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadApiData() {
+            // API 데이터 로드
+            showToast('API 관리 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadLogsData() {
+            // 로그 데이터 로드
+            showToast('로그 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadSettingsData() {
+            // 설정 데이터 로드
+            showToast('시스템 설정 섹션은 개발 중입니다.', 'info');
+        }
+
+        function loadUpdatesData() {
+            // 업데이트 데이터 로드
+            showToast('업데이트 이력 섹션은 개발 중입니다.', 'info');
+        }
+    </script>
+</body>
+</html> 

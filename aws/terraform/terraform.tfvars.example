@@ -1,0 +1,44 @@
+# Terraform 변수 값 예시
+# 이 파일을 terraform.tfvars로 복사하고 실제 값으로 수정하세요
+
+# AWS 설정
+aws_region = "us-east-1"
+environment = "production"
+
+# 프로젝트 설정
+project_name = "ai-seo-blogger"
+
+# 데이터베이스 설정
+db_password = "your_secure_database_password_here"
+
+# 도메인 설정 (선택사항)
+domain_name = "your-domain.com"
+certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+
+# ECS 설정
+min_capacity = 1
+max_capacity = 10
+desired_count = 2
+cpu = 512
+memory = 1024
+enable_auto_scaling = true
+
+# RDS 설정
+instance_class = "db.t3.micro"
+allocated_storage = 20
+max_allocated_storage = 100
+backup_retention_period = 7
+
+# 로깅 설정
+log_retention_days = 30
+
+# 추가 기능
+enable_cloudfront = false
+enable_waf = false
+
+# 추가 태그
+tags = {
+  Owner = "your-name"
+  Project = "AI-SEO-Blogger"
+  Environment = "production"
+}

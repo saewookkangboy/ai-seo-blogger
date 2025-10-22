@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SEO Blogger - 관리 대시보드</title>
+    
+    <!-- CSS 프레임워크 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 차트 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4f46e5 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* 토스트 알림 스타일 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            min-width: 300px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 8px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #212529;
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 버튼 스타일 개선 */
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline-success {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-outline-warning {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .btn-outline-warning:hover {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-outline-danger {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-secondary-modern {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary-modern:hover {
+            background: #5a6268;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="mb-4">
+                <i class="bi bi-robot"></i>
+                AI SEO Blogger
+            </h4>
+            
+            <nav>
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    대시보드
+                </a>
+                <a href="#" class="nav-link" data-section="posts">
+                    <i class="bi bi-file-text"></i>
+                    포스트 관리
+                </a>
+                <a href="#" class="nav-link" data-section="keywords">
+                    <i class="bi bi-tags"></i>
+                    키워드 관리
+                </a>
+                <a href="#" class="nav-link" data-section="news">
+                    <i class="bi bi-newspaper"></i>
+                    뉴스 아카이브
+                </a>
+                <a href="#" class="nav-link" data-section="performance">
+                    <i class="bi bi-cpu"></i>
+                    성능 모니터링
+                </a>
+                <a href="#" class="nav-link" data-section="api">
+                    <i class="bi bi-robot"></i>
+                    API 관리
+                </a>
+                <a href="#" class="nav-link" data-section="settings">
+                    <i class="bi bi-gear"></i>
+                    시스템 설정
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <!-- 대시보드 섹션 -->
+        <div id="dashboard-section" class="content-section active">
+            <h1 class="mb-4">시스템 대시보드</h1>
+            
+            <!-- 통계 카드 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle p-3 me-3">
+                                <i class="bi bi-file-text text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="total-posts">-</h3>
+                                <small class="text-muted">총 포스트</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle p-3 me-3">
+                                <i class="bi bi-tags text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="total-keywords">-</h3>
+                                <small class="text-muted">총 키워드</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle p-3 me-3">
+                                <i class="bi bi-robot text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="api-calls">-</h3>
+                                <small class="text-muted">API 호출</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info rounded-circle p-3 me-3">
+                                <i class="bi bi-graph-up text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="success-rate">-</h3>
+                                <small class="text-muted">성공률</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 시스템 상태 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-cpu"></i> 시스템 상태</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>시스템 상태:</span>
+                                        <span id="system-status" class="badge text-success">정상</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>메모리 사용량:</span>
+                                        <span id="memory-usage" class="text-muted">-</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>실시간 업데이트:</span>
+                                        <span class="badge bg-success">활성</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>마지막 업데이트:</span>
+                                        <span id="last-update" class="text-muted">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-lightning"></i> 빠른 작업</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadSectionData('posts')">
+                                    <i class="bi bi-file-text"></i> 포스트 관리
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="loadSectionData('keywords')">
+                                    <i class="bi bi-tags"></i> 키워드 관리
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="loadSectionData('performance')">
+                                    <i class="bi bi-cpu"></i> 성능 모니터링
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 차트 -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">일별 통계</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="dailyChart" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">키워드 분포</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="keywordChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 다른 섹션들 -->
+        <div id="posts-section" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>포스트 관리</h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="exportPosts()">
+                        <i class="bi bi-download"></i> 내보내기
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddPostModal()">
+                        <i class="bi bi-plus"></i> 새 포스트
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 고급 필터링 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-funnel"></i> 고급 필터링</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="post-filters">
+                        <div class="col-md-3">
+                            <label class="form-label">카테고리</label>
+                            <select class="form-select" id="post-category-filter">
+                                <option value="">전체</option>
+                                <option value="ai">AI</option>
+                                <option value="seo">SEO</option>
+                                <option value="tech">기술</option>
+                                <option value="marketing">마케팅</option>
+                                <option value="business">비즈니스</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">생성일</label>
+                            <input type="date" class="form-control" id="post-date-filter">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">상태</label>
+                            <select class="form-select" id="post-status-filter">
+                                <option value="">전체</option>
+                                <option value="published">발행됨</option>
+                                <option value="draft">임시저장</option>
+                                <option value="archived">보관됨</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-outline-secondary w-100" onclick="clearPostFilters()">
+                                <i class="bi bi-x-circle"></i> 필터 초기화
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 일괄 작업 도구 -->
+            <div id="post-bulk-actions" class="alert alert-info mb-4" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-info-circle"></i> <span id="selected-posts-count">0</span>개의 포스트가 선택되었습니다.</span>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-danger" onclick="bulkDeletePosts()">
+                            <i class="bi bi-trash"></i> 일괄 삭제
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="bulkArchivePosts()">
+                            <i class="bi bi-archive"></i> 일괄 보관
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="posts-content">포스트 관리 기능이 여기에 표시됩니다.</div>
+        </div>
+
+        <div id="keywords-section" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>키워드 관리</h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="exportKeywords()">
+                        <i class="bi bi-download"></i> 내보내기
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddKeywordModal()">
+                        <i class="bi bi-plus"></i> 새 키워드
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 고급 필터링 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-funnel"></i> 고급 필터링</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="keyword-filters">
+                        <div class="col-md-3">
+                            <label class="form-label">카테고리</label>
+                            <select class="form-select" id="keyword-category-filter">
+                                <option value="">전체</option>
+                                <option value="ai">AI</option>
+                                <option value="seo">SEO</option>
+                                <option value="tech">기술</option>
+                                <option value="marketing">마케팅</option>
+                                <option value="business">비즈니스</option>
+                                <option value="trend">트렌드</option>
+                                <option value="howto">하우투</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">경쟁도</label>
+                            <select class="form-select" id="keyword-competition-filter">
+                                <option value="">전체</option>
+                                <option value="low">낮음</option>
+                                <option value="medium">보통</option>
+                                <option value="high">높음</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">상태</label>
+                            <select class="form-select" id="keyword-status-filter">
+                                <option value="">전체</option>
+                                <option value="active">활성</option>
+                                <option value="inactive">비활성</option>
+                                <option value="pending">대기</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-outline-secondary w-100" onclick="clearKeywordFilters()">
+                                <i class="bi bi-x-circle"></i> 필터 초기화
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 일괄 작업 도구 -->
+            <div id="keyword-bulk-actions" class="alert alert-info mb-4" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-info-circle"></i> <span id="selected-keywords-count">0</span>개의 키워드가 선택되었습니다.</span>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-danger" onclick="bulkDeleteKeywords()">
+                            <i class="bi bi-trash"></i> 일괄 삭제
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="bulkDeactivateKeywords()">
+                            <i class="bi bi-pause-circle"></i> 일괄 비활성화
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="keywords-content">키워드 관리 기능이 여기에 표시됩니다.</div>
+        </div>
+
+        <div id="news-section" class="content-section">
+            <h1>뉴스 아카이브</h1>
+            <div id="news-content">뉴스 아카이브 기능이 여기에 표시됩니다.</div>
+        </div>
+
+        <div id="performance-section" class="content-section">
+            <h1>성능 모니터링</h1>
+            <div id="performance-content">성능 모니터링 기능이 여기에 표시됩니다.</div>
+        </div>
+
+        <div id="api-section" class="content-section">
+            <h1>API 관리</h1>
+            <div id="api-content">API 관리 기능이 여기에 표시됩니다.</div>
+        </div>
+
+        <div id="settings-section" class="content-section">
+            <h1>시스템 설정</h1>
+            <div id="settings-content">시스템 설정 기능이 여기에 표시됩니다.</div>
+        </div>
+    </div>
+
+    <!-- 포스트 상세보기 모달 -->
+    <div class="modal fade" id="postDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-text"></i> 포스트 상세보기
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <h6>포스트 내용</h6>
+                                <div class="border rounded p-3 bg-light" id="modal-post-content" style="max-height: 400px; overflow-y: auto;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <h6>포스트 정보</h6>
+                                <table class="table table-sm">
+                                    <tr><td>제목</td><td id="modal-post-title"></td></tr>
+                                    <tr><td>키워드</td><td id="modal-post-keywords"></td></tr>
+                                    <tr><td>단어 수</td><td id="modal-post-word-count"></td></tr>
+                                    <tr><td>생성일</td><td id="modal-post-created"></td></tr>
+                                    <tr><td>원본 URL</td><td id="modal-post-url"></td></tr>
+                                </table>
+                            </div>
+                            <div class="mb-3">
+                                <h6>SEO 분석</h6>
+                                <div id="modal-post-seo" class="border rounded p-3 bg-light">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="copyPostContent()">
+                        <i class="bi bi-clipboard"></i> 내용 복사
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="downloadPostContent()">
+                        <i class="bi bi-download"></i> 다운로드
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 포스트 추가/편집 모달 -->
+    <div class="modal fade" id="postModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postModalTitle">
+                        <i class="bi bi-file-text"></i> 포스트 추가
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="postForm">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="post-title" class="form-label">제목</label>
+                                    <input type="text" class="form-control" id="post-title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="post-category" class="form-label">카테고리</label>
+                                    <select class="form-select" id="post-category">
+                                        <option value="">카테고리 선택</option>
+                                        <option value="ai">AI</option>
+                                        <option value="seo">SEO</option>
+                                        <option value="tech">기술</option>
+                                        <option value="marketing">마케팅</option>
+                                        <option value="business">비즈니스</option>
+                                        <option value="trend">트렌드</option>
+                                        <option value="howto">하우투</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-keywords" class="form-label">키워드</label>
+                            <input type="text" class="form-control" id="post-keywords" placeholder="쉼표로 구분하여 입력" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-description" class="form-label">설명</label>
+                            <textarea class="form-control" id="post-description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-content" class="form-label">내용</label>
+                            <textarea class="form-control" id="post-content" rows="10" placeholder="포스트 내용을 입력하세요..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="post-status" class="form-label">상태</label>
+                                    <select class="form-select" id="post-status">
+                                        <option value="draft">임시저장</option>
+                                        <option value="published">발행</option>
+                                        <option value="archived">보관</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="savePost()">
+                        <i class="bi bi-save"></i> 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 키워드 추가/편집 모달 -->
+    <div class="modal fade" id="keywordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="keywordModalTitle">
+                        <i class="bi bi-tags"></i> 키워드 추가
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="keywordForm">
+                        <div class="mb-3">
+                            <label for="keyword-input" class="form-label">키워드</label>
+                            <input type="text" class="form-control" id="keyword-input" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyword-category" class="form-label">카테고리</label>
+                            <select class="form-select" id="keyword-category" required>
+                                <option value="">카테고리 선택</option>
+                                <option value="ai">AI</option>
+                                <option value="seo">SEO</option>
+                                <option value="tech">기술</option>
+                                <option value="marketing">마케팅</option>
+                                <option value="business">비즈니스</option>
+                                <option value="trend">트렌드</option>
+                                <option value="howto">하우투</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyword-description" class="form-label">설명</label>
+                            <textarea class="form-control" id="keyword-description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="keyword-volume" class="form-label">예상 검색량</label>
+                                    <input type="number" class="form-control" id="keyword-volume" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="keyword-competition" class="form-label">경쟁도</label>
+                                    <select class="form-select" id="keyword-competition">
+                                        <option value="low">낮음</option>
+                                        <option value="medium">보통</option>
+                                        <option value="high">높음</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyword-status" class="form-label">상태</label>
+                            <select class="form-select" id="keyword-status">
+                                <option value="active">활성</option>
+                                <option value="inactive">비활성</option>
+                                <option value="pending">대기</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="saveKeyword()">
+                        <i class="bi bi-save"></i> 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 네비게이션 처리
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 활성 링크 변경
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 섹션 전환
+                const section = this.dataset.section;
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section + '-section').classList.add('active');
+                
+                // 섹션별 데이터 로드
+                loadSectionData(section);
+            });
+        });
+
+        // 섹션별 데이터 로드
+        function loadSectionData(section) {
+            switch(section) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'posts':
+                    loadPostsData();
+                    break;
+                case 'keywords':
+                    loadKeywordsData();
+                    break;
+                case 'news':
+                    loadNewsData();
+                    break;
+                case 'performance':
+                    loadPerformanceData();
+                    break;
+                case 'api':
+                    loadApiData();
+                    break;
+                case 'settings':
+                    loadSettingsData();
+                    break;
+            }
+        }
+
+        // 대시보드 데이터 로드
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/v1/stats/dashboard');
+                const data = await response.json();
+                
+                // 통계 업데이트
+                document.getElementById('total-posts').textContent = data.total_posts || 0;
+                document.getElementById('total-keywords').textContent = data.total_keywords || 0;
+                document.getElementById('api-calls').textContent = data.api_calls_today || 0;
+                document.getElementById('success-rate').textContent = (data.success_rate || 0) + '%';
+                
+                // 차트 생성
+                createDailyChart();
+                createKeywordChart();
+                
+            } catch (error) {
+                console.error('대시보드 데이터 로드 오류:', error);
+            }
+        }
+
+        // 일별 통계 차트
+        function createDailyChart() {
+            const ctx = document.getElementById('dailyChart');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1일', '2일', '3일', '4일', '5일', '6일', '7일'],
+                    datasets: [{
+                        label: '포스트 생성',
+                        data: [12, 19, 15, 25, 22, 30, 28],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // 키워드 분포 차트
+        function createKeywordChart() {
+            const ctx = document.getElementById('keywordChart');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['AI', 'SEO', '기술', '마케팅', '기타'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: [
+                            '#6366f1',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#6b7280'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // 포스트 관리 관련 변수들
+        let postsData = [];
+        let currentPage = 1;
+        let postsPerPage = 10;
+        let selectedPosts = new Set();
+        let editingPostId = null;
+
+        // 키워드 관리 관련 변수들
+        let keywordsData = [];
+        let currentKeywordPage = 1;
+        let keywordsPerPage = 10;
+        let selectedKeywords = new Set();
+        let editingKeywordId = null;
+
+        // 포스트 데이터 로드
+        async function loadPostsData() {
+            try {
+                const response = await fetch('/api/v1/posts?page=1&limit=10');
+                const data = await response.json();
+                
+                postsData = data.posts || [];
+                renderPostsTable();
+                
+                showToast('포스트 데이터가 로드되었습니다.', 'success');
+            } catch (error) {
+                console.error('포스트 데이터 로드 오류:', error);
+                showToast('포스트 데이터 로드 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 포스트 테이블 렌더링
+        function renderPostsTable() {
+            const container = document.getElementById('posts-content');
+            
+            if (postsData.length === 0) {
+                container.innerHTML = '<p class="text-muted">포스트가 없습니다.</p>';
+                return;
+            }
+            
+            const html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="form-check-input" id="select-all-posts">
+                                </th>
+                                <th>제목</th>
+                                <th>키워드</th>
+                                <th>카테고리</th>
+                                <th>길이</th>
+                                <th>상태</th>
+                                <th>생성일</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${postsData.map(post => `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input post-checkbox" value="${post.id}">
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">${post.title}</div>
+                                        <small class="text-muted">${post.description || ''}</small>
+                                    </td>
+                                    <td><span class="badge bg-primary">${post.keywords}</span></td>
+                                    <td><span class="badge bg-secondary">${post.category || '기타'}</span></td>
+                                    <td>${post.word_count || 0}자</td>
+                                    <td><span class="badge bg-${getPostStatusBadgeColor(post.status)}">${getPostStatusText(post.status)}</span></td>
+                                    <td>${new Date(post.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewPost(${post.id})" title="상세보기">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="editPost(${post.id})" title="편집">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deletePost(${post.id})" title="삭제">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        총 ${postsData.length}개의 포스트
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">이전</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // 체크박스 이벤트 리스너 추가
+            setupPostCheckboxes();
+        }
+
+        function renderFilteredPostsTable(filteredPosts) {
+            const container = document.getElementById('posts-content');
+            
+            if (filteredPosts.length === 0) {
+                container.innerHTML = '<p class="text-muted">필터 조건에 맞는 포스트가 없습니다.</p>';
+                return;
+            }
+            
+            const html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="form-check-input" id="select-all-posts">
+                                </th>
+                                <th>제목</th>
+                                <th>키워드</th>
+                                <th>카테고리</th>
+                                <th>길이</th>
+                                <th>상태</th>
+                                <th>생성일</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredPosts.map(post => `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input post-checkbox" value="${post.id}">
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">${post.title}</div>
+                                        <small class="text-muted">${post.description || ''}</small>
+                                    </td>
+                                    <td><span class="badge bg-primary">${post.keywords}</span></td>
+                                    <td><span class="badge bg-secondary">${post.category || '기타'}</span></td>
+                                    <td>${post.word_count || 0}자</td>
+                                    <td><span class="badge bg-${getPostStatusBadgeColor(post.status)}">${getPostStatusText(post.status)}</span></td>
+                                    <td>${new Date(post.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewPost(${post.id})" title="상세보기">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="editPost(${post.id})" title="편집">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deletePost(${post.id})" title="삭제">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        필터링된 ${filteredPosts.length}개의 포스트
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // 체크박스 이벤트 리스너 추가
+            setupPostCheckboxes();
+        }
+
+        function setupPostCheckboxes() {
+            const checkboxes = document.querySelectorAll('.post-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectedPosts.add(this.value);
+                    } else {
+                        selectedPosts.delete(this.value);
+                    }
+                    updateBulkActionButtons();
+                    updateSelectedCount('selected-posts-count', selectedPosts.size);
+                });
+            });
+        }
+
+        // 포스트 상세보기
+        async function viewPost(postId) {
+            try {
+                const response = await fetch(`/api/v1/posts/${postId}`);
+                const post = await response.json();
+                
+                document.getElementById('modal-post-title').textContent = post.title;
+                document.getElementById('modal-post-keywords').textContent = post.keywords;
+                document.getElementById('modal-post-word-count').textContent = post.word_count + '자';
+                document.getElementById('modal-post-created').textContent = new Date(post.created_at).toLocaleString();
+                document.getElementById('modal-post-url').textContent = post.original_url || 'N/A';
+                document.getElementById('modal-post-content').innerHTML = post.content_html.replace(/\n/g, '<br>');
+                
+                const modal = new bootstrap.Modal(document.getElementById('postDetailModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('포스트 상세보기 오류:', error);
+                showToast('포스트 정보를 불러오는 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 포스트 편집
+        async function editPost(postId) {
+            try {
+                const response = await fetch(`/api/v1/posts/${postId}`);
+                const post = await response.json();
+                
+                editingPostId = postId;
+                document.getElementById('postModalTitle').textContent = '포스트 편집';
+                
+                document.getElementById('post-title').value = post.title;
+                document.getElementById('post-keywords').value = post.keywords;
+                document.getElementById('post-category').value = post.category || '';
+                document.getElementById('post-description').value = post.description || '';
+                document.getElementById('post-content').value = post.content || post.content_html || '';
+                document.getElementById('post-status').value = post.status || 'draft';
+                
+                const modal = new bootstrap.Modal(document.getElementById('postModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('포스트 편집 오류:', error);
+                showToast('포스트 정보를 불러오는 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 포스트 저장
+        async function savePost() {
+            const formData = {
+                title: document.getElementById('post-title').value,
+                keywords: document.getElementById('post-keywords').value,
+                category: document.getElementById('post-category').value,
+                description: document.getElementById('post-description').value,
+                content: document.getElementById('post-content').value,
+                status: document.getElementById('post-status').value
+            };
+            
+            if (!formData.title || !formData.keywords) {
+                showToast('제목과 키워드는 필수 입력 항목입니다.', 'warning');
+                return;
+            }
+            
+            try {
+                const url = editingPostId 
+                    ? `/api/v1/posts/${editingPostId}`
+                    : '/api/v1/posts';
+                
+                const method = editingPostId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const action = editingPostId ? '수정' : '추가';
+                    showToast(`포스트가 ${action}되었습니다.`, 'success');
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('postModal'));
+                    modal.hide();
+                    
+                    loadPostsData();
+                } else {
+                    showToast('포스트 저장 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('포스트 저장 오류:', error);
+                showToast('포스트 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 포스트 삭제
+        async function deletePost(postId) {
+            if (!confirm('정말로 이 포스트를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/posts/${postId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showToast('포스트가 삭제되었습니다.', 'success');
+                    loadPostsData();
+                } else {
+                    showToast('포스트 삭제 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('포스트 삭제 오류:', error);
+                showToast('포스트 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 포스트 내용 복사
+        function copyPostContent() {
+            const content = document.getElementById('modal-post-content').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                showToast('포스트 내용이 클립보드에 복사되었습니다.', 'success');
+            });
+        }
+
+        // 포스트 내용 다운로드
+        function downloadPostContent() {
+            const title = document.getElementById('modal-post-title').textContent;
+            const content = document.getElementById('modal-post-content').textContent;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('포스트 내용이 다운로드되었습니다.', 'success');
+        }
+
+        // 키워드 데이터 로드
+        async function loadKeywordsData() {
+            try {
+                const response = await fetch('/api/v1/keywords?page=1&limit=10');
+                const data = await response.json();
+                
+                keywordsData = data.keywords || [];
+                renderKeywordsTable();
+                
+                showToast('키워드 데이터가 로드되었습니다.', 'success');
+            } catch (error) {
+                console.error('키워드 데이터 로드 오류:', error);
+                showToast('키워드 데이터 로드 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 키워드 테이블 렌더링
+        function renderKeywordsTable() {
+            const container = document.getElementById('keywords-content');
+            
+            if (keywordsData.length === 0) {
+                container.innerHTML = '<p class="text-muted">키워드가 없습니다.</p>';
+                return;
+            }
+            
+            const html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="form-check-input" id="select-all-keywords">
+                                </th>
+                                <th>키워드</th>
+                                <th>카테고리</th>
+                                <th>검색량</th>
+                                <th>경쟁도</th>
+                                <th>상태</th>
+                                <th>생성일</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${keywordsData.map(keyword => `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input keyword-checkbox" value="${keyword.id}">
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">${keyword.keyword}</div>
+                                        <small class="text-muted">${keyword.description || ''}</small>
+                                    </td>
+                                    <td><span class="badge bg-primary">${keyword.category || keyword.type || '기타'}</span></td>
+                                    <td>${keyword.search_volume || 'N/A'}</td>
+                                    <td><span class="badge bg-${getCompetitionBadgeColor(keyword.competition)}">${getCompetitionText(keyword.competition)}</span></td>
+                                    <td><span class="badge bg-${getStatusBadgeColor(keyword.status)}">${getStatusText(keyword.status)}</span></td>
+                                    <td>${new Date(keyword.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="editKeyword(${keyword.id})" title="편집">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="generatePostFromKeyword(${keyword.id})" title="포스트 생성">
+                                                <i class="bi bi-file-text"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteKeyword(${keyword.id})" title="삭제">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        총 ${keywordsData.length}개의 키워드
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">이전</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // 체크박스 이벤트 리스너 추가
+            setupKeywordCheckboxes();
+        }
+
+        function renderFilteredKeywordsTable(filteredKeywords) {
+            const container = document.getElementById('keywords-content');
+            
+            if (filteredKeywords.length === 0) {
+                container.innerHTML = '<p class="text-muted">필터 조건에 맞는 키워드가 없습니다.</p>';
+                return;
+            }
+            
+            const html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" class="form-check-input" id="select-all-keywords">
+                                </th>
+                                <th>키워드</th>
+                                <th>카테고리</th>
+                                <th>검색량</th>
+                                <th>경쟁도</th>
+                                <th>상태</th>
+                                <th>생성일</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredKeywords.map(keyword => `
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input keyword-checkbox" value="${keyword.id}">
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">${keyword.keyword}</div>
+                                        <small class="text-muted">${keyword.description || ''}</small>
+                                    </td>
+                                    <td><span class="badge bg-primary">${keyword.category || keyword.type || '기타'}</span></td>
+                                    <td>${keyword.search_volume || 'N/A'}</td>
+                                    <td><span class="badge bg-${getCompetitionBadgeColor(keyword.competition)}">${getCompetitionText(keyword.competition)}</span></td>
+                                    <td><span class="badge bg-${getStatusBadgeColor(keyword.status)}">${getStatusText(keyword.status)}</span></td>
+                                    <td>${new Date(keyword.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="editKeyword(${keyword.id})" title="편집">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="generatePostFromKeyword(${keyword.id})" title="포스트 생성">
+                                                <i class="bi bi-file-text"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteKeyword(${keyword.id})" title="삭제">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        필터링된 ${filteredKeywords.length}개의 키워드
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // 체크박스 이벤트 리스너 추가
+            setupKeywordCheckboxes();
+        }
+
+        function setupKeywordCheckboxes() {
+            const checkboxes = document.querySelectorAll('.keyword-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectedKeywords.add(this.value);
+                    } else {
+                        selectedKeywords.delete(this.value);
+                    }
+                    updateBulkActionButtons();
+                    updateSelectedCount('selected-keywords-count', selectedKeywords.size);
+                });
+            });
+        }
+
+        // 경쟁도 배지 색상
+        function getCompetitionBadgeColor(competition) {
+            switch(competition) {
+                case 'low': return 'success';
+                case 'medium': return 'warning';
+                case 'high': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        // 상태 배지 색상
+        function getStatusBadgeColor(status) {
+            switch(status) {
+                case 'active': return 'success';
+                case 'inactive': return 'secondary';
+                case 'pending': return 'warning';
+                default: return 'primary';
+            }
+        }
+
+        // 경쟁도 텍스트
+        function getCompetitionText(competition) {
+            switch(competition) {
+                case 'low': return '낮음';
+                case 'medium': return '보통';
+                case 'high': return '높음';
+                default: return 'N/A';
+            }
+        }
+
+        // 상태 텍스트
+        function getStatusText(status) {
+            switch(status) {
+                case 'active': return '활성';
+                case 'inactive': return '비활성';
+                case 'pending': return '대기';
+                default: return '활성';
+            }
+        }
+
+        // 포스트 상태 배지 색상
+        function getPostStatusBadgeColor(status) {
+            switch(status) {
+                case 'published': return 'success';
+                case 'draft': return 'warning';
+                case 'archived': return 'secondary';
+                default: return 'secondary';
+            }
+        }
+
+        // 포스트 상태 텍스트
+        function getPostStatusText(status) {
+            switch(status) {
+                case 'published': return '발행됨';
+                case 'draft': return '임시저장';
+                case 'archived': return '보관됨';
+                default: return '임시저장';
+            }
+        }
+
+        // 선택된 항목 수 업데이트
+        function updateSelectedCount(elementId, count) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = count;
+            }
+        }
+
+        // 필터 초기화
+        function clearPostFilters() {
+            document.getElementById('post-category-filter').value = '';
+            document.getElementById('post-date-filter').value = '';
+            document.getElementById('post-status-filter').value = '';
+            renderPostsTable();
+        }
+
+        function clearKeywordFilters() {
+            document.getElementById('keyword-category-filter').value = '';
+            document.getElementById('keyword-competition-filter').value = '';
+            document.getElementById('keyword-status-filter').value = '';
+            renderKeywordsTable();
+        }
+
+        // 모달 표시 함수들
+        function showAddPostModal() {
+            editingPostId = null;
+            document.getElementById('postModalTitle').textContent = '새 포스트 추가';
+            document.getElementById('postForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('postModal'));
+            modal.show();
+        }
+
+        function showAddKeywordModal() {
+            editingKeywordId = null;
+            document.getElementById('keywordModalTitle').textContent = '새 키워드 추가';
+            document.getElementById('keywordForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+            modal.show();
+        }
+
+        // 키워드에서 포스트 생성
+        async function generatePostFromKeyword(keywordId) {
+            try {
+                showToast('포스트 생성을 시작합니다...', 'info');
+                
+                const response = await fetch('/api/v1/posts/generate-from-keyword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        keyword_id: keywordId
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast('포스트가 성공적으로 생성되었습니다!', 'success');
+                    loadPostsData();
+                } else {
+                    showToast('포스트 생성 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('포스트 생성 오류:', error);
+                showToast('포스트 생성 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 일괄 보관
+        async function bulkArchivePosts() {
+            if (selectedPosts.size === 0) {
+                showToast('보관할 포스트를 선택해주세요.', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/posts/bulk-archive', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_ids: Array.from(selectedPosts)
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast(`${selectedPosts.size}개의 포스트가 보관되었습니다.`, 'success');
+                    selectedPosts.clear();
+                    loadPostsData();
+                } else {
+                    showToast('일괄 보관 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('일괄 보관 오류:', error);
+                showToast('일괄 보관 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 일괄 비활성화
+        async function bulkDeactivateKeywords() {
+            if (selectedKeywords.size === 0) {
+                showToast('비활성화할 키워드를 선택해주세요.', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/keywords/bulk-deactivate', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        keyword_ids: Array.from(selectedKeywords)
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast(`${selectedKeywords.size}개의 키워드가 비활성화되었습니다.`, 'success');
+                    selectedKeywords.clear();
+                    loadKeywordsData();
+                } else {
+                    showToast('일괄 비활성화 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('일괄 비활성화 오류:', error);
+                showToast('일괄 비활성화 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 키워드 추가
+        function addKeyword() {
+            editingKeywordId = null;
+            document.getElementById('keywordModalTitle').innerHTML = '<i class="bi bi-tags"></i> 키워드 추가';
+            document.getElementById('keywordForm').reset();
+            
+            const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+            modal.show();
+        }
+
+        // 키워드 편집
+        async function editKeyword(keywordId) {
+            try {
+                const response = await fetch(`/api/v1/keywords/${keywordId}`);
+                const keyword = await response.json();
+                
+                editingKeywordId = keywordId;
+                document.getElementById('keywordModalTitle').innerHTML = '<i class="bi bi-pencil"></i> 키워드 편집';
+                
+                document.getElementById('keyword-input').value = keyword.keyword;
+                document.getElementById('keyword-category').value = keyword.category || keyword.type;
+                document.getElementById('keyword-description').value = keyword.description || '';
+                document.getElementById('keyword-volume').value = keyword.search_volume || '';
+                document.getElementById('keyword-competition').value = keyword.competition || 'medium';
+                document.getElementById('keyword-status').value = keyword.status || 'active';
+                
+                const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('키워드 편집 오류:', error);
+                showToast('키워드 정보를 불러오는 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 키워드 저장
+        async function saveKeyword() {
+            const formData = {
+                keyword: document.getElementById('keyword-input').value,
+                category: document.getElementById('keyword-category').value,
+                description: document.getElementById('keyword-description').value,
+                search_volume: document.getElementById('keyword-volume').value,
+                competition: document.getElementById('keyword-competition').value,
+                status: document.getElementById('keyword-status').value
+            };
+            
+            if (!formData.keyword || !formData.category) {
+                showToast('키워드와 카테고리는 필수 입력 항목입니다.', 'warning');
+                return;
+            }
+            
+            try {
+                const url = editingKeywordId 
+                    ? `/api/v1/keywords/${editingKeywordId}`
+                    : '/api/v1/keywords';
+                
+                const method = editingKeywordId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const action = editingKeywordId ? '수정' : '추가';
+                    showToast(`키워드가 ${action}되었습니다.`, 'success');
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('keywordModal'));
+                    modal.hide();
+                    
+                    loadKeywordsData();
+                } else {
+                    showToast('키워드 저장 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('키워드 저장 오류:', error);
+                showToast('키워드 저장 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 키워드 삭제
+        async function deleteKeyword(keywordId) {
+            if (!confirm('정말로 이 키워드를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/keywords/${keywordId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showToast('키워드가 삭제되었습니다.', 'success');
+                    loadKeywordsData();
+                } else {
+                    showToast('키워드 삭제 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('키워드 삭제 오류:', error);
+                showToast('키워드 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function loadNewsData() {
+            document.getElementById('news-content').innerHTML = '뉴스 데이터를 로드하는 중...';
+        }
+
+        function loadPerformanceData() {
+            document.getElementById('performance-content').innerHTML = '성능 데이터를 로드하는 중...';
+        }
+
+        function loadApiData() {
+            document.getElementById('api-content').innerHTML = 'API 데이터를 로드하는 중...';
+        }
+
+        function loadSettingsData() {
+            document.getElementById('settings-content').innerHTML = '설정 데이터를 로드하는 중...';
+        }
+
+        // 토스트 알림 시스템
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container') || createToastContainer();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <strong class="me-auto">${type.toUpperCase()}</strong>
+                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // 실시간 통계 업데이트
+        let statsUpdateInterval;
+        
+        function startRealTimeStats() {
+            statsUpdateInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/v1/stats/realtime');
+                    const data = await response.json();
+                    
+                    // 실시간 통계 업데이트
+                    updateRealTimeStats(data);
+                } catch (error) {
+                    console.error('실시간 통계 업데이트 오류:', error);
+                }
+            }, 30000); // 30초마다 업데이트
+        }
+
+        function updateRealTimeStats(data) {
+            // API 호출 수 업데이트
+            const apiCallsElement = document.getElementById('api-calls');
+            if (apiCallsElement && data.api_calls_today !== undefined) {
+                apiCallsElement.textContent = data.api_calls_today;
+            }
+            
+            // 성공률 업데이트
+            const successRateElement = document.getElementById('success-rate');
+            if (successRateElement && data.success_rate !== undefined) {
+                successRateElement.textContent = data.success_rate + '%';
+            }
+            
+            // 시스템 상태 업데이트
+            updateSystemStatus(data.system_status);
+            
+            // 마지막 업데이트 시간
+            const lastUpdateElement = document.getElementById('last-update');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = new Date().toLocaleTimeString();
+            }
+        }
+
+        function updateSystemStatus(status) {
+            const statusIndicator = document.getElementById('system-status');
+            if (statusIndicator) {
+                const statusClass = status === 'healthy' ? 'text-success' : 
+                                  status === 'warning' ? 'text-warning' : 'text-danger';
+                const statusText = status === 'healthy' ? '정상' : 
+                                 status === 'warning' ? '주의' : '오류';
+                
+                statusIndicator.className = `badge ${statusClass}`;
+                statusIndicator.textContent = statusText;
+            }
+        }
+
+        // 고급 필터링 기능
+        function setupAdvancedFilters() {
+            // 포스트 필터
+            const postFilters = document.getElementById('post-filters');
+            if (postFilters) {
+                postFilters.addEventListener('change', filterPosts);
+            }
+            
+            // 키워드 필터
+            const keywordFilters = document.getElementById('keyword-filters');
+            if (keywordFilters) {
+                keywordFilters.addEventListener('change', filterKeywords);
+            }
+        }
+
+        function filterPosts() {
+            const categoryFilter = document.getElementById('post-category-filter').value;
+            const dateFilter = document.getElementById('post-date-filter').value;
+            const statusFilter = document.getElementById('post-status-filter').value;
+            
+            const filteredPosts = postsData.filter(post => {
+                let match = true;
+                
+                if (categoryFilter && post.category !== categoryFilter) match = false;
+                if (statusFilter && post.status !== statusFilter) match = false;
+                if (dateFilter) {
+                    const postDate = new Date(post.created_at);
+                    const filterDate = new Date(dateFilter);
+                    if (postDate < filterDate) match = false;
+                }
+                
+                return match;
+            });
+            
+            renderFilteredPostsTable(filteredPosts);
+        }
+
+        function filterKeywords() {
+            const categoryFilter = document.getElementById('keyword-category-filter').value;
+            const competitionFilter = document.getElementById('keyword-competition-filter').value;
+            const statusFilter = document.getElementById('keyword-status-filter').value;
+            
+            const filteredKeywords = keywordsData.filter(keyword => {
+                let match = true;
+                
+                if (categoryFilter && keyword.category !== categoryFilter) match = false;
+                if (competitionFilter && keyword.competition !== competitionFilter) match = false;
+                if (statusFilter && keyword.status !== statusFilter) match = false;
+                
+                return match;
+            });
+            
+            renderFilteredKeywordsTable(filteredKeywords);
+        }
+
+        // 일괄 작업 기능
+        function setupBulkActions() {
+            // 전체 선택 체크박스
+            const selectAllPosts = document.getElementById('select-all-posts');
+            if (selectAllPosts) {
+                selectAllPosts.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.post-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                        if (this.checked) {
+                            selectedPosts.add(checkbox.value);
+                        } else {
+                            selectedPosts.delete(checkbox.value);
+                        }
+                    });
+                    updateBulkActionButtons();
+                });
+            }
+            
+            const selectAllKeywords = document.getElementById('select-all-keywords');
+            if (selectAllKeywords) {
+                selectAllKeywords.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.keyword-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                        if (this.checked) {
+                            selectedKeywords.add(checkbox.value);
+                        } else {
+                            selectedKeywords.delete(checkbox.value);
+                        }
+                    });
+                    updateBulkActionButtons();
+                });
+            }
+        }
+
+        function updateBulkActionButtons() {
+            const postBulkActions = document.getElementById('post-bulk-actions');
+            const keywordBulkActions = document.getElementById('keyword-bulk-actions');
+            
+            if (postBulkActions) {
+                postBulkActions.style.display = selectedPosts.size > 0 ? 'block' : 'none';
+            }
+            
+            if (keywordBulkActions) {
+                keywordBulkActions.style.display = selectedKeywords.size > 0 ? 'block' : 'none';
+            }
+        }
+
+        // 일괄 삭제
+        async function bulkDeletePosts() {
+            if (selectedPosts.size === 0) {
+                showToast('삭제할 포스트를 선택해주세요.', 'warning');
+                return;
+            }
+            
+            if (!confirm(`선택된 ${selectedPosts.size}개의 포스트를 삭제하시겠습니까?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/posts/bulk-delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_ids: Array.from(selectedPosts)
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast(`${selectedPosts.size}개의 포스트가 삭제되었습니다.`, 'success');
+                    selectedPosts.clear();
+                    loadPostsData();
+                } else {
+                    showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('일괄 삭제 오류:', error);
+                showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function bulkDeleteKeywords() {
+            if (selectedKeywords.size === 0) {
+                showToast('삭제할 키워드를 선택해주세요.', 'warning');
+                return;
+            }
+            
+            if (!confirm(`선택된 ${selectedKeywords.size}개의 키워드를 삭제하시겠습니까?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/keywords/bulk-delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        keyword_ids: Array.from(selectedKeywords)
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast(`${selectedKeywords.size}개의 키워드가 삭제되었습니다.`, 'success');
+                    selectedKeywords.clear();
+                    loadKeywordsData();
+                } else {
+                    showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('일괄 삭제 오류:', error);
+                showToast('일괄 삭제 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 데이터 내보내기 기능
+        async function exportPosts() {
+            try {
+                const response = await fetch('/api/v1/posts/export');
+                const blob = await response.blob();
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `posts_export_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showToast('포스트 데이터가 내보내기되었습니다.', 'success');
+            } catch (error) {
+                console.error('포스트 내보내기 오류:', error);
+                showToast('포스트 내보내기 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function exportKeywords() {
+            try {
+                const response = await fetch('/api/v1/keywords/export');
+                const blob = await response.blob();
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `keywords_export_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showToast('키워드 데이터가 내보내기되었습니다.', 'success');
+            } catch (error) {
+                console.error('키워드 내보내기 오류:', error);
+                showToast('키워드 내보내기 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 성능 모니터링
+        function setupPerformanceMonitoring() {
+            // 메모리 사용량 모니터링
+            setInterval(() => {
+                if (performance.memory) {
+                    const memoryUsage = performance.memory.usedJSHeapSize / 1024 / 1024;
+                    const memoryLimit = performance.memory.jsHeapSizeLimit / 1024 / 1024;
+                    
+                    const memoryElement = document.getElementById('memory-usage');
+                    if (memoryElement) {
+                        memoryElement.textContent = `${memoryUsage.toFixed(1)}MB / ${memoryLimit.toFixed(1)}MB`;
+                    }
+                }
+            }, 10000);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            createToastContainer();
+            loadDashboardData();
+            setupAdvancedFilters();
+            setupBulkActions();
+            setupPerformanceMonitoring();
+            startRealTimeStats();
+            
+            // 페이지 언로드 시 정리
+            window.addEventListener('beforeunload', function() {
+                if (statsUpdateInterval) {
+                    clearInterval(statsUpdateInterval);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,718 @@
+{
+  "total_attempts": 80,
+  "successful_crawls": 31,
+  "failed_crawls": 49,
+  "site_stats": {
+    "www.socialmediatoday.com": {
+      "total_attempts": 12,
+      "successful_crawls": 0,
+      "failed_crawls": 12,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-08-01T15:18:12.061482",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 12
+      }
+    },
+    "www.facebook.com": {
+      "total_attempts": 3,
+      "successful_crawls": 0,
+      "failed_crawls": 3,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-06-25T22:57:18.711886",
+      "common_errors": {
+        "네트워크 오류: 400 Client Error: Bad Request for url: https://www.facebook.com/business/news/cannes-lions-2025-introducing-the-next-era-of-generative-ai-for-advertisers-and-agencies-personalization-at-scale": 1,
+        "네트워크 오류: 400 Client Error: Bad Request for url: https://www.facebook.com/business/news/suite-of-truth": 2
+      }
+    },
+    "www.lucintel.com": {
+      "total_attempts": 1,
+      "successful_crawls": 0,
+      "failed_crawls": 1,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-06-24T18:57:20.596996",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 1
+      }
+    },
+    "searchengineland.com": {
+      "total_attempts": 3,
+      "successful_crawls": 0,
+      "failed_crawls": 3,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-07-31T13:21:47.267603",
+      "common_errors": {
+        "크롤링 오류: The markup you provided was rejected by the parser. Trying a different parser or a different encoding may help.\n\nOriginal exception(s) from parser:\n expected name token at '<![���\\x0f��c�n�k\"8��t�'": 1,
+        "본문이 너무 짧거나 없음: 0자": 2
+      }
+    },
+    "jdhwilkins.com": {
+      "total_attempts": 2,
+      "successful_crawls": 2,
+      "failed_crawls": 0,
+      "avg_content_length": 1779.0,
+      "last_success": "2025-06-25T16:32:41.003071",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "www.searchenginejournal.com": {
+      "total_attempts": 3,
+      "successful_crawls": 3,
+      "failed_crawls": 0,
+      "avg_content_length": 1415.0,
+      "last_success": "2025-07-04T15:15:46.619871",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "creatoreconomy.so": {
+      "total_attempts": 1,
+      "successful_crawls": 0,
+      "failed_crawls": 1,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-06-25T22:49:16.000852",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 1
+      }
+    },
+    "samsungfundblog.com": {
+      "total_attempts": 1,
+      "successful_crawls": 1,
+      "failed_crawls": 0,
+      "avg_content_length": 3392.0,
+      "last_success": "2025-06-26T13:30:15.164895",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "www.appsflyer.com": {
+      "total_attempts": 1,
+      "successful_crawls": 1,
+      "failed_crawls": 0,
+      "avg_content_length": 1294.0,
+      "last_success": "2025-07-01T12:19:53.676629",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "www.example.com": {
+      "total_attempts": 3,
+      "successful_crawls": 3,
+      "failed_crawls": 0,
+      "avg_content_length": 338.0,
+      "last_success": "2025-08-01T15:45:41.208925",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "example.com": {
+      "total_attempts": 11,
+      "successful_crawls": 10,
+      "failed_crawls": 1,
+      "avg_content_length": 338.0,
+      "last_success": "2025-07-31T14:44:58.487319",
+      "last_failure": "2025-07-07T11:08:31.977724",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 1
+      }
+    },
+    "invalid-url.com": {
+      "total_attempts": 11,
+      "successful_crawls": 0,
+      "failed_crawls": 11,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-07-29T00:43:19.509121",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 4,
+        "크롤링 오류: Connection error": 7
+      }
+    },
+    "empty-content.com": {
+      "total_attempts": 11,
+      "successful_crawls": 0,
+      "failed_crawls": 11,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-07-29T00:43:27.678093",
+      "common_errors": {
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x1057db7c0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))": 1,
+        "본문이 너무 짧거나 없음: 0자": 7,
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x103530a50>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))": 1,
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x10a080a50>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))": 1,
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x1033ca350>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))": 1
+      }
+    },
+    "www.bbc.com": {
+      "total_attempts": 7,
+      "successful_crawls": 7,
+      "failed_crawls": 0,
+      "avg_content_length": 775.8571428571429,
+      "last_success": "2025-07-30T21:05:36.720742",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "bbc.com": {
+      "total_attempts": 4,
+      "successful_crawls": 4,
+      "failed_crawls": 0,
+      "avg_content_length": 811.0,
+      "last_success": "2025-07-30T20:42:43.601215",
+      "last_failure": null,
+      "common_errors": {}
+    },
+    "www.searchengineland.com": {
+      "total_attempts": 6,
+      "successful_crawls": 0,
+      "failed_crawls": 6,
+      "avg_content_length": 0,
+      "last_success": null,
+      "last_failure": "2025-08-01T15:25:23.932081",
+      "common_errors": {
+        "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123": 6
+      }
+    }
+  },
+  "recent_attempts": [
+    {
+      "url": "https://www.example.com/",
+      "domain": "www.example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-02T16:48:23.716963"
+    },
+    {
+      "url": "https://www.example.com/",
+      "domain": "www.example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-02T17:05:24.528180"
+    },
+    {
+      "url": "https://www.searchenginejournal.com/google-claims-ai-overviews-monetize-at-same-rate-as-traditional-search/547838/",
+      "domain": "www.searchenginejournal.com",
+      "success": true,
+      "content_length": 1415,
+      "error": "Google Style",
+      "timestamp": "2025-07-02T17:59:27.669961"
+    },
+    {
+      "url": "https://www.searchenginejournal.com/google-claims-ai-overviews-monetize-at-same-rate-as-traditional-search/547838/",
+      "domain": "www.searchenginejournal.com",
+      "success": true,
+      "content_length": 1415,
+      "error": "Google Style",
+      "timestamp": "2025-07-04T15:15:46.619871"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-07T11:05:14.816750"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-07T11:05:27.020583"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x1057db7c0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))",
+      "timestamp": "2025-07-07T11:05:34.332859"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-07T11:07:24.730996"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-07T11:07:34.757038"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-07T11:07:38.570171"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-07T11:08:31.977724"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-07T11:08:40.443710"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-07T11:08:43.951975"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-07T11:09:17.981485"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-07T11:09:23.277430"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-22T16:09:20.049636"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-22T16:09:23.678258"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-22T16:30:55.957258"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-22T16:31:01.126522"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-23T15:30:53.133983"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-23T15:30:55.949104"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "크롤링 오류: Connection error",
+      "timestamp": "2025-07-23T16:02:47.036126"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-23T16:02:50.825475"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-29T00:34:15.628651"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-29T00:34:28.997114"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x103530a50>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))",
+      "timestamp": "2025-07-29T00:34:35.615810"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-29T00:42:19.526480"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-29T00:42:31.797747"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x10a080a50>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))",
+      "timestamp": "2025-07-29T00:42:39.213964"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-29T00:43:07.429257"
+    },
+    {
+      "url": "https://invalid-url.com",
+      "domain": "invalid-url.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-29T00:43:19.509121"
+    },
+    {
+      "url": "https://empty-content.com",
+      "domain": "empty-content.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x1033ca350>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))",
+      "timestamp": "2025-07-29T00:43:27.678093"
+    },
+    {
+      "url": "https://www.bbc.com/news/articles/c3rpx1rl2nlo?cid=omcknsl-eml-nsl--mck-ext-----&hlkid=fa2372af3a724a26a8e9318087efa4de&hctky=12886952&hdpid=9cbbf4c3-a693-4a1c-a074-ce444b4c6fa5",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:32:16.744764"
+    },
+    {
+      "url": "https://bbc.com/news/articles/c3rpx1rl2nlo?cid=omcknsl-eml-nsl--mck-ext-----&hlkid=fa2372af3a724a26a8e9318087efa4de&hctky=12886952&hdpid=9cbbf4c3-a693-4a1c-a074-ce444b4c6fa5",
+      "domain": "bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:41:24.704694"
+    },
+    {
+      "url": "https://bbc.com/news/articles/c3rpx1rl2nlo?cid=omcknsl-eml-nsl--mck-ext-----&hlkid=fa2372af3a724a26a8e9318087efa4de&hctky=12886952&hdpid=9cbbf4c3-a693-4a1c-a074-ce444b4c6fa5",
+      "domain": "bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:42:11.652126"
+    },
+    {
+      "url": "https://bbc.com/news/articles/c3rpx1rl2nlo?cid=omcknsl-eml-nsl--mck-ext-----&hlkid=fa2372af3a724a26a8e9318087efa4de&hctky=12886952&hdpid=9cbbf4c3-a693-4a1c-a074-ce444b4c6fa5",
+      "domain": "bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:42:26.320339"
+    },
+    {
+      "url": "https://bbc.com/news/articles/c3rpx1rl2nlo?cid=omcknsl-eml-nsl--mck-ext-----&hlkid=fa2372af3a724a26a8e9318087efa4de&hctky=12886952&hdpid=9cbbf4c3-a693-4a1c-a074-ce444b4c6fa5",
+      "domain": "bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:42:43.601215"
+    },
+    {
+      "url": "https://www.bbc.com/news/articles/c3rpx1rl2nlo",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:48:59.932155"
+    },
+    {
+      "url": "https://www.bbc.com/news/articles/c3rpx1rl2nlo",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:49:46.256872"
+    },
+    {
+      "url": "https://www.bbc.com/news/articles/c3rpx1rl2nlo",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:51:41.408254"
+    },
+    {
+      "url": "https://www.bbc.com/news/articles/c3rpx1rl2nlo",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 811,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T20:53:18.564513"
+    },
+    {
+      "url": "https://www.bbc.com/culture/article/20250729-how-gwyneth-paltrow-became-a-divisive-icon",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 688,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T21:03:35.549034"
+    },
+    {
+      "url": "https://www.bbc.com/culture/article/20250729-how-gwyneth-paltrow-became-a-divisive-icon",
+      "domain": "www.bbc.com",
+      "success": true,
+      "content_length": 688,
+      "error": "Google Style",
+      "timestamp": "2025-07-30T21:05:36.720742"
+    },
+    {
+      "url": "https://searchengineland.com/what-is-generative-engine-optimization-geo-444418",
+      "domain": "searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-31T13:16:58.084227"
+    },
+    {
+      "url": "https://searchengineland.com/what-is-generative-engine-optimization-geo-444418",
+      "domain": "searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-07-31T13:21:47.267603"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-31T14:39:51.185968"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-31T14:40:39.551702"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-31T14:40:40.995019"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-31T14:41:12.507949"
+    },
+    {
+      "url": "https://example.com",
+      "domain": "example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-07-31T14:44:58.487319"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T14:58:51.596656"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T15:02:51.039832"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T15:06:53.419501"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T15:09:09.420633"
+    },
+    {
+      "url": "https://www.socialmediatoday.com/news/instagram-overview-post-types-buyers-journey-infographic/756507/",
+      "domain": "www.socialmediatoday.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-08-01T15:11:29.171238"
+    },
+    {
+      "url": "https://www.socialmediatoday.com/news/instagram-overview-post-types-buyers-journey-infographic/756507/",
+      "domain": "www.socialmediatoday.com",
+      "success": false,
+      "content_length": 0,
+      "error": "본문이 너무 짧거나 없음: 0자",
+      "timestamp": "2025-08-01T15:18:12.061482"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T15:18:30.437964"
+    },
+    {
+      "url": "https://www.searchengineland.com/google-core-update-may-2024-447123",
+      "domain": "www.searchengineland.com",
+      "success": false,
+      "content_length": 0,
+      "error": "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123",
+      "timestamp": "2025-08-01T15:25:23.932081"
+    },
+    {
+      "url": "https://www.example.com",
+      "domain": "www.example.com",
+      "success": true,
+      "content_length": 338,
+      "error": "Google Style",
+      "timestamp": "2025-08-01T15:45:41.208925"
+    }
+  ],
+  "problem_sites": [
+    {
+      "domain": "www.socialmediatoday.com",
+      "success_rate": 0.0,
+      "total_attempts": 12,
+      "failed_attempts": 12,
+      "last_failure": "2025-08-01T15:18:12.061482",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 12
+      }
+    },
+    {
+      "domain": "www.facebook.com",
+      "success_rate": 0.0,
+      "total_attempts": 3,
+      "failed_attempts": 3,
+      "last_failure": "2025-06-25T22:57:18.711886",
+      "common_errors": {
+        "네트워크 오류: 400 Client Error: Bad Request for url: https://www.facebook.com/business/news/suite-of-truth": 2,
+        "네트워크 오류: 400 Client Error: Bad Request for url: https://www.facebook.com/business/news/cannes-lions-2025-introducing-the-next-era-of-generative-ai-for-advertisers-and-agencies-personalization-at-scale": 1
+      }
+    },
+    {
+      "domain": "searchengineland.com",
+      "success_rate": 0.0,
+      "total_attempts": 3,
+      "failed_attempts": 3,
+      "last_failure": "2025-07-31T13:21:47.267603",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 2,
+        "크롤링 오류: The markup you provided was rejected by the parser. Trying a different parser or a different encoding may help.\n\nOriginal exception(s) from parser:\n expected name token at '<![���\\x0f��c�n�k\"8��t�'": 1
+      }
+    },
+    {
+      "domain": "invalid-url.com",
+      "success_rate": 0.0,
+      "total_attempts": 11,
+      "failed_attempts": 11,
+      "last_failure": "2025-07-29T00:43:19.509121",
+      "common_errors": {
+        "크롤링 오류: Connection error": 7,
+        "본문이 너무 짧거나 없음: 0자": 4
+      }
+    },
+    {
+      "domain": "empty-content.com",
+      "success_rate": 0.0,
+      "total_attempts": 11,
+      "failed_attempts": 11,
+      "last_failure": "2025-07-29T00:43:27.678093",
+      "common_errors": {
+        "본문이 너무 짧거나 없음: 0자": 7,
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x1057db7c0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))": 1,
+        "네트워크 오류: HTTPSConnectionPool(host='empty-content.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"<urllib3.connection.HTTPSConnection object at 0x103530a50>: Failed to resolve 'empty-content.com' ([Errno 8] nodename nor servname provided, or not known)\"))": 1
+      }
+    },
+    {
+      "domain": "www.searchengineland.com",
+      "success_rate": 0.0,
+      "total_attempts": 6,
+      "failed_attempts": 6,
+      "last_failure": "2025-08-01T15:25:23.932081",
+      "common_errors": {
+        "네트워크 오류: 404 Client Error: Not Found for url: https://searchengineland.com/google-core-update-may-2024-447123": 6
+      }
+    }
+  ],
+  "last_updated": "2025-08-01T16:25:50.677039"
+}

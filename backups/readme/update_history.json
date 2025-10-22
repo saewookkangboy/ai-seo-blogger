@@ -1,0 +1,48 @@
+[
+  {
+    "timestamp": "2025-10-22T15:25:07.747628",
+    "improvements": {
+      "system_health": {
+        "health_score": 70,
+        "critical_issues": 1,
+        "warnings": 2,
+        "last_diagnostic": "N/A",
+        "auto_update_enabled": true
+      },
+      "performance_metrics": {
+        "page_load_time": "0.001-0.013",
+        "api_response_time": "999.000",
+        "static_file_time": "0.001-0.003",
+        "app_startup_time": "1.38",
+        "memory_usage": "85.7",
+        "cpu_usage": "60.9",
+        "database_size": "1512KB",
+        "openai_avg_time": "19.56",
+        "gemini_avg_time": "14.21",
+        "translation_avg_time": "1.06",
+        "google_drive_avg_time": "2-3"
+      },
+      "api_status": {
+        "openai_status": "healthy",
+        "gemini_status": "healthy",
+        "deepl_status": "not_configured",
+        "google_drive_status": "not_configured",
+        "last_check": "2025-10-22T15:25:07.739362"
+      },
+      "dependencies": {},
+      "recent_updates": [
+        {
+          "date": "2025.10.22",
+          "title": "자동 업데이트 시스템 구축",
+          "description": "전체 서비스의 테스트, 진단, 자동 업데이트, 로그 기록 시스템 구축 완료"
+        },
+        {
+          "date": "2025.10.22",
+          "title": "시스템 진단 완료",
+          "description": "치명적 오류 1개, 경고 2개 식별"
+        }
+      ]
+    },
+    "readme_size": 25263
+  }
+]

@@ -15,5 +15,64 @@
     "openai": 16,
     "deepl": 4,
     "gemini": 1
+  },
+  "2025-06-26": {
+    "deepl": 17,
+    "openai": 44
+  },
+  "2025-07-01": {
+    "deepl": 1,
+    "openai": 2
+  },
+  "2025-07-29": {
+    "gemini": 28
+  },
+  "2025-07-30": {
+    "gemini": 4,
+    "openai": 52
+  },
+  "2025-07-31": {
+    "openai": 54,
+    "gemini": 6
+  },
+  "2025-08-01": {
+    "openai": 137,
+    "gemini": 90,
+    "gemini_2_0_flash": 52,
+    "openai_translation": 7,
+    "enhanced_content_generation": 16
+  },
+  "2025-08-02": {
+    "gemini": 1,
+    "openai": 5
+  },
+  "2025-08-04": {
+    "openai": 2,
+    "gemini": 54,
+    "enhanced_content_generation": 1,
+    "deepl": 8
+  },
+  "2025-08-05": {
+    "gemini": 5,
+    "deepl": 1
+  },
+  "2025-08-19": {
+    "gemini": 5
+  },
+  "2025-09-04": {
+    "gemini": 8
+  },
+  "2025-09-14": {
+    "gemini": 1
+  },
+  "2025-09-25": {
+    "gemini": 2
+  },
+  "2025-10-15": {
+    "gemini": 3
+  },
+  "2025-10-22": {
+    "gemini": 1,
+    "deepl": 1
   }
 }

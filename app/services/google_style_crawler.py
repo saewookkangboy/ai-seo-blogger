@@ -43,7 +43,7 @@ class GoogleStyleCrawler:
         
         # Google Chrome과 유사한 헤더
         session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -71,7 +71,16 @@ class GoogleStyleCrawler:
                 ".content-area", ".content-body", ".content-main",
                 # Search Engine Land 특화 선택자
                 ".article-text", ".global-content-stream", ".lomita-c-content",
-                ".Campaign__content", ".Column__content", ".Element__content", ".Row__content"
+                ".Campaign__content", ".Column__content", ".Element__content", ".Row__content",
+                # BBC 특화 선택자
+                ".article-body", ".story-body", "[data-component='text-block']",
+                ".gs-c-promo-body", ".gs-o-faux-block-link", ".gs-c-promo-summary",
+                # Facebook 특화 선택자
+                "[data-testid='post_message']", "[data-testid='story_message']",
+                ".userContent", ".userContent p",
+                # 일반적인 시맨틱 선택자
+                "[itemprop='articleBody']", "[itemprop='text']", "[itemprop='description']",
+                ".article-body", ".post-body", ".entry-body", ".story-body"
             ],
             "text_blocks": [
                 "p", "div", "section", "article", "main",
@@ -98,332 +107,367 @@ class GoogleStyleCrawler:
                 ".related", ".recommended", ".suggested",
                 ".newsletter", ".subscribe", ".signup",
                 ".cookie", ".privacy", ".terms", ".disclaimer",
-                ".loading", ".spinner", ".overlay", ".modal"
+                ".author-bio", ".author-info", ".author-meta",
+                ".post-meta", ".entry-meta", ".article-meta",
+                ".social-media", ".social-links", ".social-buttons",
+                ".pagination", ".pager", ".page-nav",
+                ".breadcrumbs", ".breadcrumb", ".crumb",
+                ".search", ".search-box", ".search-form",
+                ".newsletter-signup", ".email-signup", ".subscription",
+                ".popup", ".modal", ".overlay", ".lightbox",
+                ".cookie-banner", ".privacy-notice", ".gdpr-notice",
+                ".right-rail-content", ".sel-new-articles", ".stream-article"
             ],
-            "exclude_text_patterns": [
-                r"^\s*$",  # 빈 텍스트
-                r"^Advertisement$", r"^Ad$", r"^Sponsored$",
-                r"^Click here$", r"^Read more$", r"^Continue reading$",
-                r"^Share this$", r"^Follow us$", r"^Subscribe$",
-                r"^Loading\.\.\.$", r"^Please wait$",
-                r"^Enable JavaScript$", r"^JavaScript required$",
-                r"^Cookie Policy$", r"^Privacy Policy$",
-                r"^Terms of Service$", r"^Disclaimer$"
+            "text_filters": [
+                r'^\s*$',  # 빈 텍스트
+                r'^Advertisement$', r'^Ad$', r'^Sponsored$',
+                r'^Related.*$', r'^You might also like.*$',
+                r'^Share.*$', r'^Follow.*$', r'^Subscribe.*$',
+                r'^Sign up.*$', r'^Join.*$', r'^Get.*$',
+                r'^Click here.*$', r'^Read more.*$', r'^Continue reading.*$',
+                r'^Loading.*$', r'^Please wait.*$', r'^Error.*$',
+                r'^404.*$', r'^Page not found.*$', r'^Not found.*$',
+                r'^Access denied.*$', r'^Forbidden.*$', r'^Unauthorized.*$'
             ]
         }
     
     def crawl_url(self, url: str, max_retries: int = 3) -> Optional[str]:
-        """Google 스타일로 URL 크롤링"""
+        """URL을 Google 스타일로 크롤링합니다."""
         for attempt in range(max_retries):
             try:
-                print(f"[DEBUG] [GoogleStyleCrawler] 시도 {attempt+1}: {url}")
+                logger.info(f"Google 스타일 크롤링 시도 {attempt + 1}/{max_retries}: {url}")
+                
+                # 요청 전송
                 response = self._make_request(url)
                 if not response:
-                    print(f"[DEBUG] [GoogleStyleCrawler] 응답 없음")
                     continue
+                
+                # HTML 파싱
                 soup = BeautifulSoup(response.text, 'html.parser')
+                
+                # 노이즈 제거
+                self._remove_noise(soup)
+                
+                # 본문 추출
                 content = self._extract_google_style_content(soup, url)
-                print(f"[DEBUG] [GoogleStyleCrawler] 추출된 content 길이: {len(content) if content else 0}")
+                
                 if content and len(content.strip()) > 200:
-                    print(f"[DEBUG] [GoogleStyleCrawler] 본문 추출 성공: {len(content)}자")
+                    logger.info(f"Google 스타일 크롤링 성공: {len(content)}자 추출")
                     return content
                 else:
-                    print(f"[DEBUG] [GoogleStyleCrawler] 본문이 너무 짧거나 없음: {len(content) if content else 0}자")
+                    logger.warning(f"Google 스타일 크롤링 실패: 콘텐츠가 너무 짧음 ({len(content) if content else 0}자)")
+                    
             except Exception as e:
-                print(f"[DEBUG] [GoogleStyleCrawler] 예외 발생: {e}")
+                logger.error(f"Google 스타일 크롤링 오류 (시도 {attempt + 1}): {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(random.uniform(1, 3))
-        print(f"[DEBUG] [GoogleStyleCrawler] 모든 시도 실패: {url}")
+                    time.sleep(2 ** attempt)  # 지수 백오프
+        
+        logger.error(f"Google 스타일 크롤링 모든 시도 실패: {url}")
         return None
     
     def _make_request(self, url: str) -> Optional[requests.Response]:
-        """Google과 유사한 요청 생성"""
+        """HTTP 요청을 전송합니다."""
         try:
-            # Google과 유사한 지연
-            time.sleep(random.uniform(0.5, 2.0))
-            
-            # 요청 전송
-            response = self.session.get(url, timeout=15)
+            response = self.session.get(url, timeout=20)
             response.raise_for_status()
             
-            # 인코딩 처리
+            # 인코딩 확인 및 수정
             if response.encoding == 'ISO-8859-1':
                 response.encoding = response.apparent_encoding
             
             return response
-            
         except requests.exceptions.RequestException as e:
-            logger.error(f"요청 오류: {e}")
+            logger.error(f"HTTP 요청 실패: {e}")
             return None
     
     def _extract_google_style_content(self, soup: BeautifulSoup, url: str) -> Optional[str]:
-        """Google 스타일 콘텐츠 추출"""
-        print(f"[DEBUG] [GoogleStyleCrawler] _extract_google_style_content 호출")
-        self._remove_noise(soup)
-        main_content = self._identify_main_content(soup)
-        print(f"[DEBUG] [GoogleStyleCrawler] main_content: {type(main_content)}, {main_content.name if main_content else None}")
-        if not main_content:
-            print(f"[DEBUG] [GoogleStyleCrawler] 메인 콘텐츠 영역을 찾을 수 없음")
+        """Google 스타일로 본문을 추출합니다."""
+        try:
+            # 1. 메인 콘텐츠 영역 식별
+            main_content = self._identify_main_content(soup)
+            if not main_content:
+                logger.warning("메인 콘텐츠 영역을 찾을 수 없음")
+                return None
+            
+            # 2. 콘텐츠 블록 분석
+            content_blocks = self._analyze_content_blocks(main_content)
+            if not content_blocks:
+                logger.warning("콘텐츠 블록을 찾을 수 없음")
+                return None
+            
+            # 3. 최적의 콘텐츠 선택
+            best_content = self._select_best_content(content_blocks)
+            if not best_content:
+                logger.warning("최적의 콘텐츠를 선택할 수 없음")
+                return None
+            
+            # 4. 텍스트 정리 및 구조화
+            cleaned_content = self._clean_and_structure_text(best_content)
+            
+            return cleaned_content
+            
+        except Exception as e:
+            logger.error(f"Google 스타일 콘텐츠 추출 오류: {e}")
             return None
-        content_blocks = self._analyze_content_blocks(main_content)
-        print(f"[DEBUG] [GoogleStyleCrawler] content_blocks 개수: {len(content_blocks)}")
-        best_content = self._select_best_content(content_blocks)
-        print(f"[DEBUG] [GoogleStyleCrawler] best_content 길이: {len(best_content) if best_content else 0}")
-        cleaned_content = self._clean_and_structure_text(best_content)
-        print(f"[DEBUG] [GoogleStyleCrawler] cleaned_content 길이: {len(cleaned_content) if cleaned_content else 0}")
-        return cleaned_content
     
     def _remove_noise(self, soup: BeautifulSoup):
-        """노이즈 요소 제거"""
-        # 제외할 요소들 제거
+        """노이즈 요소들을 제거합니다."""
+        # 제외할 선택자들 제거
         for selector in self.noise_patterns["exclude_selectors"]:
             for element in soup.select(selector):
                 element.decompose()
-        
-        # 스크립트와 스타일 태그 제거
-        for element in soup(["script", "style", "noscript"]):
-            element.decompose()
     
     def _identify_main_content(self, soup: BeautifulSoup) -> Optional[Any]:
-        """메인 콘텐츠 영역 식별 (Google 방식)"""
-        print(f"[DEBUG] [GoogleStyleCrawler] _identify_main_content 호출")
-        candidates = []
+        """메인 콘텐츠 영역을 식별합니다."""
+        # 1. 시맨틱 메인 콘텐츠 선택자들 시도
         for selector in self.content_patterns["main_content"]:
             elements = soup.select(selector)
-            print(f"[DEBUG] selector: {selector}, elements: {len(elements)}")
-            for element in elements:
-                if isinstance(element, Tag):
-                    score = self._calculate_content_score(element)
-                    candidates.append((element, score))
-        print(f"[DEBUG] candidates 개수: {len(candidates)}")
-        text_dense_elements = self._find_text_dense_elements(soup)
-        print(f"[DEBUG] text_dense_elements 개수: {len(text_dense_elements)}")
-        for element, density in text_dense_elements:
-            score = density * 100
-            if isinstance(element, Tag):
-                candidates.append((element, score))
-        if candidates:
-            candidates.sort(key=lambda x: x[1], reverse=True)
-            best_element = candidates[0][0]
-            print(f"[DEBUG] best_element: {best_element.name}, 점수: {candidates[0][1]:.2f}, 길이: {len(best_element.get_text(strip=True))}")
-            return best_element
-        articles = soup.find_all('article')
-        print(f"[DEBUG] article 태그 개수: {len(articles)}")
-        if articles:
-            best = max(articles, key=lambda el: len(el.get_text(strip=True)))
-            print(f"[DEBUG] 강제 article 선택: {len(best.get_text(strip=True))}자")
-            return best
-        if soup.body:
-            print(f"[DEBUG] body 전체 사용")
-            return soup.body
+            if elements:
+                # 가장 큰 요소 선택
+                largest_element = max(elements, key=lambda e: len(e.get_text(strip=True)))
+                if len(largest_element.get_text(strip=True)) > 500:
+                    return largest_element
+        
+        # 2. 텍스트 밀도가 높은 요소들 찾기
+        dense_elements = self._find_text_dense_elements(soup)
+        if dense_elements:
+            best_element, score = max(dense_elements, key=lambda x: x[1])
+            if score > 0.3:  # 텍스트 밀도 임계값
+                return best_element
+        
         return None
     
     def _calculate_content_score(self, element: Tag) -> float:
-        """콘텐츠 점수 계산 (Google 방식)"""
-        score = 0.0
+        """요소의 콘텐츠 점수를 계산합니다."""
+        if not element:
+            return 0.0
         
-        # 1. 텍스트 길이
-        text_length = len(element.get_text(strip=True))
-        score += min(text_length / 100, 10)  # 최대 10점
+        text = element.get_text(strip=True)
+        if not text:
+            return 0.0
         
-        # 2. 링크 밀도 (낮을수록 좋음)
+        # 텍스트 길이 점수
+        length_score = min(len(text) / 1000, 1.0)
+        
+        # 텍스트 밀도 점수
+        total_length = len(element.get_text())
+        text_density = len(text) / total_length if total_length > 0 else 0
+        
+        # 링크 밀도 점수 (낮을수록 좋음)
         links = element.find_all('a')
-        link_density = len(links) / max(text_length / 100, 1)
-        score += max(0, 5 - link_density)  # 링크 밀도가 낮을수록 높은 점수
+        link_density = len(links) / len(text) if len(text) > 0 else 1.0
+        link_score = max(0, 1 - link_density * 10)
         
-        # 3. 구조적 요소
-        structural_elements = element.find_all(['h1', 'h2', 'h3', 'h4', 'p', 'li'])
-        score += min(len(structural_elements) / 10, 5)  # 최대 5점
+        # 태그 점수
+        tag_score = 1.0
+        if element.name in ['article', 'main']:
+            tag_score = 1.2
+        elif element.name in ['div', 'section']:
+            tag_score = 1.0
+        else:
+            tag_score = 0.8
         
-        # 4. 클래스명 점수
-        class_attr = element.get('class')
-        if class_attr:
-            class_name = ' '.join(class_attr) if isinstance(class_attr, list) else str(class_attr)
-            if any(keyword in class_name.lower() for keyword in ['content', 'post', 'article', 'main', 'body']):
-                score += 3
+        # 클래스명 점수
+        class_score = 1.0
+        class_name = element.get('class', [])
+        if class_name:
+            class_str = ' '.join(class_name).lower()
+            if any(keyword in class_str for keyword in ['content', 'post', 'article', 'main', 'body']):
+                class_score = 1.2
+            elif any(keyword in class_str for keyword in ['sidebar', 'nav', 'menu', 'footer', 'header']):
+                class_score = 0.5
         
-        # 5. ID 점수
-        element_id = element.get('id', '')
-        if element_id and any(keyword in element_id.lower() for keyword in ['content', 'post', 'article', 'main']):
-            score += 2
+        # 종합 점수
+        total_score = (length_score * 0.3 + 
+                      text_density * 0.3 + 
+                      link_score * 0.2 + 
+                      tag_score * 0.1 + 
+                      class_score * 0.1)
         
-        return score
+        return total_score
     
     def _find_text_dense_elements(self, soup: BeautifulSoup) -> List[Tuple[Tag, float]]:
-        """텍스트 밀도가 높은 요소 찾기"""
+        """텍스트 밀도가 높은 요소들을 찾습니다."""
         dense_elements = []
         
         for element in soup.find_all(['div', 'article', 'section', 'main']):
             if isinstance(element, Tag):
-                text_length = len(element.get_text(strip=True))
-                total_length = len(str(element))
-                
-                if total_length > 0:
-                    density = text_length / total_length
-                    if density > 0.1 and text_length > 500:  # 최소 밀도와 길이
-                        dense_elements.append((element, density))
+                score = self._calculate_content_score(element)
+                if score > 0.2:  # 최소 점수 임계값
+                    dense_elements.append((element, score))
         
-        # 밀도 순으로 정렬
-        dense_elements.sort(key=lambda x: x[1], reverse=True)
-        return dense_elements[:5]  # 상위 5개만 반환
+        return sorted(dense_elements, key=lambda x: x[1], reverse=True)[:10]
     
     def _analyze_content_blocks(self, main_content: Tag) -> List[ContentBlock]:
-        """콘텐츠 블록 분석"""
-        print(f"[DEBUG] [GoogleStyleCrawler] _analyze_content_blocks 호출")
+        """콘텐츠 블록들을 분석합니다."""
         blocks = []
-        position = 0
         
-        for tag in main_content.find_all(self.content_patterns["text_blocks"]):
-            if isinstance(tag, Tag):
-                text = tag.get_text(strip=True)
-                
-                if len(text) > 50:  # 의미있는 텍스트 블록
-                    # 텍스트 밀도 계산
-                    total_length = len(str(tag))
-                    density = len(text) / total_length if total_length > 0 else 0
-                    
-                    # 클래스명 처리
-                    class_attr = tag.get('class')
-                    if hasattr(class_attr, '__iter__') and not isinstance(class_attr, str):
-                        class_name = ' '.join(class_attr)
-                    elif class_attr:
-                        class_name = str(class_attr)
-                    else:
-                        class_name = ''
-                    
-                    # ID 처리
-                    id_attr = tag.get('id')
-                    id_name = str(id_attr) if id_attr else ''
-                    
+        for i, element in enumerate(main_content.find_all(self.content_patterns["text_blocks"])):
+            if isinstance(element, Tag):
+                text = element.get_text(strip=True)
+                if len(text) > 50:  # 최소 텍스트 길이
                     block = ContentBlock(
                         text=text,
-                        tag=tag.name,
-                        class_name=class_name,
-                        id_name=id_name,
+                        tag=element.name,
+                        class_name=' '.join(element.get('class', [])),
+                        id_name=element.get('id', ''),
                         length=len(text),
-                        density=density,
-                        position=position
+                        density=len(text) / len(element.get_text()) if len(element.get_text()) > 0 else 0,
+                        position=i
                     )
                     blocks.append(block)
-                    position += 1
         
-        print(f"[DEBUG] [GoogleStyleCrawler] 분석된 블록 개수: {len(blocks)}")
         return blocks
     
     def _select_best_content(self, blocks: List[ContentBlock]) -> str:
-        """최적 콘텐츠 선택"""
-        print(f"[DEBUG] [GoogleStyleCrawler] _select_best_content 호출, 블록 개수: {len(blocks)}")
+        """최적의 콘텐츠를 선택합니다."""
         if not blocks:
-            print(f"[DEBUG] [GoogleStyleCrawler] 블록 없음")
             return ""
         
-        # 1. 점수 계산
+        # 점수 계산
         scored_blocks = []
         for block in blocks:
             score = 0
             
             # 길이 점수
-            score += min(block.length / 100, 10)
+            length_score = min(block.length / 1000, 1.0)
+            score += length_score * 0.3
             
             # 밀도 점수
-            score += block.density * 20
+            density_score = min(block.density * 2, 1.0)
+            score += density_score * 0.3
             
             # 태그 점수
-            if block.tag in ['p', 'h1', 'h2', 'h3']:
-                score += 2
-            elif block.tag in ['article', 'section']:
-                score += 3
+            tag_score = 1.0
+            if block.tag in ['p', 'div']:
+                tag_score = 1.0
+            elif block.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                tag_score = 0.8
+            elif block.tag in ['li', 'blockquote']:
+                tag_score = 0.9
+            else:
+                tag_score = 0.7
+            score += tag_score * 0.2
             
-            # 클래스명 점수
-            try:
-                if isinstance(block.class_name, str):
-                    class_name_str = block.class_name
-                elif block.class_name is not None and hasattr(block.class_name, '__iter__'):
-                    class_name_str = ' '.join([str(x) for x in list(block.class_name) if x])
-                elif block.class_name:
-                    class_name_str = str(block.class_name)
-                else:
-                    class_name_str = ''
-            except Exception:
-                class_name_str = ''
-            if any(keyword in class_name_str.lower() for keyword in ['content', 'post', 'article']):
-                score += 2
+            # 위치 점수 (중간 부분이 좋음)
+            position_score = 1.0
+            if len(blocks) > 1:
+                relative_position = block.position / len(blocks)
+                if 0.2 <= relative_position <= 0.8:
+                    position_score = 1.2
+                elif relative_position < 0.1 or relative_position > 0.9:
+                    position_score = 0.7
+            score += position_score * 0.2
             
             scored_blocks.append((block, score))
         
-        # 2. 점수 순으로 정렬
+        # 점수순으로 정렬
         scored_blocks.sort(key=lambda x: x[1], reverse=True)
         
-        # 3. 상위 블록들 선택 (연속된 블록 우선)
-        selected_blocks = []
-        selected_positions = set()
+        # 상위 블록들 결합
+        top_blocks = scored_blocks[:min(5, len(scored_blocks))]
+        combined_text = " ".join([block.text for block, score in top_blocks])
         
-        for block, score in scored_blocks:
-            if len(selected_blocks) >= 10:  # 최대 10개 블록
-                break
-            
-            # 연속된 블록 우선 선택
-            if not selected_positions or any(abs(block.position - pos) <= 2 for pos in selected_positions):
-                selected_blocks.append(block)
-                selected_positions.add(block.position)
-        
-        # 4. 위치 순으로 정렬하여 텍스트 구성
-        selected_blocks.sort(key=lambda x: x.position)
-        
-        print(f"[DEBUG] [GoogleStyleCrawler] 선택된 블록 개수: {len(selected_blocks)}")
-        return "\n\n".join([block.text for block in selected_blocks])
+        return combined_text
     
     def _clean_and_structure_text(self, text: str) -> str:
-        """텍스트 정제 및 구조화"""
+        """텍스트를 정리하고 구조화합니다."""
         if not text:
             return ""
         
-        # 1. 기본 정제
-        lines = text.split('\n')
-        cleaned_lines = []
+        # HTML 엔티티 디코딩
+        text = self._decode_html_entities(text)
         
-        for line in lines:
-            line = line.strip()
-            
-            # 노이즈 패턴 필터링
-            if any(re.match(pattern, line) for pattern in self.noise_patterns["exclude_text_patterns"]):
-                continue
-            
-            # 너무 짧은 라인 제거
-            if len(line) < 10:
-                continue
-            
-            # 중복 라인 제거
-            if line not in cleaned_lines:
-                cleaned_lines.append(line)
+        # 불필요한 공백 정리
+        text = re.sub(r'\s+', ' ', text)
         
-        # 2. 텍스트 재구성
-        cleaned_text = "\n\n".join(cleaned_lines)
+        # 노이즈 텍스트 필터링
+        for pattern in self.noise_patterns["text_filters"]:
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE)
         
-        # 3. HTML 엔티티 디코딩
-        cleaned_text = self._decode_html_entities(cleaned_text)
+        # 문단 구분 정리
+        text = re.sub(r'\n\s*\n', '\n\n', text)
         
-        # 4. 공백 정리
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
-        cleaned_text = re.sub(r'\n\s*\n', '\n\n', cleaned_text)
+        # 앞뒤 공백 제거
+        text = text.strip()
         
-        return cleaned_text.strip()
+        return text
     
     def _decode_html_entities(self, text: str) -> str:
-        """HTML 엔티티 디코딩"""
+        """HTML 엔티티를 디코딩합니다."""
         entities = {
-            '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>',
-            '&quot;': '"', '&apos;': "'", '&copy;': '©', '&reg;': '®',
-            '&trade;': '™', '&hellip;': '...', '&mdash;': '—', '&ndash;': '–'
+            '&nbsp;': ' ',
+            '&amp;': '&',
+            '&lt;': '<',
+            '&gt;': '>',
+            '&quot;': '"',
+            '&apos;': "'",
+            '&hellip;': '...',
+            '&mdash;': '—',
+            '&ndash;': '–',
+            '&copy;': '©',
+            '&reg;': '®',
+            '&trade;': '™',
+            '&deg;': '°',
+            '&plusmn;': '±',
+            '&times;': '×',
+            '&divide;': '÷',
+            '&frac12;': '½',
+            '&frac14;': '¼',
+            '&frac34;': '¾',
+            '&lsquo;': ''',
+            '&rsquo;': ''',
+            '&ldquo;': '"',
+            '&rdquo;': '"',
+            '&laquo;': '«',
+            '&raquo;': '»',
+            '&lsaquo;': '‹',
+            '&rsaquo;': '›',
+            '&sbquo;': '‚',
+            '&dbquo;': '„',
+            '&dagger;': '†',
+            '&Dagger;': '‡',
+            '&permil;': '‰',
+            '&euro;': '€',
+            '&pound;': '£',
+            '&cent;': '¢',
+            '&yen;': '¥',
+            '&sect;': '§',
+            '&para;': '¶',
+            '&micro;': 'µ',
+            '&alpha;': 'α',
+            '&beta;': 'β',
+            '&gamma;': 'γ',
+            '&delta;': 'δ',
+            '&epsilon;': 'ε',
+            '&zeta;': 'ζ',
+            '&eta;': 'η',
+            '&theta;': 'θ',
+            '&iota;': 'ι',
+            '&kappa;': 'κ',
+            '&lambda;': 'λ',
+            '&mu;': 'μ',
+            '&nu;': 'ν',
+            '&xi;': 'ξ',
+            '&omicron;': 'ο',
+            '&pi;': 'π',
+            '&rho;': 'ρ',
+            '&sigma;': 'σ',
+            '&tau;': 'τ',
+            '&upsilon;': 'υ',
+            '&phi;': 'φ',
+            '&chi;': 'χ',
+            '&psi;': 'ψ',
+            '&omega;': 'ω'
         }
         
-        for entity, replacement in entities.items():
-            text = text.replace(entity, replacement)
+        for entity, char in entities.items():
+            text = text.replace(entity, char)
+            text = text.replace(entity.upper(), char)
         
         return text
 
-# 기존 인터페이스와의 호환성을 위한 래퍼
 def crawl_url_google_style(url: str) -> Optional[str]:
-    """Google 스타일로 URL 크롤링"""
+    """Google 스타일 크롤링을 위한 편의 함수"""
     crawler = GoogleStyleCrawler()
     return crawler.crawl_url(url) 

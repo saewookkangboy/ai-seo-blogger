@@ -108,204 +108,11 @@ AI를 활용하여 특정 키워드에 대한 해외 자료를 수집, 번역, �
 
 ## 2025년 주요 변경 이력
 
-- **2025.06**
-  - 기능 업데이트 이력(히스토리) 자동화: README.md, git 커밋 메시지 기반 자동 등록 스크립트 구현
-  - 관리자 UI > 기능 업데이트 이력 탭 신설 및 히스토리 병합/날짜 이동 기능 추가
-  - 커밋 메시지 기반 주요 변경사항 자동 기록 및 관리자 화면 실시간 반영
-  - 기능 업데이트 이력 병합/날짜 이동/중복 제거 등 관리 기능 강화
-  - 시스템 관리 패널 UI/UX 개선 및 안내 문구 추가
-  - 배포/협업을 위한 git, GitHub 연동 및 충돌/동기화 가이드 추가
-  - **AI 요약/신뢰도 평가 기능 추가:**
-    - 본문에 대해 OpenAI 기반 AI 요약, 신뢰도 평가 기능 구현 (백엔드 API 및 프론트엔드 버튼/모달 연동)
-    - 신뢰도 평가 결과 JSON 파싱 및 예외 처리 보완, 코드블록/불완전 응답 대응
-    - 요약/신뢰도 평가 결과 모달 레이어 닫기 시 DOM 완전 제거(잔여 레이어/백드롭 문제 해결)
-  - **연관 참고글 추천 기능 고도화:**
-    - 생성 결과 키워드 기반 구글 검색 결과로 연관 참고글(제목+URL) 추천
-    - BeautifulSoup+requests 기반 파싱, selector 다양화, 광고/중복/빈값 제외 등 로직 개선
-    - 결과 부족 시 SerpAPI 등 공식 API 연동, 키워드 조합 개선, 결과 개수 확장 등 대안 제시
-  - **모달/레이어 UI 개선:**
-    - showSimpleModal 함수 개선(중복/잔여 모달 완전 제거, 모든 모달 공통 적용)
-    - SEO 적용 여부, AI 요약, 신뢰도 평가 등 모든 모달에서 닫기 시 레이어 완전 제거
-  - **오류 및 안정성 개선:**
-    - OpenAI 응답 파싱 오류, IndentationError 등 주요 오류 진단 및 예외 처리 강화
-    - 서버 재시작, 콘솔 로그, 파일 저장, 들여쓰기 혼용 등 실무 운영 팁 README/가이드에 추가
-- **2025.06.26**
-  - 기능 업데이트 이력(히스토리) 관리자 화면에 미니멀 리스트+2025-06 테이블로 정적 반영, box/card 스타일 통일
-- **2025.07.29**
-  - **관리 대시보드 전체 탭 디자인 재배치 완료:**
-    - 탭 구조 최적화: 통계 대시보드 → 포스트 관리 → 키워드 관리 → 크롤링 관리 → 시스템 관리 → 업데이트 이력
-    - 통계 대시보드 개선: 주요 통계 카드 (총 포스트, 총 키워드, 오늘 API 호출, 크롤링 성공률) + 차트 + 오늘의 업데이트
-    - 포스트 관리 탭 신규 추가: 포스트 생성 설정 (기본 분량/AI 모드) + 일괄 관리 (선택 삭제, 백업/복원, 엑셀 내보내기) + 분량별 통계
-    - 시스템 관리 탭 재구성: 시스템 정보 + 백업/복원 + API 키 관리 + AI 설정
-    - 업데이트 이력 탭 개선: README.md 자동 갱신 버튼 + 최신 내역 실시간 반영
-    - JavaScript 기능 확장: 포스트 통계 로드, 일괄 관리, 주요 통계 로드, 탭별 자동 로드
-    - API 엔드포인트 추가: `/api/v1/admin/posts/stats` (포스트 분량별 통계)
-    - **포스트 관리 탭 기능 테스트 완료:**
-      - ✅ 포스트 통계 API 정상 작동 (`/api/v1/admin/posts/stats`)
-      - ✅ 포스트 관리 탭 HTML 구조 완성 (admin.html)
-      - ✅ BlogPost 모델에 content_length 필드 추가
-      - ✅ 포스트 분량별 통계 기능 구현 (2000자, 3000자, 4000자+)
-      - ✅ 포스트 일괄 관리 기능 구현 (선택 삭제, 백업/복원, 엑셀 내보내기)
-      - ✅ 포스트 생성 설정 기능 구현 (기본 분량/AI 모드 설정)
-      - ✅ 관리자 로그인 문제 해결 (비밀번호: 0000)
-              - ✅ 포스트 관리 탭 UI 정상 작동 확인
-        - ✅ 포스트 생성 기본 분량 조절 기능 콘텐츠 생성 페이지로 이동 완료:
-          - 콘텐츠 생성 페이지에 분량 선택 드롭다운 추가 (2000자/3000자/4000자/5000자)
-          - 관리자 페이지에서 기본 분량/AI 모드 설정 기능 추가
-          - 로컬 스토리지 기반 설정 저장/불러오기 구현
-          - 백엔드 API에 content_length 파라미터 전달 및 처리
-          - AI 프롬프트에 목표 분량 지시사항 추가
-          - max_tokens 동적 조절로 분량별 최적화
-        - ✅ Google Gemini 번역 시스템으로 통합 완료:
-          - DeepL API 제거 및 Google Gemini API로 번역 시스템 통합
-          - 번역 기능 단순화 및 안정성 향상
-          - API 키 설정 가이드 문서 업데이트 (API_SETUP_GUIDE.md)
-        - ✅ 최신 AEO, GEO, AIO 가이드라인 반영 완료:
-          - AEO (Answer Engine Optimization): 사용자 질문 직접 답변, Featured Snippet 최적화
-          - GEO (Generative Engine Optimization): AI 생성 응답 인용 최적화, 권위 신호 강화
-          - AIO (AI Integration Optimization): AI 도구 통합 최적화, API 친화적 구조
-          - 기존 AIEO를 AEO, GEO, AIO로 세분화하여 더 정확한 최적화 제공
-  - **성능 최적화 및 테스트 완료:**
-    - 페이지 응답 시간: 메인 페이지 0.0017s, 관리자 페이지 0.0009s, 생성 기록 페이지 0.013s
-    - API 응답 시간: 통계 API 0.002s, 키워드 API 0.0009s, 포스트 API 0.002s
-    - 정적 파일 응답: favicon.ico 0.001s, common.css 0.003s
-    - 시스템 리소스: CPU 0.0%, 메모리 0.2%, 데이터베이스 크기 80KB
-    - 애플리케이션 시작 시간: 1.38초 (FastAPI 앱 로드)
-    - 단위 테스트 통과율: 100% (3/3 테스트 통과)
-  - **관리 대시보드 스크롤 최적화:**
-    - 포스트 관리, 키워드 관리, 크롤링 관리, 시스템 관리 탭에 내용에 맞는 자연스러운 스크롤 적용
-    - 통계 대시보드 탭은 스크롤 제외 (전체 화면 표시)
-    - 테이블 컨테이너별 스크롤 최적화 (최대 높이 500px, 모바일 350px)
-    - 내용이 많을 때만 스크롤이 나타나도록 Fit한 설정
-  - **Python 3.13 업데이트:**
-    - Python 3.9.6 → Python 3.13.5로 업그레이드
-    - Homebrew를 통한 최신 Python 설치 및 가상환경 재생성
-    - 모든 의존성 패키지 최신 버전으로 재설치
-    - 성능 향상 및 최신 기능 지원
-- **2025.07.30**
-  - **API 키 설정 및 성능 테스트 완료:**
-    - OpenAI API 키 업데이트: 새로운 유효한 API 키 적용 (`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`)
-    - Google Gemini API 키 유지: 기존 API 키 정상 작동 확인 (`AIzaSyDsBBgP9R8NrLaseWWFDcdYFGrrUNbIX9A`)
-    - 환경 설정 파일(.env) 정상화: DEBUG 값 파싱 오류 수정, API 키 변수명 통일
-  - **API 성능 테스트 시스템 구축:**
-    - 종합적인 API 성능 테스트 스크립트 구현 (`tools/api_performance_test.py`)
-    - API 키 유효성 검사 스크립트 구현 (`tools/api_key_validator.py`)
-    - 프론트엔드 API 호출 건수 표시 확인 스크립트 구현 (`tools/check_frontend_display.py`)
-    - 테스트 결과: OpenAI 평균 19.56초, Gemini 평균 14.21초, 번역 평균 1.06초
-  - **프론트엔드 API 호출 건수 표시 개선:**
-    - HTML 구조 수정: 중복된 Gemini 카운트 요소 제거, OpenAI 카운트 요소 추가
-    - API 엔드포인트 수정: 페이지 로드 시 누적 데이터(`/api/v1/stats/api-usage`) 사용
-    - 실시간 업데이트 기능 정상화: 콘텐츠 생성 후 API 호출 건수 자동 업데이트
-    - 현재 누적 API 호출: OpenAI 152회, Gemini 33회
-  - **업데이트 이력 시스템 자동화:**
-    - README.md 기반 업데이트 이력 자동 파싱 시스템 구축
-    - 관리 대시보드 > 업데이트 이력 탭에 실시간 반영
-    - 날짜별, 카테고리별, 중요도별 업데이트 이력 분류 및 표시
-    - 자동 업데이트 이력 갱신 기능 구현
-  - **상세 업데이트 이력 통계 시스템 구축:**
-    - 카테고리별 상세 통계 자동화 및 실시간 적용 시스템 구현
-    - 중요도별, 영향도별, 성능 지표별 상세 분석 기능 추가
-    - 관리 대시보드 > 통계 대시보드 탭에 '상세 업데이트 통계' 섹션 신규 추가
-    - 트렌드 분석 및 핫 토픽 추출 기능 구현
-    - 새로운 API 엔드포인트 추가: `/api/v1/feature-updates/statistics`, `/api/v1/feature-updates/trends`, `/api/v1/feature-updates/refresh`
-    - 실시간 통계 업데이트 및 자동 새로고침 기능 구현
-    - 현재 통계 현황: 총 699개 업데이트 (UI/UX 72개, API 171개, AI 63개, 기타 240개)
-    - 성능 지표: 완료율 100%, 평균 중요도 1.8/3.0, 신규 기능 24개, 기능 개선 14개, 버그 수정 4개
+- **2025.10.22**
+  - **자동 업데이트 시스템 구축**: 전체 서비스의 테스트, 진단, 자동 업데이트, 로그 기록 시스템 구축 완료
 
-- **2025.07.31**
-  - **고급 SEO 분석 시스템 통합 완료:**
-    - 고급 SEO 분석 기능 추가: 콘텐츠 구조 분석, 신뢰도 및 EEAT 평가, 기술적 최적화 진단
-    - 외부 언급 및 백링크 확인, 실제 AI 응답에서 인용 여부 확인, GEO 최적화 점수 및 개선안 제시
-    - 실행 가능한 구조화 콘텐츠 예시 제공, 개선 권장사항 및 예시 제공
-    - SEO 분석 결과를 콘텐츠 생성 결과 하단에 표 형식으로 표시
-    - 새로운 SEO 분석 서비스 구현 (`app/services/seo_analyzer.py`)
-    - SEO 분석 결과 Pydantic 스키마 추가 (`app/schemas.py`)
-  - **GEO 최적화 알고리즘 업데이트:**
-    - Search Engine Land 기준으로 GEO(Generative Engine Optimization) 가이드라인 업데이트
-    - 생성형 AI 엔진 친화적 콘텐츠 구조, Featured Snippet 및 AI 오버뷰 최적화
-    - How-to, 정의, 비교, 단계별 가이드 패턴 활용, AI가 이해하기 쉬운 시맨틱 HTML 구조
-    - 구조화된 데이터(Schema.org) 마크업 적용, 명확한 답변 블록 및 FAQ 형식 포함
-    - 검증 가능한 출처 및 최신 정보 제공, AI 친화적 콘텐츠 요소 (리스트, 테이블, 인용 등)
-    - GEO 분석 점수 시스템 개선: GEO 신호(25점), 생성형 최적화(30점), AI 친화적 콘텐츠(25점), 구조화된 답변(20점)
-  - **Pydantic 검증 오류 해결:**
-    - SEO 분석 결과 객체를 딕셔너리로 변환하여 Pydantic 검증 오류 해결
-    - `app/routers/blog_generator.py`에서 SEO 분석 결과 딕셔너리 변환 로직 추가
-    - 모든 SEO 분석 필드를 딕셔너리 형태로 변환하여 API 응답에 포함
-    - 프론트엔드에서 SEO 분석 결과 정상 표시 확인
-  - **모달 스크롤 문제 해결:**
-    - 'SEO 적용 여부 보기', 'AI 요약', 'AI 신뢰도 평가' 모달 닫기 시 화면 고정 문제 해결
-    - 모달 닫기 이벤트에 body 스타일 복원 로직 추가
-    - 모달 백드롭 완전 제거 및 스크롤 위치 복원 기능 구현
-    - CSS 스타일 개선: `body.modal-open` 스타일 최적화, 모달 z-index 조정
-    - 모달 닫기 버튼에 직접 이벤트 리스너 추가로 안정성 향상
-  - **자동 업데이트 이력 시스템 구축:**
-    - 매일 디버그 및 로그 업데이트 자동 정리 시스템 구현
-    - README.md 자동 업데이트 기능 추가
-    - 관리 대시보드 > 업데이트 이력 실시간 반영
-    - 업데이트 이력 자동 파싱 및 분류 시스템 고도화
-
-- **2025.08.01**
-  - **준수도 점수 개선 결과 UI/UX 개선 완료:**
-    - 상세 준수도 분석 테이블 헤더 변경: "이전/이후" → "적용 여부 (O, X)" / "준수 상태"
-    - 준수도 분석 데이터 구조 정렬: 백엔드 필드명(`content_length`, `ai_seo_compliant` 등)과 프론트엔드 일치
-    - 적용 여부 표시: O/X 배지로 명확한 시각적 표현
-    - 준수 상태 표시: ✅ 준수 / ❌ 미준수 아이콘과 배지 조합
-    - CSS 스타일 개선: 그라데이션 헤더, 호버 효과, 배지 스타일링 강화
-  - **개선된 사항 카드 "Undefined" 문제 해결:**
-    - 프론트엔드 fallback 로직 추가: `priority`, `category`, `description`, `improvement` 필드 기본값 설정
-    - 기본값: 우선순위 '보통', 카테고리 '개선 사항', 설명 '개선이 적용되었습니다.', 개선 '개선됨'
-    - 백엔드 `extract_improvements` 함수에서 누락된 필드에 대한 안전한 처리
-  - **콘텐츠 생성 가이드라인 적용 개선:**
-    - 모든 콘텐츠 스타일(뉴스, 리뷰, 가이드, 요약, 블로그, enhanced)에 가이드라인 적용
-    - 스타일별 상세 가이드라인 추가: 객관적 서술, 장단점 구분, 단계별 설명 등
-    - 요약 가이드라인: 완벽한 문장, 500자 이내, 핵심 포인트 명확화
-    - 주요 내용 가이드라인: 구조화된 제목, 키워드 자연스러운 포함, 독자 친화적 구성
-    - AI 프롬프트에 동적 가이드라인 주입으로 일관된 품질 보장
-  - **Gemini API 키 및 버전 업데이트:**
-    - Gemini API 키 업데이트: `AIzaSyDsBBgP9R8NrLaseWWFDcdYFGrrUNbIX9A`
-    - Gemini API 모델 버전 업데이트: `gemini-2.0-flash-exp` → `gemini-2.0-flash`
-    - 숨김 처리된 Gemini API 코드 활성화: 번역, 언어 감지, 콘텐츠 생성 기능
-    - `app/config.py`, `app/services/translator.py`, `app/services/content_generator.py` 전면 업데이트
-    - API 키 유효성 검사에서 새 키 패턴 허용
-  - **Gemini API 할당량 과부하 대응 시스템 구축:**
-    - 할당량 오류 감지 함수 구현: `is_gemini_quota_exceeded()` - 다양한 할당량 오류 패턴 인식
-    - 번역 시스템 개선: Gemini → DeepL → OpenAI → 원본 텍스트 순서로 fallback
-    - 언어 감지 시스템 개선: Gemini 할당량 초과 시 기본 감지 방법 사용
-    - 콘텐츠 생성 시스템 개선: Gemini 할당량 초과 시 OpenAI로 자동 전환
-    - 상세한 로깅 시스템: 할당량 초과 감지, API 전환 과정, 사용량 기록
-    - 사용자 경험 개선: 할당량 초과로 인한 서비스 중단 방지, 연속적 번역 서비스 제공
-
-- **2025.08.05**
-  - **Google Drive API 통합 시스템 완전 구축:**
-    - Google Drive API OAuth 2.0 인증 시스템 구현: 클라이언트 ID/시크릿 기반 인증, 토큰 자동 관리
-    - Google Drive 서비스 클래스 구현: `app/services/google_drive_service.py` - 인증, 폴더 생성, 파일 업로드, 데이터베이스 내보내기
-    - FastAPI 라우터 구현: `app/routers/google_drive.py` - 데이터베이스 내보내기, 백업, 연결 테스트, 폴더 생성 API
-    - Pydantic 스키마 추가: `app/schemas.py`에 Google Drive API 요청/응답 모델 정의
-    - 환경 설정 업데이트: `app/config.py`, `env.example`에 Google Drive API 설정 추가
-    - 의존성 패키지 추가: `requirements.txt`에 `google-auth`, `google-auth-oauthlib`, `google-auth-httplib2`, `google-api-python-client`, `pandas` 추가
-  - **blog_generator 폴더 관리 시스템 구현:**
-    - 전용 폴더 자동 생성: Google Drive에 "blog_generator" 폴더 자동 생성 및 관리
-    - 기존 파일 자동 정리: 루트에 있는 AI SEO Blogger 관련 파일들을 blog_generator 폴더로 이동
-    - 새로운 파일 자동 저장: 모든 백업 및 내보내기 파일이 blog_generator 폴더에 저장
-    - 파일 정리 API 구현: `/api/v1/google-drive/organize-files` - 기존 파일들을 blog_generator 폴더로 정리
-    - 폴더 정보 확인 API: `/api/v1/google-drive/blog-generator-folder` - blog_generator 폴더 정보 확인
-  - **데이터베이스 백업 및 내보내기 시스템:**
-    - 다중 테이블 내보내기: BlogPost, APIKey, KeywordList, FeatureUpdate 테이블을 CSV로 내보내기
-    - pandas DataFrame 활용: 데이터베이스 쿼리 결과를 DataFrame으로 변환하여 CSV 업로드
-    - 시스템 통계 생성: API 사용량, 크롤링 통계, 포스트 통계 등을 JSON으로 저장
-    - 자동 백업 스케줄링: 일별/주별/월별 자동 백업 기능 구현
-    - 실시간 업로드: 데이터베이스 변경사항을 실시간으로 Google Drive에 반영
-  - **Google Drive API 인증 및 설정 가이드:**
-    - OAuth 설정 가이드: `GOOGLE_DRIVE_OAUTH_SETUP.md` - Google Cloud Console 설정, OAuth 동의 화면, 테스트 사용자 등록
-    - 자동 설정 스크립트: `google_drive_setup.py` - credentials.json, .env.google_drive 템플릿 생성
-    - 테스트 스크립트: `test_google_drive_simple.py`, `test_blog_generator_folder.py` - API 연결 및 기능 테스트
-    - OAuth URL 생성: `test_oauth_url.py` - 브라우저 기반 인증 URL 생성 및 테스트
-  - **통합 테스트 및 검증 완료:**
-    - API 연결 테스트: Google Drive API 인증, 폴더 생성, 파일 업로드 성공
-    - blog_generator 폴더 테스트: 폴더 생성, 기존 파일 5개 이동, 새 테스트 파일 업로드 성공
-    - 웹 API 테스트: `/api/v1/google-drive/test-connection`, `/api/v1/google-drive/blog-generator-folder`, `/api/v1/google-drive/organize-files` 정상 작동
-    - 성능 최적화: 가상환경 패키지 설치, 애플리케이션 재시작, API 응답 시간 최적화
-    - 현재 상태: blog_generator 폴더 ID `1LeBxfZyclGTtEtbM5N3-psAZTfgSiqCs`, 5개 파일 이동 완료, 새 파일 업로드 성공
+- **2025.10.22**
+  - **시스템 진단 완료**: 치명적 오류 1개, 경고 2개 식별
 
 ---
 
@@ -370,23 +177,32 @@ AI를 활용하여 특정 키워드에 대한 해외 자료를 수집, 번역, �
 - **네트워크**: 인터넷 연결 필수 (API 호출용)
 
 ### 🔑 **API 키 요구사항**
-- **OpenAI API 키**: GPT-4 모델 사용을 위한 유효한 API 키
-- **Google Gemini API 키**: Gemini 2.0 Flash 모델 사용을 위한 API 키
-- **DeepL API 키**: 번역 서비스용 API 키 (선택사항, fallback용)
-- **Google Drive API**: Google Cloud Console에서 OAuth 2.0 클라이언트 ID 및 시크릿 설정
+- **OpenAI API 키**: GPT-4 모델 사용을 위한 유효한 API 키 ✅ 정상
+- **Google Gemini API 키**: Gemini 2.0 Flash 모델 사용을 위한 API 키 ✅ 정상
+- **DeepL API 키**: 번역 서비스용 API 키 (선택사항, fallback용) ❌ 오류
+- **Google Drive API**: Google Cloud Console에서 OAuth 2.0 클라이언트 ID 및 시크릿 설정 ❌ 오류
+
+**API 상태 (자동 업데이트: 2025-10-22 15:25:07):**
+- **전체 API 상태**: 일부 오류
+- **마지막 확인**: 2025-10-22T15:25:07.739362
 
 ### 📦 **주요 의존성**
-- **FastAPI**: 웹 프레임워크
-- **SQLAlchemy**: ORM 및 데이터베이스 관리
-- **Pydantic**: 데이터 검증 및 직렬화
-- **httpx**: 비동기 HTTP 클라이언트
-- **openai**: OpenAI API 클라이언트
-- **selenium**: 웹 크롤링
-- **beautifulsoup4**: HTML 파싱
-- **openpyxl**: 엑셀 파일 처리
-- **google-auth**: Google API 인증
-- **google-api-python-client**: Google Drive API 클라이언트
-- **pandas**: 데이터 처리 및 CSV 변환
+- **FastAPI**: 웹 프레임워크 (vlatest)
+- **SQLAlchemy**: ORM 및 데이터베이스 관리 (vlatest)
+- **Pydantic**: 데이터 검증 및 직렬화 (vlatest)
+- **httpx**: 비동기 HTTP 클라이언트 (vlatest)
+- **openai**: OpenAI API 클라이언트 (vlatest)
+- **selenium**: 웹 크롤링 (vlatest)
+- **beautifulsoup4**: HTML 파싱 (vlatest)
+- **openpyxl**: 엑셀 파일 처리 (vlatest)
+- **google-auth**: Google API 인증 (vlatest)
+- **google-api-python-client**: Google Drive API 클라이언트 (vlatest)
+- **pandas**: 데이터 처리 및 CSV 변환 (vlatest)
+
+**의존성 상태 (자동 업데이트: 2025-10-22 15:25:07):**
+- **전체 패키지 수**: N/A개
+- **업데이트 가능**: 0개
+- **보안 취약점**: 0개
 
 ## 🛠️ 설치 및 설정
 
@@ -463,6 +279,7 @@ python3 test_google_drive_simple.py
 ## 🔧 **시스템 최적화**
 
 ### 🧹 **자동 최적화**
+
 ```bash
 # 시스템 최적화 실행
 make optimize
@@ -470,6 +287,13 @@ make optimize
 # 또는 직접 실행
 python3 optimize_system.py
 ```
+
+**최근 시스템 상태 (자동 업데이트: 2025-10-22 15:25:07):**
+- **전체 건강 점수**: 70/100
+- **치명적 오류**: 1개
+- **경고 사항**: 2개
+- **마지막 진단**: N/A
+- **자동 업데이트**: 활성
 
 ### 📋 **최적화 내용**
 - **Python 캐시 파일**: `__pycache__` 디렉토리, `.pyc` 파일 정리
@@ -525,15 +349,15 @@ source venv/bin/activate && python test_google_drive_simple.py
 
 ### ⚡ **응답 시간**
 - **페이지 로드**: 0.001-0.013초
-- **API 응답**: 0.001-0.003초
+- **API 응답**: 999.000초
 - **정적 파일**: 0.001-0.003초
 - **애플리케이션 시작**: 1.38초
 
 ### 🎯 **성능 최적화**
 - **캐시 효율성**: 번역 결과 30분 캐시, 콘텐츠 생성 결과 1시간 캐시
 - **동시성 제어**: 번역 3개, 생성 2개 동시 요청 제한
-- **메모리 사용량**: 0.2% (80KB 데이터베이스)
-- **CPU 사용률**: 0.0% (유휴 상태)
+- **메모리 사용량**: 85.7% (1512KB 데이터베이스)
+- **CPU 사용률**: 60.9% (유휴 상태)
 
 ### 📈 **API 성능**
 - **OpenAI**: 평균 19.56초 (콘텐츠 생성)

@@ -1,0 +1,663 @@
+<!-- 키워드 관리 섹션 -->
+<div id="keywords-section" class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>키워드 관리</h1>
+        <div class="btn-group">
+            <button class="btn btn-outline-success" onclick="addKeyword()">
+                <i class="bi bi-plus"></i> 키워드 추가
+            </button>
+            <button class="btn btn-outline-primary" onclick="importKeywords()">
+                <i class="bi bi-upload"></i> 일괄 등록
+            </button>
+            <button class="btn btn-outline-warning" onclick="analyzeKeywords()">
+                <i class="bi bi-graph-up"></i> 키워드 분석
+            </button>
+        </div>
+    </div>
+
+    <!-- 키워드 통계 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle p-3 me-3">
+                        <i class="bi bi-tags text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="keywords-total">-</h3>
+                        <small class="text-muted">총 키워드</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success rounded-circle p-3 me-3">
+                        <i class="bi bi-robot text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="keywords-ai">-</h3>
+                        <small class="text-muted">AI 관련</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning rounded-circle p-3 me-3">
+                        <i class="bi bi-search text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="keywords-seo">-</h3>
+                        <small class="text-muted">SEO 관련</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info rounded-circle p-3 me-3">
+                        <i class="bi bi-code-slash text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" id="keywords-tech">-</h3>
+                        <small class="text-muted">기술 관련</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 검색 및 필터 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="keywords-search" placeholder="키워드로 검색...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="keywords-filter-category">
+                        <option value="">전체 카테고리</option>
+                        <option value="ai">AI</option>
+                        <option value="seo">SEO</option>
+                        <option value="tech">기술</option>
+                        <option value="marketing">마케팅</option>
+                        <option value="business">비즈니스</option>
+                        <option value="trend">트렌드</option>
+                        <option value="howto">하우투</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="keywords-filter-status">
+                        <option value="">전체 상태</option>
+                        <option value="active">활성</option>
+                        <option value="inactive">비활성</option>
+                        <option value="pending">대기</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="searchKeywords()">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 키워드 목록 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">키워드 목록</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" onclick="refreshKeywords()">
+                    <i class="bi bi-arrow-clockwise"></i> 새로고침
+                </button>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="select-all-keywords">
+                    <label class="form-check-label" for="select-all-keywords">
+                        전체 선택
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" id="select-all-keywords-checkbox">
+                            </th>
+                            <th>키워드</th>
+                            <th>카테고리</th>
+                            <th>검색량</th>
+                            <th>경쟁도</th>
+                            <th>상태</th>
+                            <th>사용 횟수</th>
+                            <th width="150">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keywords-table-body">
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">로딩 중...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 페이지네이션 -->
+            <nav aria-label="키워드 페이지네이션">
+                <ul class="pagination justify-content-center" id="keywords-pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- 키워드 추가/편집 모달 -->
+<div class="modal fade" id="keywordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="keywordModalTitle">
+                    <i class="bi bi-tags"></i> 키워드 추가
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="keywordForm">
+                    <div class="mb-3">
+                        <label for="keyword-input" class="form-label">키워드</label>
+                        <input type="text" class="form-control" id="keyword-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="keyword-category" class="form-label">카테고리</label>
+                        <select class="form-select" id="keyword-category" required>
+                            <option value="">카테고리 선택</option>
+                            <option value="ai">AI</option>
+                            <option value="seo">SEO</option>
+                            <option value="tech">기술</option>
+                            <option value="marketing">마케팅</option>
+                            <option value="business">비즈니스</option>
+                            <option value="trend">트렌드</option>
+                            <option value="howto">하우투</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="keyword-description" class="form-label">설명</label>
+                        <textarea class="form-control" id="keyword-description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="keyword-volume" class="form-label">예상 검색량</label>
+                                <input type="number" class="form-control" id="keyword-volume" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="keyword-competition" class="form-label">경쟁도</label>
+                                <select class="form-select" id="keyword-competition">
+                                    <option value="low">낮음</option>
+                                    <option value="medium">보통</option>
+                                    <option value="high">높음</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="keyword-status" class="form-label">상태</label>
+                        <select class="form-select" id="keyword-status">
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                            <option value="pending">대기</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveKeyword()">
+                    <i class="bi bi-save"></i> 저장
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 키워드 분석 모달 -->
+<div class="modal fade" id="keywordAnalysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-graph-up"></i> 키워드 분석
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>키워드 분포</h6>
+                        <canvas id="keywordAnalysisChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>인기 키워드</h6>
+                        <div id="popular-keywords" class="border rounded p-3">
+                            <!-- 인기 키워드 목록이 여기에 표시됩니다 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>키워드 추천</h6>
+                        <div id="keyword-recommendations" class="border rounded p-3">
+                            <!-- 키워드 추천이 여기에 표시됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 키워드 관리 관련 JavaScript
+
+let keywordsData = [];
+let currentKeywordPage = 1;
+let keywordsPerPage = 10;
+let selectedKeywords = new Set();
+let editingKeywordId = null;
+
+// 키워드 데이터 로드
+async function loadKeywordsData() {
+    try {
+        // 통계 데이터 로드
+        const statsResponse = await fetch('/api/v1/stats/keywords-summary');
+        const stats = await statsResponse.json();
+        
+        document.getElementById('keywords-total').textContent = stats.total_keywords || 0;
+        document.getElementById('keywords-ai').textContent = stats.ai_keywords || 0;
+        document.getElementById('keywords-seo').textContent = stats.seo_keywords || 0;
+        document.getElementById('keywords-tech').textContent = stats.tech_keywords || 0;
+        
+        // 키워드 목록 로드
+        await loadKeywordsList();
+        
+    } catch (error) {
+        console.error('키워드 데이터 로드 오류:', error);
+        showToast('키워드 데이터 로드 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 목록 로드
+async function loadKeywordsList(page = 1) {
+    try {
+        const response = await fetch(`/api/v1/keywords?page=${page}&limit=${keywordsPerPage}`);
+        const data = await response.json();
+        
+        keywordsData = data.keywords || [];
+        currentKeywordPage = page;
+        
+        renderKeywordsTable();
+        renderKeywordsPagination(data.total || 0);
+        
+    } catch (error) {
+        console.error('키워드 목록 로드 오류:', error);
+        showToast('키워드 목록 로드 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 테이블 렌더링
+function renderKeywordsTable() {
+    const tbody = document.getElementById('keywords-table-body');
+    
+    if (keywordsData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    키워드가 없습니다.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const html = keywordsData.map(keyword => `
+        <tr>
+            <td>
+                <input type="checkbox" class="form-check-input keyword-checkbox" 
+                       value="${keyword.id}" onchange="toggleKeywordSelection(${keyword.id})">
+            </td>
+            <td>
+                <div class="fw-medium">${keyword.keyword}</div>
+                <small class="text-muted">${keyword.description || ''}</small>
+            </td>
+            <td>
+                <span class="badge bg-primary">${keyword.category || '기타'}</span>
+            </td>
+            <td>${keyword.search_volume || 'N/A'}</td>
+            <td>
+                <span class="badge bg-${getCompetitionBadgeColor(keyword.competition)}">
+                    ${keyword.competition || 'N/A'}
+                </span>
+            </td>
+            <td>
+                <span class="badge bg-${getStatusBadgeColor(keyword.status)}">
+                    ${keyword.status || 'active'}
+                </span>
+            </td>
+            <td>${keyword.usage_count || 0}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="editKeyword(${keyword.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="deleteKeyword(${keyword.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    tbody.innerHTML = html;
+}
+
+// 경쟁도 배지 색상
+function getCompetitionBadgeColor(competition) {
+    switch(competition) {
+        case 'low': return 'success';
+        case 'medium': return 'warning';
+        case 'high': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+// 상태 배지 색상
+function getStatusBadgeColor(status) {
+    switch(status) {
+        case 'active': return 'success';
+        case 'inactive': return 'secondary';
+        case 'pending': return 'warning';
+        default: return 'primary';
+    }
+}
+
+// 키워드 페이지네이션 렌더링
+function renderKeywordsPagination(total) {
+    const totalPages = Math.ceil(total / keywordsPerPage);
+    const pagination = document.getElementById('keywords-pagination');
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // 이전 페이지
+    if (currentKeywordPage > 1) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadKeywordsList(${currentKeywordPage - 1})">이전</a></li>`;
+    }
+    
+    // 페이지 번호
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === currentKeywordPage) {
+            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+        } else {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="loadKeywordsList(${i})">${i}</a></li>`;
+        }
+    }
+    
+    // 다음 페이지
+    if (currentKeywordPage < totalPages) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadKeywordsList(${currentKeywordPage + 1})">다음</a></li>`;
+    }
+    
+    pagination.innerHTML = html;
+}
+
+// 키워드 선택 토글
+function toggleKeywordSelection(keywordId) {
+    if (selectedKeywords.has(keywordId)) {
+        selectedKeywords.delete(keywordId);
+    } else {
+        selectedKeywords.add(keywordId);
+    }
+    updateSelectAllKeywordsCheckbox();
+}
+
+// 전체 선택 체크박스 업데이트
+function updateSelectAllKeywordsCheckbox() {
+    const selectAll = document.getElementById('select-all-keywords-checkbox');
+    const checkboxes = document.querySelectorAll('.keyword-checkbox');
+    
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+    
+    selectAll.checked = allChecked;
+    selectAll.indeterminate = someChecked && !allChecked;
+}
+
+// 전체 선택/해제
+document.getElementById('select-all-keywords-checkbox').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.keyword-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = this.checked;
+        if (this.checked) {
+            selectedKeywords.add(parseInt(cb.value));
+        } else {
+            selectedKeywords.delete(parseInt(cb.value));
+        }
+    });
+});
+
+// 키워드 검색
+function searchKeywords() {
+    const searchTerm = document.getElementById('keywords-search').value;
+    const categoryFilter = document.getElementById('keywords-filter-category').value;
+    const statusFilter = document.getElementById('keywords-filter-status').value;
+    
+    // 검색 로직 구현
+    console.log('검색 조건:', { searchTerm, categoryFilter, statusFilter });
+    loadKeywordsList(1);
+}
+
+// 키워드 새로고침
+function refreshKeywords() {
+    loadKeywordsData();
+    showToast('키워드 목록이 새로고침되었습니다.', 'success');
+}
+
+// 키워드 추가
+function addKeyword() {
+    editingKeywordId = null;
+    document.getElementById('keywordModalTitle').innerHTML = '<i class="bi bi-tags"></i> 키워드 추가';
+    document.getElementById('keywordForm').reset();
+    
+    const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+    modal.show();
+}
+
+// 키워드 편집
+async function editKeyword(keywordId) {
+    try {
+        const response = await fetch(`/api/v1/keywords/${keywordId}`);
+        const keyword = await response.json();
+        
+        editingKeywordId = keywordId;
+        document.getElementById('keywordModalTitle').innerHTML = '<i class="bi bi-pencil"></i> 키워드 편집';
+        
+        // 폼에 데이터 채우기
+        document.getElementById('keyword-input').value = keyword.keyword;
+        document.getElementById('keyword-category').value = keyword.category || '';
+        document.getElementById('keyword-description').value = keyword.description || '';
+        document.getElementById('keyword-volume').value = keyword.search_volume || '';
+        document.getElementById('keyword-competition').value = keyword.competition || 'medium';
+        document.getElementById('keyword-status').value = keyword.status || 'active';
+        
+        const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('키워드 편집 오류:', error);
+        showToast('키워드 정보를 불러오는 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 저장
+async function saveKeyword() {
+    const formData = {
+        keyword: document.getElementById('keyword-input').value,
+        category: document.getElementById('keyword-category').value,
+        description: document.getElementById('keyword-description').value,
+        search_volume: document.getElementById('keyword-volume').value,
+        competition: document.getElementById('keyword-competition').value,
+        status: document.getElementById('keyword-status').value
+    };
+    
+    if (!formData.keyword || !formData.category) {
+        showToast('키워드와 카테고리는 필수 입력 항목입니다.', 'warning');
+        return;
+    }
+    
+    try {
+        const url = editingKeywordId 
+            ? `/api/v1/keywords/${editingKeywordId}`
+            : '/api/v1/keywords';
+        
+        const method = editingKeywordId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            const action = editingKeywordId ? '수정' : '추가';
+            showToast(`키워드가 ${action}되었습니다.`, 'success');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('keywordModal'));
+            modal.hide();
+            
+            loadKeywordsData();
+        } else {
+            showToast('키워드 저장 중 오류가 발생했습니다.', 'error');
+        }
+    } catch (error) {
+        console.error('키워드 저장 오류:', error);
+        showToast('키워드 저장 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 삭제
+async function deleteKeyword(keywordId) {
+    if (!confirm('정말로 이 키워드를 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/keywords/${keywordId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showToast('키워드가 삭제되었습니다.', 'success');
+            loadKeywordsData();
+        } else {
+            showToast('키워드 삭제 중 오류가 발생했습니다.', 'error');
+        }
+    } catch (error) {
+        console.error('키워드 삭제 오류:', error);
+        showToast('키워드 삭제 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 일괄 등록
+function importKeywords() {
+    showToast('키워드 일괄 등록 기능은 개발 중입니다.', 'info');
+}
+
+// 키워드 분석
+async function analyzeKeywords() {
+    try {
+        const response = await fetch('/api/v1/admin/keywords-recommend');
+        const data = await response.json();
+        
+        // 분석 차트 생성
+        createKeywordAnalysisChart();
+        
+        // 인기 키워드 표시
+        const popularKeywords = document.getElementById('popular-keywords');
+        popularKeywords.innerHTML = data.recommendations?.map(keyword => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>${keyword.keyword}</span>
+                <span class="badge bg-primary">${keyword.score}</span>
+            </div>
+        `).join('') || '<p class="text-muted">추천 키워드가 없습니다.</p>';
+        
+        // 키워드 추천 표시
+        const recommendations = document.getElementById('keyword-recommendations');
+        recommendations.innerHTML = data.suggestions?.map(suggestion => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>${suggestion.keyword}</span>
+                <span class="badge bg-success">추천</span>
+            </div>
+        `).join('') || '<p class="text-muted">추천 키워드가 없습니다.</p>';
+        
+        const modal = new bootstrap.Modal(document.getElementById('keywordAnalysisModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('키워드 분석 오류:', error);
+        showToast('키워드 분석 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 키워드 분석 차트
+function createKeywordAnalysisChart() {
+    const ctx = document.getElementById('keywordAnalysisChart');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['AI', 'SEO', '기술', '마케팅', '기타'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [
+                    '#6366f1',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#6b7280'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function showToast(message, type = 'info') {
+    console.log(`${type.toUpperCase()}: ${message}`);
+}
+</script> 
