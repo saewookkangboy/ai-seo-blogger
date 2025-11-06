@@ -40,6 +40,10 @@ from app.services.readme_updater import readme_updater
 from app.services.memory_manager import memory_manager
 from app.services.structured_logger import setup_optimized_logging, compress_old_logs
 from app.database import create_indexes
+# 중간 우선순위 최적화 서비스
+from app.services.redis_cache import get_redis_cache
+from app.services.background_queue import background_queue
+from app.services.optimized_crawler import priority_crawler
 # from app.services.auto_performance_tester import auto_performance_tester
 
 # API 응답 시간 최적화를 위한 캐시
@@ -486,6 +490,28 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"메모리 모니터링 시작 실패: {e}")
     
+    # Redis 캐시 초기화
+    try:
+        redis_cache = get_redis_cache()
+        stats = redis_cache.get_stats()
+        logger.info(f"✅ Redis 캐시 초기화 완료: {stats.get('type', 'unknown')}")
+    except Exception as e:
+        logger.warning(f"Redis 캐시 초기화 실패: {e}")
+    
+    # 백그라운드 작업 큐 시작
+    try:
+        background_queue.start()
+        logger.info("✅ 백그라운드 작업 큐 시작")
+    except Exception as e:
+        logger.warning(f"백그라운드 작업 큐 시작 실패: {e}")
+    
+    # 우선순위 크롤러 초기화
+    try:
+        asyncio.create_task(priority_crawler.initialize())
+        logger.info("✅ 우선순위 크롤러 초기화")
+    except Exception as e:
+        logger.warning(f"우선순위 크롤러 초기화 실패: {e}")
+    
     # 설정 유효성 검사
     errors = settings.validate_settings()
     if errors:
@@ -577,6 +603,20 @@ async def shutdown_event():
         logger.info("메모리 모니터링 중지")
     except Exception as e:
         logger.warning(f"메모리 모니터링 중지 실패: {e}")
+    
+    # 백그라운드 작업 큐 중지
+    try:
+        background_queue.stop()
+        logger.info("백그라운드 작업 큐 중지")
+    except Exception as e:
+        logger.warning(f"백그라운드 작업 큐 중지 실패: {e}")
+    
+    # 우선순위 크롤러 종료
+    try:
+        asyncio.run(priority_crawler.close())
+        logger.info("우선순위 크롤러 종료")
+    except Exception as e:
+        logger.warning(f"우선순위 크롤러 종료 실패: {e}")
     logger.info("애플리케이션 종료 중...")
     log_system("애플리케이션 종료 시작")
     

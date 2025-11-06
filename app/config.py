@@ -88,6 +88,15 @@ class Settings(BaseSettings):
     log_enable_console: bool = True  # 콘솔 로깅 활성화
     log_compress_after_days: int = 7  # 로그 압축 주기 (일)
     
+    # 중간 우선순위 최적화 설정
+    redis_url: Optional[str] = None  # Redis URL (예: redis://localhost:6379/0)
+    batch_api_size: int = 10  # 배치 API 크기
+    batch_api_interval: float = 0.5  # 배치 API 간격 (초)
+    background_queue_workers: int = 4  # 백그라운드 작업 큐 작업자 수
+    background_queue_size: int = 100  # 백그라운드 작업 큐 크기
+    crawler_max_concurrent: int = 10  # 크롤러 최대 동시 처리 수
+    crawler_queue_size: int = 100  # 크롤러 큐 크기
+    
     def validate_settings(self) -> list[str]:
         """설정 유효성 검사 (개선된 버전)"""
         errors = []
