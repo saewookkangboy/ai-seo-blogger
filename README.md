@@ -94,6 +94,10 @@ AI를 활용하여 특정 키워드에 대한 해외 자료를 수집, 번역, �
 | **파일 정리** | 기존 파일 이동 | 루트에 있는 관련 파일들을 blog_generator 폴더로 자동 정리 |
 | **실시간 업로드** | pandas DataFrame | 데이터베이스 쿼리 결과를 CSV로 변환하여 Google Drive에 실시간 업로드 |
 | **시스템 통계** | JSON 형태 저장 | 시스템 현황, API 사용량, 크롤링 통계 등을 JSON으로 저장 |
+| **Google Docs Archive** | 자동 Archive 저장 | 블로그 포스트 생성 시 자동으로 Google Docs로 Archive 저장 |
+| **Archive 관리** | 문서 관리 API | Archive 문서 목록 조회, 수동 Archive, 문서 삭제 기능 |
+| **Archive 폴더** | 자동 폴더 생성 | AI_SEO_Blogger_Archive 폴더 자동 생성 및 관리 |
+| **Archive 형식** | 구조화된 문서 | 제목, 키워드, 생성일, 출처, 본문 내용을 포함한 깔끔한 문서 형식 |
 
 ### ⚡ **성능 최적화**
 
@@ -107,6 +111,13 @@ AI를 활용하여 특정 키워드에 대한 해외 자료를 수집, 번역, �
 ---
 
 ## 2025년 주요 변경 이력
+
+- **2025.12.XX**
+  - **Google Docs Archive 기능 추가**: 블로그 포스트 생성 시 자동으로 Google Docs로 Archive 저장
+  - Google Docs API 통합, Archive 폴더 자동 생성 및 관리
+  - Archive 관리 API 엔드포인트 추가 (문서 목록 조회, 수동 Archive, 문서 삭제)
+  - HTML 태그 제거 및 깔끔한 텍스트 형식으로 저장
+  - 상세한 설정 가이드 및 테스트 스크립트 제공
 
 - **2025.10.22**
   - **자동 업데이트 시스템 구축**: 전체 서비스의 테스트, 진단, 자동 업데이트, 로그 기록 시스템 구축 완료
@@ -234,6 +245,11 @@ OPENAI_API_KEY=your_openai_api_key_here
 DEEPL_API_KEY=your_deepl_api_key_here
 GOOGLE_DRIVE_CLIENT_ID=your_google_drive_client_id_here
 GOOGLE_DRIVE_CLIENT_SECRET=your_google_drive_client_secret_here
+
+# Google Docs Archive 설정 (선택사항)
+GOOGLE_DOCS_ARCHIVE_ENABLED=true
+GOOGLE_DOCS_ARCHIVE_FOLDER=AI_SEO_Blogger_Archive
+GOOGLE_DOCS_AUTO_ARCHIVE=true
 ```
 
 ### 5. 데이터베이스 초기화
@@ -263,8 +279,12 @@ Google Drive 백업 기능을 사용하려면 추가 설정이 필요합니다:
 
 1. **Google Cloud Console 설정**:
    - Google Cloud Console에서 Google Drive API 활성화
+   - **Google Docs API도 함께 활성화** (Archive 기능 사용 시 필요)
    - OAuth 2.0 클라이언트 ID 및 시크릿 생성
    - OAuth 동의 화면 설정 및 테스트 사용자 등록
+   - 다음 범위 추가:
+     - `https://www.googleapis.com/auth/documents` (Google Docs API)
+     - `https://www.googleapis.com/auth/drive.file` (Google Drive API)
 
 2. **자동 설정 스크립트 실행**:
 ```bash
@@ -275,6 +295,28 @@ python3 google_drive_setup.py
 ```bash
 python3 test_google_drive_simple.py
 ```
+
+### Google Docs Archive 설정 (선택사항)
+블로그 포스트를 Google Docs로 자동 Archive 저장하려면:
+
+1. **Google Docs API 활성화** (위 Google Drive API 설정 참조)
+
+2. **Archive 기능 테스트**:
+```bash
+python3 test_google_docs_archive.py
+```
+
+3. **상세 설정 가이드**:
+   - `GOOGLE_DOCS_ARCHIVE_SETUP_GUIDE.md` 파일 참조
+
+Archive 기능은 블로그 포스트 생성 시 자동으로 Google Docs 문서로 저장되며, 다음 정보를 포함합니다:
+- 제목 (스타일링된 헤더)
+- 키워드
+- 생성일
+- 출처 URL
+- AI 모드
+- 본문 내용 (HTML 태그 제거됨)
+- 요약 (있는 경우)
 
 ## 🔧 **시스템 최적화**
 
