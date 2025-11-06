@@ -44,6 +44,10 @@ from app.database import create_indexes
 from app.services.redis_cache import get_redis_cache
 from app.services.background_queue import background_queue
 from app.services.optimized_crawler import priority_crawler
+# 낮은 우선순위 최적화 서비스
+from app.services.health_check import health_check
+from app.services.postgresql_optimizer import get_postgresql_optimizer
+from app.services.horizontal_scaling import horizontal_scaling
 # from app.services.auto_performance_tester import auto_performance_tester
 
 # API 응답 시간 최적화를 위한 캐시
@@ -130,7 +134,32 @@ async def blog_generator_exception_handler(request: Request, exc: exceptions.Blo
     return exceptions.handle_blog_generator_exception(exc)
 
 # 헬스체크 엔드포인트
-@app.get("/health")
+@app.get("/health", tags=["monitoring"])
+async def health_check_endpoint():
+    """헬스체크 엔드포인트 (로드 밸런서용)"""
+    return health_check.check_health()
+
+@app.get("/health/readiness", tags=["monitoring"])
+async def readiness_check():
+    """Readiness 체크 (서비스 준비 상태)"""
+    return health_check.check_readiness()
+
+@app.get("/health/liveness", tags=["monitoring"])
+async def liveness_check():
+    """Liveness 체크 (서비스 생존 상태)"""
+    return health_check.check_liveness()
+
+@app.get("/api/v1/scaling/info", tags=["scaling"])
+async def get_scaling_info():
+    """수평 확장 정보 조회"""
+    return {
+        'instance_info': horizontal_scaling.get_instance_info(),
+        'stateless_check': horizontal_scaling.check_stateless(),
+        'load_balancer_config': horizontal_scaling.get_load_balancer_config(),
+        'recommendations': horizontal_scaling.get_scaling_recommendations()
+    }
+
+@app.get("/health/legacy")
 async def health_check():
     """헬스 체크 엔드포인트"""
     try:
@@ -511,6 +540,15 @@ async def startup_event():
         logger.info("✅ 우선순위 크롤러 초기화")
     except Exception as e:
         logger.warning(f"우선순위 크롤러 초기화 실패: {e}")
+    
+    # PostgreSQL 최적화 (PostgreSQL 사용 시)
+    try:
+        if settings.database_url.startswith("postgresql"):
+            postgresql_optimizer = get_postgresql_optimizer()
+            postgresql_optimizer.optimize_query_performance()
+            logger.info("✅ PostgreSQL 최적화 완료")
+    except Exception as e:
+        logger.warning(f"PostgreSQL 최적화 실패: {e}")
     
     # 설정 유효성 검사
     errors = settings.validate_settings()

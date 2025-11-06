@@ -97,6 +97,11 @@ class Settings(BaseSettings):
     crawler_max_concurrent: int = 10  # 크롤러 최대 동시 처리 수
     crawler_queue_size: int = 100  # 크롤러 큐 크기
     
+    # 낮은 우선순위 최적화 설정
+    enable_postgresql_optimization: bool = True  # PostgreSQL 최적화 활성화
+    session_storage: str = "memory"  # 세션 저장소 (memory, redis)
+    enable_horizontal_scaling: bool = True  # 수평 확장 지원 활성화
+    
     def validate_settings(self) -> list[str]:
         """설정 유효성 검사 (개선된 버전)"""
         errors = []
