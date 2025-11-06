@@ -85,49 +85,66 @@ def create_indexes():
     """데이터베이스 성능 최적화를 위한 인덱스를 생성합니다."""
     try:
         with engine.connect() as conn:
-            # blog_posts 테이블 인덱스
+            # blog_posts 테이블 인덱스 (최적화)
             conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at 
+                CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at_desc 
                 ON blog_posts(created_at DESC)
             """))
             
             conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_blog_posts_title 
-                ON blog_posts(title)
+                CREATE INDEX IF NOT EXISTS idx_blog_posts_title_lower 
+                ON blog_posts(LOWER(title))
             """))
             
             conn.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_blog_posts_keywords 
-                ON blog_posts(keywords)
+                ON blog_posts(keywords) WHERE keywords IS NOT NULL
             """))
             
-            # keyword_list 테이블 인덱스
+            # 복합 인덱스 추가 (자주 함께 사용되는 컬럼)
             conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_keyword_list_type 
-                ON keyword_list(type)
-            """))
-            
-            conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_keyword_list_keyword 
-                ON keyword_list(keyword)
-            """))
-            
-            # api_keys 테이블 인덱스
-            conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_api_keys_service 
-                ON api_keys(service)
+                CREATE INDEX IF NOT EXISTS idx_blog_posts_status_created 
+                ON blog_posts(status, created_at DESC)
             """))
             
             conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS idx_api_keys_active 
-                ON api_keys(is_active)
+                CREATE INDEX IF NOT EXISTS idx_blog_posts_category_status 
+                ON blog_posts(category, status) WHERE category IS NOT NULL
+            """))
+            
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_blog_posts_content_length 
+                ON blog_posts(content_length) WHERE content_length IS NOT NULL
+            """))
+            
+            # keyword_list 테이블 인덱스 (최적화)
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_keyword_list_type_keyword 
+                ON keyword_list(type, keyword)
+            """))
+            
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_keyword_list_keyword_lower 
+                ON keyword_list(LOWER(keyword))
+            """))
+            
+            # api_keys 테이블 인덱스 (최적화)
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_api_keys_service_active 
+                ON api_keys(service, is_active) WHERE is_active = 1
+            """))
+            
+            # feature_updates 테이블 인덱스 추가
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_feature_updates_date 
+                ON feature_updates(date DESC)
             """))
             
             conn.commit()
-            logger.info("데이터베이스 인덱스 생성 완료")
+            logger.info("✅ 데이터베이스 인덱스 생성 완료 (최적화됨)")
             
     except Exception as e:
-        logger.error(f"인덱스 생성 중 오류: {e}")
+        logger.error(f"❌ 인덱스 생성 중 오류: {e}")
 
 # 애플리케이션 시작 시 인덱스 생성
 create_indexes()

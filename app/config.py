@@ -78,6 +78,16 @@ class Settings(BaseSettings):
     google_docs_archive_folder: str = "AI_SEO_Blogger_Archive"
     google_docs_auto_archive: bool = True
     
+    # 성능 최적화 설정
+    max_memory_mb: int = 1024  # 최대 메모리 사용량 (MB)
+    memory_cleanup_interval: int = 300  # 메모리 정리 주기 (초)
+    cache_max_size: int = 1000  # 캐시 최대 크기
+    cache_default_ttl: int = 3600  # 캐시 기본 TTL (초)
+    log_level: str = "INFO"  # 로그 레벨 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    log_enable_file: bool = True  # 파일 로깅 활성화
+    log_enable_console: bool = True  # 콘솔 로깅 활성화
+    log_compress_after_days: int = 7  # 로그 압축 주기 (일)
+    
     def validate_settings(self) -> list[str]:
         """설정 유효성 검사 (개선된 버전)"""
         errors = []

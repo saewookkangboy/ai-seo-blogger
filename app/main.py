@@ -36,6 +36,10 @@ from app.services.system_diagnostic import system_diagnostic
 from app.services.comprehensive_logger import comprehensive_logger, log_system, log_api, log_error
 from app.services.auto_update_monitor import auto_update_monitor
 from app.services.readme_updater import readme_updater
+# 최적화 서비스
+from app.services.memory_manager import memory_manager
+from app.services.structured_logger import setup_optimized_logging, compress_old_logs
+from app.database import create_indexes
 # from app.services.auto_performance_tester import auto_performance_tester
 
 # API 응답 시간 최적화를 위한 캐시
@@ -448,6 +452,40 @@ async def startup_event():
     logger.info("=== AI SEO Blog Generator 시작 ===")
     log_system("애플리케이션 시작", {"timestamp": datetime.now().isoformat()})
     
+    # 최적화 로깅 설정
+    try:
+        setup_optimized_logging(
+            log_dir="logs",
+            log_level=settings.log_level,
+            enable_file=settings.log_enable_file,
+            enable_console=settings.log_enable_console
+        )
+        logger.info("✅ 최적화된 로깅 설정 완료")
+    except Exception as e:
+        logger.warning(f"로깅 설정 중 오류: {e}")
+    
+    # 오래된 로그 압축
+    try:
+        compressed_count = compress_old_logs("logs", days=settings.log_compress_after_days)
+        if compressed_count > 0:
+            logger.info(f"✅ {compressed_count}개의 오래된 로그 파일 압축 완료")
+    except Exception as e:
+        logger.warning(f"로그 압축 중 오류: {e}")
+    
+    # 데이터베이스 인덱스 생성
+    try:
+        create_indexes()
+        logger.info("✅ 데이터베이스 인덱스 생성 완료")
+    except Exception as e:
+        logger.warning(f"인덱스 생성 중 오류: {e}")
+    
+    # 메모리 관리 시작
+    try:
+        memory_manager.start_monitoring()
+        logger.info("✅ 메모리 모니터링 시작")
+    except Exception as e:
+        logger.warning(f"메모리 모니터링 시작 실패: {e}")
+    
     # 설정 유효성 검사
     errors = settings.validate_settings()
     if errors:
@@ -533,6 +571,12 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """애플리케이션 종료 시 실행되는 이벤트"""
+    # 메모리 모니터링 중지
+    try:
+        memory_manager.stop_monitoring()
+        logger.info("메모리 모니터링 중지")
+    except Exception as e:
+        logger.warning(f"메모리 모니터링 중지 실패: {e}")
     logger.info("애플리케이션 종료 중...")
     log_system("애플리케이션 종료 시작")
     
