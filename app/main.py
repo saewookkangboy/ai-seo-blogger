@@ -1074,6 +1074,130 @@ def get_posts_stats(db: Session = Depends(get_db)):
             "length_3000": 0,
             "length_4000_plus": 0
         }
+
+# 데이터 동기화 API
+@app.post("/api/v1/admin/sync/database")
+def sync_database(db: Session = Depends(get_db)):
+    """데이터베이스 동기화"""
+    try:
+        from app.models import BlogPost, APIKey, KeywordList
+        from sqlalchemy import text
+        
+        # 데이터베이스 최적화
+        db.execute(text("VACUUM"))
+        db.commit()
+        
+        # 통계 업데이트
+        total_posts = db.query(BlogPost).count()
+        total_keys = db.query(APIKey).count()
+        total_keywords = db.query(KeywordList).count()
+        
+        logger.info(f"데이터베이스 동기화 완료: 포스트={total_posts}, API키={total_keys}, 키워드={total_keywords}")
+        
+        return {
+            "success": True,
+            "message": "데이터베이스 동기화가 완료되었습니다.",
+            "stats": {
+                "posts": total_posts,
+                "api_keys": total_keys,
+                "keywords": total_keywords
+            }
+        }
+    except Exception as e:
+        logger.error(f"데이터베이스 동기화 오류: {e}")
+        return {
+            "success": False,
+            "message": f"동기화 중 오류가 발생했습니다: {str(e)}"
+        }
+
+@app.post("/api/v1/admin/sync/cache")
+def sync_cache():
+    """캐시 동기화"""
+    try:
+        # 메모리 캐시 초기화
+        global api_cache
+        api_cache.clear()
+        
+        # LRU 캐시 초기화
+        get_cached_stats.cache_clear()
+        
+        logger.info("캐시 동기화 완료")
+        
+        return {
+            "success": True,
+            "message": "캐시 동기화가 완료되었습니다."
+        }
+    except Exception as e:
+        logger.error(f"캐시 동기화 오류: {e}")
+        return {
+            "success": False,
+            "message": f"캐시 동기화 중 오류가 발생했습니다: {str(e)}"
+        }
+
+@app.post("/api/v1/admin/sync/api-status")
+def sync_api_status(db: Session = Depends(get_db)):
+    """API 상태 동기화"""
+    try:
+        from app.models import APIKey
+        
+        # 모든 API 키 조회
+        api_keys = db.query(APIKey).all()
+        
+        # API 키 상태 확인 (간단한 검증)
+        active_count = sum(1 for key in api_keys if key.is_active)
+        
+        logger.info(f"API 상태 동기화 완료: 활성 키={active_count}/{len(api_keys)}")
+        
+        return {
+            "success": True,
+            "message": "API 상태 동기화가 완료되었습니다.",
+            "stats": {
+                "total": len(api_keys),
+                "active": active_count,
+                "inactive": len(api_keys) - active_count
+            }
+        }
+    except Exception as e:
+        logger.error(f"API 상태 동기화 오류: {e}")
+        return {
+            "success": False,
+            "message": f"API 상태 동기화 중 오류가 발생했습니다: {str(e)}"
+        }
+
+@app.post("/api/v1/admin/sync/all")
+def sync_all(db: Session = Depends(get_db)):
+    """전체 동기화"""
+    try:
+        # 데이터베이스 동기화
+        db_result = sync_database(db)
+        
+        # 캐시 동기화
+        cache_result = sync_cache()
+        
+        # API 상태 동기화
+        api_result = sync_api_status(db)
+        
+        all_success = all([
+            db_result.get("success", False),
+            cache_result.get("success", False),
+            api_result.get("success", False)
+        ])
+        
+        return {
+            "success": all_success,
+            "message": "전체 동기화가 완료되었습니다." if all_success else "일부 동기화에 실패했습니다.",
+            "results": {
+                "database": db_result,
+                "cache": cache_result,
+                "api_status": api_result
+            }
+        }
+    except Exception as e:
+        logger.error(f"전체 동기화 오류: {e}")
+        return {
+            "success": False,
+            "message": f"전체 동기화 중 오류가 발생했습니다: {str(e)}"
+        }
     syn_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'synonyms.json'))
     if not os.path.exists(syn_file):
         return {"success": False}

@@ -92,6 +92,7 @@ class APIKeyUpdate(BaseModel):
 
 class APIKeyOut(APIKeyBase):
     id: int
+    key: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     class Config:

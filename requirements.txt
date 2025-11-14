@@ -17,3 +17,9 @@ pandas
 schedule
 google-generativeai
 psycopg2-binary
+itsdangerous
+aiohttp
+jinja2
+selenium
+webdriver-manager
+python-multipart
