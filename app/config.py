@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     
     # Admin
     admin_username: str = "admin"
-    admin_password: str = "admin123"
+    admin_password: str = "1234"
     
     # 네이버 검색광고 API 연동용
     naver_client_id: Optional[str] = None
