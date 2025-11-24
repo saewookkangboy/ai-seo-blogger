@@ -2,6 +2,7 @@ import os
 import sys
 from typing import Optional
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from dotenv import load_dotenv
 
 # Python 바이트코드 캐시 비활성화 (시스템 최적화)
@@ -25,10 +26,12 @@ class Settings(BaseSettings):
     app_name: str = "AI SEO Blogger"
     debug: bool = True  # 개발 환경에서 테스트 세션 사용을 위해 True로 설정
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-        env_prefix = ""
+    model_config = ConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'  # .env 파일의 추가 필드 무시
+    )
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
