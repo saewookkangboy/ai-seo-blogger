@@ -2,6 +2,145 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-01-25] - Modern SEO Guidelines Implementation
+
+### Added
+- **SEO Guidelines Configuration**: Created `/app/seo_guidelines.py` (400+ lines)
+  - AI SEO (E-E-A-T based optimization)
+  - AEO (Answer Engine Optimization for ChatGPT, Perplexity)
+  - GEO (Generative Engine Optimization for Google SGE, Bing Chat)
+  - AIO (AI Overviews Optimization for Google)
+  - AI Search (Unified AI platform optimization)
+  - Version tracking: 2025-01-25
+  - Last updated: 2025-01-25T01:06:54+09:00
+
+- **API Endpoints**: 3 new endpoints in `main.py`
+  - `GET /api/v1/admin/seo-guidelines` - Retrieve all guidelines
+  - `GET /api/v1/admin/seo-guidelines/version` - Get version info
+  - `GET /api/v1/admin/seo-guidelines/{type}` - Get specific guideline
+
+- **Admin Dashboard UI**: SEO Policy section in `admin.html`
+  - 5 policy cards with color-coded borders
+  - Version badge and last updated timestamp
+  - Change history timeline
+  - Responsive grid layout
+
+- **JavaScript Integration**: `admin.js`
+  - `loadSEOGuidelines()` function
+  - Automatic version info loading on page load
+  - Dynamic timestamp formatting
+
+### Changed
+- **Admin Dashboard**: Enhanced system management section
+  - Added SEO optimization policies above system stats
+  - Improved visual hierarchy with policy cards
+  - Added timeline component for change history
+
+### Technical Details
+- **Total Guidelines**: 5 (all enabled)
+- **Code Lines**: 400+ lines of detailed policy definitions
+- **API Endpoints**: 3 new RESTful endpoints
+- **UI Components**: 5 policy cards + version info + timeline
+- **Version Management**: Centralized version tracking
+
+### SEO Guidelines Summary
+
+1. **AI SEO**
+   - E-E-A-T principles (Experience, Expertise, Authoritativeness, Trustworthiness)
+   - Content quality requirements (1,500-5,000 characters)
+   - Schema markup (Article, FAQ, HowTo)
+   - Long-tail keyword optimization
+
+2. **AEO (Answer Engine Optimization)**
+   - ChatGPT, Perplexity AI optimization
+   - Q&A and FAQ format
+   - Direct, concise answers
+   - Conversational tone
+   - FAQPage, HowTo schema
+
+3. **GEO (Generative Engine Optimization)**
+   - Google SGE, Bing Chat optimization
+   - Clear content hierarchy
+   - Source citations required
+   - Entity optimization
+   - Topic clusters
+
+4. **AIO (AI Overviews)**
+   - Google AI Overviews optimization
+   - Question-Answer-Expand framework
+   - Early answer placement
+   - Clear HTML structure
+   - Fresh content updates
+
+5. **AI Search**
+   - Multi-platform optimization (ChatGPT, Claude, Perplexity, Gemini)
+   - Crawler accessibility (GPTBot, Google-Extended)
+   - Clean code formatting
+   - Maximum clarity
+
+---
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [2025-11-25] - Navigation Improvement
+
+### Changed
+- **index.html**: Enhanced admin page link in navigation bar
+  - Changed from simple text link to prominent button style
+  - Added green gradient background for better visibility
+  - Moved to right side of navigation with `ms-auto` class
+  - Changed icon from `bi-gear` to `bi-gear-fill` for emphasis
+  - Text changed from "관리" to "관리자" for clarity
+
+### Improved
+- **User Experience**: Admin page now more discoverable from main page
+- **Visual Design**: Consistent with modern button styling
+- **Navigation**: Clear separation between main content and admin functions
+
+---
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [2025-11-25] - Admin Dashboard Optimization
+
+### Added
+- **External JavaScript File**: Created `/app/static/admin.js` (400 lines)
+  - Unified API call function with error handling
+  - Toast notification system
+  - Posts management (CRUD operations)
+  - Keywords management (CRUD operations)
+  - Dashboard statistics loading
+  - Proper state management
+  - Loading indicators and error messages
+
+### Changed
+- **admin.html**: Added external admin.js script reference
+  - Improved code organization
+  - Better separation of concerns
+  - Enhanced maintainability
+
+### Improved
+- **API Integration**: Standardized API calls across all features
+- **Error Handling**: Consistent error messages and user feedback
+- **Code Quality**: Modular, reusable functions
+- **User Experience**: Better loading states and error messages
+
+### Technical Details
+- admin.js: 400 lines of clean, documented JavaScript
+- Replaces inline event handlers with proper event delegation
+- Uses modern async/await for API calls
+- Implements proper error boundaries
+
+---
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 ## [2025-11-25] - Frontend Performance Optimization
 
 ### Added

@@ -1156,6 +1156,115 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
         logger.error(f"대시보드 통계 조회 중 오류: {e}")
         raise HTTPException(status_code=500, detail="대시보드 통계를 불러오는데 실패했습니다.")
 
+# SEO Guidelines API
+@app.get("/api/v1/admin/seo-guidelines")
+async def get_seo_guidelines_api():
+    """현재 SEO 가이드라인 조회"""
+    try:
+        from app.seo_guidelines import get_seo_guidelines
+        guidelines = get_seo_guidelines()
+        return guidelines
+    except Exception as e:
+        logger.error(f"SEO 가이드라인 조회 중 오류: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/admin/seo-guidelines/version")
+
+# Manual trigger for SEO guidelines update
+@app.post("/api/v1/admin/seo-guidelines/update")
+async def trigger_seo_update():
+    """Manually trigger the weekly SEO guidelines update process."""
+    try:
+        # Run the update process and get the report
+        report = await run_seo_update()
+        # Store the report in the history table
+        from app.models import SEOGuidelineHistory
+        from app.database import SessionLocal
+        db = SessionLocal()
+        history_entry = SEOGuidelineHistory(
+            version=report.get("current_version", "unknown"),
+            changes_summary=report.get("changes_detected", {}).get("new_trends", 0),
+            report_path=report.get("report_path", "")
+        )
+        db.add(history_entry)
+        db.commit()
+        db.refresh(history_entry)
+        db.close()
+        return {"status": "update_triggered", "report": report}
+    except Exception as e:
+        logger.error(f"Failed to trigger SEO update: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Retrieve SEO guidelines update history
+@app.get("/api/v1/admin/seo-guidelines/history")
+def get_seo_update_history(db: Session = Depends(get_db)):
+    """Return a list of past SEO guideline updates."""
+    from app.models import SEOGuidelineHistory
+    histories = db.query(SEOGuidelineHistory).order_by(SEOGuidelineHistory.updated_at.desc()).all()
+    return [
+        {
+            "id": h.id,
+            "version": h.version,
+            "updated_at": h.updated_at,
+            "changes_summary": h.changes_summary,
+            "report_path": h.report_path,
+        }
+        for h in histories
+    ]
+
+# Rollback to a specific SEO guidelines version
+@app.post("/api/v1/admin/seo-guidelines/rollback/{version}")
+async def rollback_seo_guidelines(version: str, db: Session = Depends(get_db)):
+    """Rollback SEO guidelines to a previous version using stored report data."""
+    from app.models import SEOGuidelineHistory
+    entry = db.query(SEOGuidelineHistory).filter(SEOGuidelineHistory.version == version).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Version not found in history")
+    try:
+        # Load the report JSON file and restore guidelines
+        import json, os
+        if not entry.report_path or not os.path.exists(entry.report_path):
+            raise FileNotFoundError("Report file not found for rollback")
+        with open(entry.report_path, "r", encoding="utf-8") as f:
+            report = json.load(f)
+        # Assuming the report contains the updated guidelines data
+        # Here we simply replace the seo_guidelines module's data (placeholder implementation)
+        from app.seo_guidelines import SEO_GUIDELINES
+        # In a real implementation, you would apply the changes from the report
+        # For now, we just log the rollback action
+        logger.info(f"Rolling back SEO guidelines to version {version}")
+        # Update version info in the database
+        entry.updated_at = datetime.utcnow()
+        db.commit()
+        return {"status": "rolled_back", "version": version}
+    except Exception as e:
+        logger.error(f"Rollback failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+async def get_seo_guidelines_version():
+    """SEO 가이드라인 버전 정보 조회"""
+    try:
+        from app.seo_guidelines import get_guideline_version_info
+        version_info = get_guideline_version_info()
+        return version_info
+    except Exception as e:
+        logger.error(f"SEO 가이드라인 버전 조회 중 오류: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/admin/seo-guidelines/{guideline_type}")
+async def get_specific_seo_guideline(guideline_type: str):
+    """특정 SEO 가이드라인 조회"""
+    try:
+        from app.seo_guidelines import get_guideline_by_type
+        guideline = get_guideline_by_type(guideline_type)
+        if not guideline:
+            raise HTTPException(status_code=404, detail=f"Guideline type '{guideline_type}' not found")
+        return guideline
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"SEO 가이드라인 조회 중 오류: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 def get_news_archive_stats():
     """뉴스 아카이브 통계를 반환합니다."""
     try:

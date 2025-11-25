@@ -64,3 +64,12 @@ class FeatureUpdate(Base):
     date = Column(Date, unique=True, nullable=False, index=True)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+# SEO 가이드라인 업데이트 이력 테이블
+class SEOGuidelineHistory(Base):
+    __tablename__ = 'seo_guideline_history'
+    id = Column(Integer, primary_key=True, index=True)
+    version = Column(String(20), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+    changes_summary = Column(Text)
+    report_path = Column(String(500))  # JSON report 파일 경로
