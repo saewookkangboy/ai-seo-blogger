@@ -17,3 +17,6 @@ pandas
 schedule
 google-generativeai
 psycopg2-binary
+webdriver-manager
+itsdangerous
+python-multipart

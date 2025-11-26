@@ -179,6 +179,40 @@ async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[l
         
         # 생성 요청 간 지연 (API 부하 방지)
         await asyncio.sleep(GENERATION_DELAY)
+        
+    # 최신 SEO 가이드라인 로드 및 적용
+    try:
+        from app.seo_guidelines import get_seo_guidelines
+        seo_guidelines = get_seo_guidelines()
+        
+        # 가이드라인 리스트 초기화
+        if rule_guidelines is None:
+            rule_guidelines = []
+        else:
+            rule_guidelines = list(rule_guidelines)  # 복사본 생성
+            
+        # 활성화된 가이드라인 추출
+        active_guidelines = []
+        if seo_guidelines.get("guidelines", {}).get("ai_seo", {}).get("enabled"):
+            e_e_a_t = seo_guidelines["guidelines"]["ai_seo"].get("e_e_a_t", {})
+            active_guidelines.append(f"E-E-A-T 원칙 준수: {e_e_a_t.get('experience', {}).get('description', '')}, {e_e_a_t.get('expertise', {}).get('description', '')}")
+        
+        if seo_guidelines.get("guidelines", {}).get("aeo", {}).get("enabled"):
+            aeo = seo_guidelines["guidelines"]["aeo"]
+            active_guidelines.append(f"AEO 최적화: {aeo.get('description', '')}")
+            
+        if seo_guidelines.get("guidelines", {}).get("geo", {}).get("enabled"):
+            geo = seo_guidelines["guidelines"]["geo"]
+            active_guidelines.append(f"GEO 최적화: {geo.get('description', '')}")
+            
+        if active_guidelines:
+            rule_guidelines.append("--- 최신 SEO 가이드라인 ---")
+            rule_guidelines.extend(active_guidelines)
+            
+    except Exception as e:
+        logger.warning(f"SEO 가이드라인 로드 실패: {e}")
+        if rule_guidelines is None:
+            rule_guidelines = []
     
     # Gemini 2.0 Flash 모드인 경우 Gemini 사용
     if ai_mode == "gemini_2_0_flash":
@@ -217,6 +251,33 @@ async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[l
         rules_text = ""
         if rule_guidelines:
             rules_text = "\n".join([f"- {rule}" for rule in rule_guidelines])
+            
+        # 최신 SEO 가이드라인 로드 및 적용
+        try:
+            from app.seo_guidelines import get_seo_guidelines
+            seo_guidelines = get_seo_guidelines()
+            
+            # 활성화된 가이드라인 추출
+            active_guidelines = []
+            if seo_guidelines.get("guidelines", {}).get("ai_seo", {}).get("enabled"):
+                e_e_a_t = seo_guidelines["guidelines"]["ai_seo"].get("e_e_a_t", {})
+                active_guidelines.append(f"E-E-A-T 원칙 준수: {e_e_a_t.get('experience', {}).get('description', '')}, {e_e_a_t.get('expertise', {}).get('description', '')}")
+            
+            if seo_guidelines.get("guidelines", {}).get("aeo", {}).get("enabled"):
+                aeo = seo_guidelines["guidelines"]["aeo"]
+                active_guidelines.append(f"AEO 최적화: {aeo.get('description', '')}")
+                
+            if seo_guidelines.get("guidelines", {}).get("geo", {}).get("enabled"):
+                geo = seo_guidelines["guidelines"]["geo"]
+                active_guidelines.append(f"GEO 최적화: {geo.get('description', '')}")
+                
+            seo_guidelines_text = "\n".join([f"- {g}" for g in active_guidelines])
+            
+            if seo_guidelines_text:
+                rules_text += "\n\n[최신 SEO 가이드라인]\n" + seo_guidelines_text
+                
+        except Exception as e:
+            logger.warning(f"SEO 가이드라인 로드 실패: {e}")
         
         # 콘텐츠 스타일별 가이드라인 추가
         style_guidelines = ""
@@ -798,17 +859,121 @@ async def extract_seo_keywords(text: str) -> str:
                 )
                 
                 extracted_keywords = response.choices[0].message.content.strip()
-                if extracted_keywords and len(extracted_keywords) > 5:
-                    return extracted_keywords
-                    
+                return extracted_keywords
+                
             except Exception as e:
-                logger.warning(f"OpenAI 키워드 추출 실패: {e}")
+                logger.error(f"OpenAI 키워드 추출 중 오류: {e}")
+                return keywords
+                
+    except Exception as e:
+        logger.error(f"SEO 키워드 추출 중 오류: {e}")
+        return _extract_default_keywords(text)
+
+async def analyze_seo_news(news_items: List[Dict[str, Any]]) -> Dict[str, List[str]]:
+    """
+    수집된 뉴스 아이템들을 분석하여 SEO 트렌드를 추출합니다.
+    """
+    global client
+    
+    if not news_items:
+        return {}
         
-        return keywords
+    if not client and not _initialize_client():
+        logger.warning("OpenAI 클라이언트 초기화 실패. 뉴스 분석을 건너뜁니다.")
+        return {}
+        
+    try:
+        # 뉴스 내용 요약 준비
+        news_summary = ""
+        for i, item in enumerate(news_items[:10]):  # 최대 10개만 분석
+            news_summary += f"{i+1}. 제목: {item.get('title', '')}\n   내용: {item.get('summary', '')}\n   카테고리: {item.get('category', '')}\n\n"
+            
+        prompt = f"""
+다음은 최근 수집된 SEO 관련 뉴스 기사들입니다. 이 기사들을 분석하여 각 카테고리별(AI SEO, AEO, GEO, AIO, AI Search)로 최신 트렌드와 중요한 변경사항을 추출해주세요.
+
+뉴스 기사 목록:
+{news_summary}
+
+응답 형식 (JSON):
+{{
+    "ai_seo": ["트렌드 1", "트렌드 2"],
+    "aeo": ["트렌드 1", "트렌드 2"],
+    "geo": ["트렌드 1", "트렌드 2"],
+    "aio": ["트렌드 1", "트렌드 2"],
+    "ai_search": ["트렌드 1", "트렌드 2"]
+}}
+
+각 트렌드는 간결하고 명확한 문장으로 작성해주세요. 중요한 알고리즘 업데이트나 새로운 최적화 전략에 초점을 맞춰주세요.
+"""
+
+        response = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {"role": "system", "content": "당신은 SEO 트렌드 분석 전문가입니다."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1000,
+            temperature=0.3,
+            response_format={"type": "json_object"}
+        )
+        
+        result_json = response.choices[0].message.content.strip()
+        return json.loads(result_json)
         
     except Exception as e:
-        logger.error(f"키워드 추출 중 오류: {e}")
-        return "AI, 기술, 분석, 개발, 시스템"
+        logger.error(f"SEO 뉴스 분석 중 오류: {e}")
+        return {}
+
+async def update_guideline_content(current_guidelines: Dict[str, Any], trends: Dict[str, List[str]]) -> Dict[str, Any]:
+    """
+    현재 가이드라인과 새로운 트렌드를 병합하여 업데이트된 가이드라인을 생성합니다.
+    """
+    global client
+    
+    if not client and not _initialize_client():
+        logger.warning("OpenAI 클라이언트 초기화 실패. 가이드라인 업데이트를 건너뜁니다.")
+        return current_guidelines
+        
+    try:
+        # 프롬프트 구성
+        prompt = f"""
+다음은 현재 SEO 가이드라인과 새로 발견된 트렌드입니다.
+새로운 트렌드를 반영하여 가이드라인을 업데이트해주세요.
+
+현재 가이드라인 (JSON):
+{json.dumps(current_guidelines, ensure_ascii=False, indent=2)[:3000]}... (생략)
+
+새로운 트렌드 (JSON):
+{json.dumps(trends, ensure_ascii=False, indent=2)}
+
+요구사항:
+1. 기존 가이드라인의 구조를 유지하세요.
+2. 새로운 트렌드를 적절한 섹션(requirements, optimization_focus 등)에 추가하거나 기존 내용을 수정하세요.
+3. 'version'과 'last_updated' 필드는 업데이트하지 마세요 (시스템이 처리함).
+4. JSON 형식으로 전체 가이드라인을 반환하세요.
+"""
+
+        response = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {"role": "system", "content": "당신은 SEO 가이드라인 관리자입니다. JSON 형식을 정확히 준수하여 응답하세요."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=4000,
+            temperature=0.3,
+            response_format={"type": "json_object"}
+        )
+        
+        result_json = response.choices[0].message.content.strip()
+        updated_guidelines = json.loads(result_json)
+        
+        return updated_guidelines
+        
+    except Exception as e:
+        logger.error(f"가이드라인 업데이트 중 오류: {e}")
+        return current_guidelines
+
+
 
 def _extract_default_keywords(text: str) -> str:
     """

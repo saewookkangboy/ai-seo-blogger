@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime
 import asyncio
+import json
 
 from app.utils.logger import setup_logger
 
@@ -34,6 +35,26 @@ async def weekly_seo_update_task():
         else:
             logger.info(f"SEO update completed: {report.get('recommendation', 'N/A')}")
             logger.info(f"New trends found: {report.get('changes_detected', {}).get('new_trends', 0)}")
+            
+            # DB에 이력 저장
+            try:
+                from app.database import SessionLocal
+                from app.models import SEOGuidelineHistory
+                
+                db = SessionLocal()
+                try:
+                    history = SEOGuidelineHistory(
+                        version=report.get("new_version", report.get("current_version", "unknown")),
+                        changes_summary=json.dumps(report.get("changes_detected", {}), ensure_ascii=False),
+                        report_path=report.get("report_path", "")
+                    )
+                    db.add(history)
+                    db.commit()
+                    logger.info("Update history saved to database")
+                finally:
+                    db.close()
+            except Exception as e:
+                logger.error(f"Failed to save history to DB: {e}")
         
         return report
         

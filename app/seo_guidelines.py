@@ -288,7 +288,7 @@ AI_SEARCH_GUIDELINES = {
 # ============================================================================
 # Combined SEO Guidelines
 # ============================================================================
-SEO_GUIDELINES = {
+SEO_GUIDELINES_DEFAULT = {
     "version": SEO_VERSION,
     "last_updated": SEO_LAST_UPDATED,
     "guidelines": {
@@ -305,6 +305,40 @@ SEO_GUIDELINES = {
         "next_review_date": "2025-04-25"
     }
 }
+
+import json
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+GUIDELINES_FILE = os.path.join(os.path.dirname(__file__), "seo_guidelines.json")
+
+def load_seo_guidelines_from_file() -> Dict[str, Any]:
+    """파일에서 가이드라인 로드"""
+    if os.path.exists(GUIDELINES_FILE):
+        try:
+            with open(GUIDELINES_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load guidelines from file: {e}")
+    return SEO_GUIDELINES_DEFAULT
+
+def save_seo_guidelines(guidelines: Dict[str, Any]) -> bool:
+    """가이드라인을 파일에 저장"""
+    try:
+        with open(GUIDELINES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(guidelines, f, indent=2, ensure_ascii=False)
+        
+        # 메모리 상의 가이드라인 업데이트
+        global SEO_GUIDELINES
+        SEO_GUIDELINES = guidelines
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save guidelines to file: {e}")
+        return False
+
+# 초기 로드
+SEO_GUIDELINES = load_seo_guidelines_from_file()
 
 def get_seo_guidelines() -> Dict[str, Any]:
     """현재 SEO 가이드라인 반환"""

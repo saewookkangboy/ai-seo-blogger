@@ -260,16 +260,7 @@ async def admin_dashboard(request: Request):
     logger.info(f"관리자 페이지 접근: {request.session.get('admin_username')}")
     return templates.TemplateResponse("admin.html", {"request": request})
 
-@app.get("/admin/new", response_class=HTMLResponse)
-async def admin_dashboard_new(request: Request):
-    """새로운 관리자 대시보드"""
-    # 세션 확인
-    if not request.session.get("admin_logged_in"):
-        logger.warning("인증되지 않은 관리자 페이지 접근")
-        return RedirectResponse(url="/login", status_code=303)
-    
-    logger.info(f"새로운 관리자 페이지 접근: {request.session.get('admin_username')}")
-    return templates.TemplateResponse("admin_new.html", {"request": request})
+
 
 # 테스트용 관리자 세션 생성 (개발 환경에서만)
 @app.get("/admin/test-session")
@@ -1215,28 +1206,36 @@ def get_seo_update_history(db: Session = Depends(get_db)):
 # Rollback to a specific SEO guidelines version
 @app.post("/api/v1/admin/seo-guidelines/rollback/{version}")
 async def rollback_seo_guidelines(version: str, db: Session = Depends(get_db)):
-    """Rollback SEO guidelines to a previous version using stored report data."""
-    from app.models import SEOGuidelineHistory
-    entry = db.query(SEOGuidelineHistory).filter(SEOGuidelineHistory.version == version).first()
-    if not entry:
-        raise HTTPException(status_code=404, detail="Version not found in history")
+    """SEO 가이드라인을 특정 버전으로 롤백"""
     try:
-        # Load the report JSON file and restore guidelines
+        # 이력 조회
+        from app.models import SEOGuidelineHistory
+        history = db.query(SEOGuidelineHistory).filter(SEOGuidelineHistory.version == version).first()
+        if not history:
+            raise HTTPException(status_code=404, detail="Version not found")
+        
+        # 리포트 파일 로드
         import json, os
-        if not entry.report_path or not os.path.exists(entry.report_path):
-            raise FileNotFoundError("Report file not found for rollback")
-        with open(entry.report_path, "r", encoding="utf-8") as f:
+        if not history.report_path or not os.path.exists(history.report_path):
+            raise HTTPException(status_code=404, detail="Report file not found")
+            
+        with open(history.report_path, 'r', encoding='utf-8') as f:
             report = json.load(f)
-        # Assuming the report contains the updated guidelines data
-        # Here we simply replace the seo_guidelines module's data (placeholder implementation)
-        from app.seo_guidelines import SEO_GUIDELINES
-        # In a real implementation, you would apply the changes from the report
-        # For now, we just log the rollback action
-        logger.info(f"Rolling back SEO guidelines to version {version}")
-        # Update version info in the database
-        entry.updated_at = datetime.utcnow()
-        db.commit()
-        return {"status": "rolled_back", "version": version}
+            
+        # 가이드라인 스냅샷 확인
+        if "guidelines_snapshot" not in report:
+            raise HTTPException(status_code=400, detail="Snapshot not available in this version")
+            
+        # 롤백 적용
+        from app.seo_guidelines import save_seo_guidelines
+        if save_seo_guidelines(report["guidelines_snapshot"]):
+            logger.info(f"Rolled back SEO guidelines to version {version}")
+            return {"message": f"Successfully rolled back to version {version}"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save rolled back guidelines")
+            
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Rollback failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

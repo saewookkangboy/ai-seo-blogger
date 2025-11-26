@@ -38,37 +38,65 @@ class SEOGuidelineUpdater:
         """최신 SEO 트렌드 리서치"""
         logger.info("Starting SEO trends research...")
         
-        results = {}
-        for guideline_type, query in self.research_queries.items():
-            try:
-                logger.info(f"Researching {guideline_type}: {query}")
+        try:
+            # 1. 뉴스 수집
+            from app.services.news_collector import NewsCollectorService
+            collector = NewsCollectorService()
+            
+            logger.info("Collecting latest news...")
+            collection_result = collector.collect_all_news()
+            
+            # 2. 뉴스 조회 (최근 7일)
+            all_news = collector.get_all_news()
+            recent_news = []
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            
+            for item in all_news:
+                collected_date = datetime.fromisoformat(item['collected_date'])
+                if collected_date > seven_days_ago:
+                    recent_news.append(item)
+            
+            logger.info(f"Found {len(recent_news)} recent news items for analysis")
+            
+            # 3. AI 분석
+            from app.services.content_generator import analyze_seo_news
+            logger.info("Analyzing news for SEO trends...")
+            analysis_results = await analyze_seo_news(recent_news)
+            
+            # 4. 결과 구성
+            results = {}
+            for guideline_type in self.research_queries.keys():
+                trends = analysis_results.get(guideline_type, [])
                 
-                # 웹 검색 (실제 구현 시 search_web 사용)
-                # search_results = await search_web(query)
+                # 분석 결과가 없으면 시뮬레이션 데이터 사용 (안전장치)
+                if not trends:
+                    logger.warning(f"No trends found for {guideline_type}, using simulation fallback")
+                    trends = await self._simulate_research(guideline_type, "")
                 
-                # 임시: 시뮬레이션
-                findings = await self._simulate_research(guideline_type, query)
+                results[guideline_type] = {
+                    "query": self.research_queries.get(guideline_type, ""),
+                    "findings": trends,
+                    "timestamp": datetime.now().isoformat(),
+                    "sources": [item['url'] for item in recent_news if item['category'] == guideline_type.upper()]
+                }
                 
+            return results
+            
+        except Exception as e:
+            logger.error(f"Research failed: {e}")
+            # 전체 실패 시 시뮬레이션으로 폴백
+            results = {}
+            for guideline_type, query in self.research_queries.items():
                 results[guideline_type] = {
                     "query": query,
-                    "findings": findings,
+                    "findings": await self._simulate_research(guideline_type, query),
                     "timestamp": datetime.now().isoformat(),
-                    "sources": []  # 실제 구현 시 출처 추가
+                    "error": f"Real research failed, used fallback: {str(e)}"
                 }
-                
-                logger.info(f"Research completed for {guideline_type}")
-                
-            except Exception as e:
-                logger.error(f"Research failed for {guideline_type}: {e}")
-                results[guideline_type] = {
-                    "error": str(e),
-                    "timestamp": datetime.now().isoformat()
-                }
-        
-        return results
-    
+            return results
+
     async def _simulate_research(self, guideline_type: str, query: str) -> List[str]:
-        """리서치 시뮬레이션 (테스트용)"""
+        """리서치 시뮬레이션 (Fallback용)"""
         # 실제 구현에서는 search_web 결과를 파싱
         await asyncio.sleep(0.1)  # 비동기 시뮬레이션
         
@@ -214,11 +242,51 @@ class SEOGuidelineUpdater:
             # 3. 리포트 생성
             report = self.generate_update_report(research_results, changes)
             
-            # 4. 로그 저장
+            # 4. 업데이트 적용 (권장 시)
+            if report['recommendation'] == "UPDATE":
+                try:
+                    logger.info("Applying recommended updates to guidelines...")
+                    from app.services.content_generator import update_guideline_content
+                    from app.seo_guidelines import save_seo_guidelines
+                    
+                    # 트렌드 추출
+                    trends = {}
+                    for type_, res in research_results.items():
+                        if "findings" in res:
+                            trends[type_] = res["findings"]
+                    
+                    # 가이드라인 업데이트 생성
+                    new_guidelines = await update_guideline_content(self.current_guidelines, trends)
+                    
+                    # 메타데이터 업데이트
+                    new_guidelines["last_updated"] = datetime.now().isoformat()
+                    # 버전은 날짜 기반으로 업데이트
+                    new_guidelines["version"] = datetime.now().strftime("%Y-%m-%d")
+                    
+                    # 저장
+                    if save_seo_guidelines(new_guidelines):
+                        logger.info("Guidelines updated and saved successfully")
+                        report["status"] = "UPDATED"
+                        report["new_version"] = new_guidelines["version"]
+                        report["guidelines_snapshot"] = new_guidelines
+                    else:
+                        logger.error("Failed to save updated guidelines")
+                        report["status"] = "SAVE_FAILED"
+                        
+                except Exception as e:
+                    logger.error(f"Failed to apply updates: {e}")
+                    report["status"] = "UPDATE_FAILED"
+                    report["update_error"] = str(e)
+            else:
+                report["status"] = "SKIPPED"
+                report["guidelines_snapshot"] = self.current_guidelines
+            
+            # 5. 로그 저장
             self._save_report(report)
             
             logger.info("Weekly update completed successfully")
             logger.info(f"Recommendation: {report['recommendation']}")
+            logger.info(f"Status: {report.get('status', 'UNKNOWN')}")
             
             return report
             

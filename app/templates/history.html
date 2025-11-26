@@ -1,153 +1,174 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>생성 기록 - AI Blog Generator</title>
-    <!-- Bootstrap CSS -->
+
+    <!-- CSS 프레임워크 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="/static/common.css">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Custom Sanity Style -->
+    <link rel="stylesheet" href="/static/sanity_style.css">
+
     <style>
-        body, html { font-family: 'IBM Plex Sans KR', sans-serif !important; }
-        body { background-color: #f8f9fa; }
-        .container { max-width: 960px; }
-        .card { margin-bottom: 1.5rem; }
-        #result-container {
-            border: 1px solid #dee2e6;
-            border-radius: .375rem;
-            padding: 1.5rem;
-            background-color: #fff;
-            min-height: 200px;
-            max-height: 600px;
-            overflow-y: auto;
+        body {
+            background-color: var(--bg-color);
+            padding-top: 80px;
+            /* Navbar height */
+            padding-bottom: 100px;
+            /* Footer height */
         }
-        .keyword-badge {
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        .progress-container {
-            display: none;
-            margin: 1rem 0;
-        }
-        .step-indicator {
+
+        .history-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        .step {
-            flex: 1;
-            text-align: center;
-            padding: 0.5rem;
-            background-color: #e9ecef;
-            border-radius: 0.375rem;
-            margin: 0 0.25rem;
-        }
-        .step.active {
-            background-color: #007bff;
-            color: white;
-        }
-        .step.completed {
-            background-color: #28a745;
-            color: white;
-        }
-        .section-title { margin-top: 2rem; margin-bottom: 1rem; }
-        .post-card {
-            transition: transform 0.2s;
-            margin-bottom: 18px;
-        }
-        .post-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .search-container {
+
+        .search-bar {
             background: white;
-            padding: 1rem;
-            border-radius: 0.375rem;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
-        h5.card-title {
+
+        .post-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--primary-light);
+        }
+
+        .post-title {
+            font-size: 1.25rem;
             font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
-        .meta-description, .card-text .meta-desc, .card-text .original-url, .card-text strong, .card-text span.text-muted {
-            font-weight: 300 !important;
+
+        .post-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
         }
-        .card-text > strong {
-            font-weight: 300 !important;
+
+        .keyword-badge {
+            background-color: var(--bg-color);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
         }
-        #posts-container {
-            background: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            padding: 16px 0 16px 0;
+
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            z-index: 1000;
         }
-        /* #page-nav { display: none !important; } */
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
     </style>
 </head>
+
 <body>
+
     {% include '_navbar.html' %}
-    <div class="container" style="padding-top: 84px; padding-bottom: 120px;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><span style="font-size:1.2em;">⏰</span> 생성된 포스트 기록</h1>
+
+    <div class="container-custom">
+        <div class="history-header">
             <div>
-                <button class="btn btn-outline-primary" onclick="refreshPosts()">
-                    <i class="bi bi-arrow-clockwise"></i> 새로고침
-                </button>
+                <h1 class="section-title mb-1">생성된 포스트 기록</h1>
+                <p class="text-secondary mb-0">AI가 생성한 블로그 포스트의 전체 기록입니다.</p>
             </div>
+            <button class="btn btn-outline-custom" onclick="refreshPosts()">
+                <i class="bi bi-arrow-clockwise me-1"></i> 새로고침
+            </button>
         </div>
 
-        <!-- 검색 기능 -->
-        <div class="search-container">
-            <div class="row">
-                <div class="col-md-6">
+        <!-- 검색 및 필터 -->
+        <div class="search-bar">
+            <div class="row g-3">
+                <div class="col-md-8">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="searchInput" placeholder="제목, 키워드, 내용으로 검색...">
-                        <button class="btn btn-outline-secondary" type="button" onclick="searchPosts()">
-                            <i class="bi bi-search"></i> 검색
-                        </button>
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-secondary"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom border-start-0 ps-0" id="searchInput"
+                            placeholder="제목, 키워드, 내용으로 검색...">
+                        <button class="btn btn-custom" type="button" onclick="searchPosts()">검색</button>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end align-items-center">
-                        <!-- <select class="form-select me-2" id="pageSizeSelect" style="width: auto; display: none;" onchange="changePageSize()">
-                            <option value="5">5개씩</option>
-                            <option value="10">10개씩</option>
-                            <option value="20">20개씩</option>
-                            <option value="50">50개씩</option>
-                        </select> -->
-                        <select class="form-select" id="sortSelect" style="width: auto;" onchange="sortPosts()">
-                            <option value="newest">최신순</option>
-                            <option value="oldest">오래된순</option>
-                            <option value="keywords">키워드 순</option>
-                        </select>
-                    </div>
+                <div class="col-md-4">
+                    <select class="form-select form-select-custom" id="sortSelect" onchange="sortPosts()">
+                        <option value="newest">최신순</option>
+                        <option value="oldest">오래된순</option>
+                        <option value="keywords">키워드 순</option>
+                    </select>
                 </div>
             </div>
         </div>
-
-        <!-- 전체 생성 기록 수 표시 -->
-        <div id="total-count" class="mb-2 text-end text-muted small"></div>
 
         <!-- 포스트 목록 -->
         <div id="posts-container">
-            <!-- 가상 스크롤로 렌더링됩니다 -->
+            <!-- 자바스크립트로 렌더링됨 -->
         </div>
-        <div id="page-nav" class="mt-3"></div>
 
-        <!-- 포스트가 없는 경우 (이 부분은 JS에서 처리하므로 삭제 또는 주석 처리 가능) -->
+        <div id="page-nav" class="mt-4 d-flex justify-content-center"></div>
+
         {% if not posts %}
-        <div class="alert alert-info">생성된 포스트가 없습니다.</div>
+        <div class="text-center py-5">
+            <div class="text-secondary mb-3">
+                <i class="bi bi-journal-x" style="font-size: 3rem;"></i>
+            </div>
+            <h5>생성된 포스트가 없습니다.</h5>
+            <p class="text-secondary">새로운 포스트를 생성해보세요.</p>
+            <a href="/" class="btn btn-custom mt-2">포스트 생성하기</a>
+        </div>
         {% endif %}
 
-        <div id="modals-container">
-            <!-- 자바스크립트로 동적 생성됩니다 -->
-        </div>
+        <div id="modals-container"></div>
     </div>
-    
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2026 AI SEO Blog Generator. Made by <strong>chunghyo</strong>.</span>
+            <span class="mx-2">|</span>
+            <a href="mailto:chunghyo@troe.kr">chunghyo@troe.kr</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const initialPosts = {{ posts_json|safe }};
+        const initialPosts = {{ posts_json| safe }};
         let allPosts = initialPosts;
         let currentPage = 1;
         const pageSize = 5;
@@ -158,7 +179,7 @@
             if (post.keywords) {
                 post.keywords.split(',').forEach(k => {
                     const kw = k.trim();
-                    if (kw) keywordCounts[kw] = (keywordCounts[kw]||0)+1;
+                    if (kw) keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
                 });
             }
         });
@@ -166,14 +187,22 @@
         function renderPagedPosts(page = 1) {
             currentPage = page;
             const container = document.getElementById('posts-container');
+
+            if (allPosts.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
             const startIdx = (page - 1) * pageSize;
             const endIdx = startIdx + pageSize;
             const pagedPosts = allPosts.slice(startIdx, endIdx);
+
             let html = '';
             for (let i = 0; i < pagedPosts.length; i++) {
                 html += renderPostCard(pagedPosts[i]);
             }
             container.innerHTML = html;
+
             document.getElementById('modals-container').innerHTML = pagedPosts.map(post => renderPostModal(post)).join('');
             renderPagination();
         }
@@ -181,25 +210,41 @@
         function renderPagination() {
             const nav = document.getElementById('page-nav');
             const totalPages = Math.ceil(allPosts.length / pageSize);
+
             if (totalPages <= 1) {
                 nav.innerHTML = '';
-                nav.style.display = 'none';
                 return;
             }
-            nav.style.display = 'block';
-            let html = '<nav><ul class="pagination justify-content-center">';
+
+            let html = '<nav><ul class="pagination pagination-custom">';
+
+            // 이전 버튼
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${currentPage - 1});return false;">이전</a>
+                 </li>`;
+
             for (let i = 1; i <= totalPages; i++) {
-                html += `<li class="page-item${i === currentPage ? ' active' : ''}"><a class="page-link" href="#" onclick="goToPage(${i});return false;">${i}</a></li>`;
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="goToPage(${i});return false;">${i}</a>
+                     </li>`;
             }
+
+            // 다음 버튼
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${currentPage + 1});return false;">다음</a>
+                 </li>`;
+
             html += '</ul></nav>';
             nav.innerHTML = html;
         }
 
         function goToPage(page) {
+            if (page < 1 || page > Math.ceil(allPosts.length / pageSize)) return;
             renderPagedPosts(page);
+            window.scrollTo(0, 0);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(window.location.search);
             const q = params.get('keyword');
             if (q) {
@@ -208,70 +253,87 @@
             } else {
                 renderPagedPosts(1);
             }
-            setTimeout(()=>{
+
+            // 툴팁 초기화
+            setTimeout(() => {
                 const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                    new bootstrap.Tooltip(tooltipTriggerEl);
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
                 });
             }, 500);
         });
 
-        // 포스트 카드 HTML 생성
         function renderPostCard(post) {
             const dateStr = post.created_at ? new Date(post.created_at).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
-            const wordCountStr = post.word_count ? `<span class="ms-3"><i class="bi bi-file-text"></i> ${post.word_count}단어</span>` : '';
-            const keywordsStr = post.keywords ? `<div class="mb-2"><strong>키워드:</strong> ${post.keywords.split(',').map(k => {
-                const kw = k.trim();
-                const count = keywordCounts[kw] || 1;
-                return `<span class="badge bg-secondary keyword-badge" data-bs-toggle="tooltip" title="누적 ${count}회">${kw}</span>`;
-            }).join(' ')}</div>` : '';
-            const metaDescStr = post.meta_description ? `<div class="mb-2"><strong>메타 설명:</strong> <span class="meta-description text-muted">${post.meta_description}</span></div>` : '';
-            const urlStr = (post.original_url && post.original_url !== "텍스트 직접 입력")
-                ? `<a href="${post.original_url}" target="_blank" rel="noopener noreferrer">${post.original_url}</a>`
-                : `<span class="original-url text-muted">텍스트 직접 입력</span>`;
-            
-            return `
-            <div class="card post-card mb-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h5 class="card-title">${post.title}</h5>
-                            <p class="card-text text-muted mb-2"><i class="bi bi-calendar3"></i> ${dateStr}${wordCountStr}</p>
-                            ${keywordsStr}${metaDescStr}
-                            <p class="card-text"><strong>원문:</strong> ${urlStr}</p>
-                        </div>
-                        <div class="ms-3 d-flex flex-column align-items-center justify-content-center" style="min-width:90px;">
-                            <button class="btn btn-primary btn-sm mb-2" onclick="viewPost(${post.id})"><i class="bi bi-eye"></i> 보기</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePost(${post.id})"><i class="bi bi-trash"></i> 삭제</button>
-                        </div>
-                    </div>
-                </div>
+            const wordCountStr = post.word_count ? `<span><i class="bi bi-file-text me-1"></i> ${post.word_count}자</span>` : '';
+
+            let keywordsHtml = '';
+            if (post.keywords) {
+                keywordsHtml = `<div class="mb-3">
+                ${post.keywords.split(',').map(k => {
+                    const kw = k.trim();
+                    return `<span class="keyword-badge me-1">${kw}</span>`;
+                }).join('')}
             </div>`;
+            }
+
+            const urlStr = (post.original_url && post.original_url !== "텍스트 직접 입력")
+                ? `<a href="${post.original_url}" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none"><i class="bi bi-link-45deg"></i> ${post.original_url}</a>`
+                : `<span class="text-muted"><i class="bi bi-pencil-square"></i> 텍스트 직접 입력</span>`;
+
+            return `
+        <div class="post-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="post-title">${post.title}</h5>
+                <div class="btn-group">
+                    <button class="btn btn-outline-custom btn-sm" onclick="viewPost(${post.id})">
+                        <i class="bi bi-eye"></i> 보기
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deletePost(${post.id})">
+                        <i class="bi bi-trash"></i> 삭제
+                    </button>
+                </div>
+            </div>
+            
+            <div class="post-meta">
+                <span><i class="bi bi-calendar3 me-1"></i> ${dateStr}</span>
+                ${wordCountStr}
+            </div>
+            
+            ${keywordsHtml}
+            
+            <div class="d-flex align-items-center text-sm text-secondary">
+                <strong class="me-2">원문:</strong> ${urlStr}
+            </div>
+        </div>`;
         }
 
-        // 포스트 모달 HTML 생성
         function renderPostModal(post) {
-            // '```html' 문구가 있으면 제거
             let cleanContent = post.content_html ? post.content_html.replace(/^```html\s*/i, '') : '';
             return `
-            <div class="modal fade" id="postModal${post.id}" tabindex="-1">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">${post.title}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">${cleanContent}</div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="copyPostContent(${post.id})"><i class="bi bi-clipboard"></i> 복사</button>
-                            <button type="button" class="btn btn-primary" onclick="downloadPostContent(${post.id})"><i class="bi bi-download"></i> 다운로드</button>
-                        </div>
+        <div class="modal fade" id="postModal${post.id}" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">${post.title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        ${cleanContent}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" onclick="copyPostContent(${post.id})">
+                            <i class="bi bi-clipboard me-1"></i> 내용 복사
+                        </button>
+                        <button type="button" class="btn btn-custom" onclick="downloadPostContent(${post.id})">
+                            <i class="bi bi-download me-1"></i> 다운로드
+                        </button>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
         }
 
-        // 이벤트 핸들러 및 기타 함수들
         function viewPost(postId) {
             const modal = new bootstrap.Modal(document.getElementById(`postModal${postId}`));
             modal.show();
@@ -351,16 +413,10 @@
             }
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') searchPosts();
         });
     </script>
-    <!-- 고정형 copyright footer -->
-    <footer class="footer position-fixed w-100 text-center bg-dark text-white py-2" style="left:0;bottom:0;z-index:1050;box-shadow:0 -2px 8px rgba(0,0,0,0.08);font-size:0.97rem;letter-spacing:0.01em;">
-        <span style="opacity:0.85;">
-            &copy; made by <strong>chunghyo</strong>, 2026 &nbsp;|&nbsp; email : <a href="mailto:chunghyo@troe.kr" class="text-warning text-decoration-none">chunghyo@troe.kr</a>
-        </span>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
