@@ -195,6 +195,45 @@
                         </div>
                     </div>
 
+                    <!-- Detailed Metrics -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded border">
+                                <h6 class="fw-bold mb-3">상세 분석 지표</h6>
+                                <div class="row text-center">
+                                    <div class="col-md-3 mb-2">
+                                        <small class="text-muted d-block">명사</small>
+                                        <span id="noun-count" class="fw-bold">-</span>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <small class="text-muted d-block">동사</small>
+                                        <span id="verb-count" class="fw-bold">-</span>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <small class="text-muted d-block">형용사</small>
+                                        <span id="adj-count" class="fw-bold">-</span>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <small class="text-muted d-block">최대 문장 길이</small>
+                                        <span id="max-sent-len" class="fw-bold">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Score -->
+                    <div class="mb-4">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0 fw-bold">AI 가이드라인 준수 평가</h6>
+                                <span class="badge bg-primary fs-6" id="eval-score">점수: -</span>
+                            </div>
+                            <p class="text-muted small mb-0" id="eval-reason">평가 대기 중...</p>
+                        </div>
+                    </div>
+
+
                     <!-- Guidelines Summary -->
                     <div id="guidelines-summary" style="display: none;" class="mb-4">
                         <div class="p-3 bg-light rounded border">
@@ -619,6 +658,21 @@
                     keywordCountDiv.textContent = data.keywords ? data.keywords.split(',').length : 0;
                     contentLengthDiv.textContent = actualContentLength.toLocaleString();
                     wordCountDiv.textContent = actualWordCount.toLocaleString();
+
+                    // 상세 지표 업데이트
+                    if (data.metrics) {
+                        document.getElementById('noun-count').textContent = data.metrics.noun_count || '-';
+                        document.getElementById('verb-count').textContent = data.metrics.verb_count || '-';
+                        document.getElementById('adj-count').textContent = data.metrics.adjective_count || '-';
+                        document.getElementById('max-sent-len').textContent = data.metrics.max_sentence_length || '-';
+                    }
+
+                    // 평가 점수 업데이트
+                    if (data.score !== undefined) {
+                        document.getElementById('eval-score').textContent = `점수: ${data.score}`;
+                        document.getElementById('eval-reason').textContent = data.evaluation || '평가 내용 없음';
+                    }
+
 
                     // 가이드라인 분석 및 표시
                     // 현재 생성된 콘텐츠 저장

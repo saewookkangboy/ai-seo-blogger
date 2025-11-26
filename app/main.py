@@ -160,7 +160,7 @@ async def get_scaling_info():
     }
 
 @app.get("/health/legacy")
-async def health_check():
+async def health_check_legacy():
     """헬스 체크 엔드포인트"""
     try:
         # 데이터베이스 연결 확인

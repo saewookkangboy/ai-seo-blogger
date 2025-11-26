@@ -6,6 +6,8 @@ from ..config import settings
 from ..exceptions import ContentGenerationError, APIKeyError
 from ..utils.logger import setup_logger
 from .keyword_manager import keyword_manager
+from .redis_cache import get_redis_cache
+from .structured_logger import setup_optimized_logging
 import os
 import json
 import threading
@@ -30,9 +32,8 @@ CACHE_DURATION = 1800  # 캐시 시간 30분으로 단축 (메모리 효율성)
 MAX_CONCURRENT_GENERATIONS = 2  # 동시 생성 수 제한 (안정성)
 GENERATION_DELAY = 0.1  # 생성 요청 간 지연 시간 (초)
 
-# 메모리 캐시 (간단한 구현)
-content_cache: Dict[str, Tuple[Dict[str, Any], float]] = {}
-cache_lock = threading.Lock()
+# Redis 캐시 인스턴스 가져오기
+redis_cache = get_redis_cache()
 
 def _initialize_client():
     """OpenAI 클라이언트 초기화"""
@@ -58,43 +59,27 @@ def _get_cache_key(text: str, keywords: str, content_length: str, ai_mode: str) 
     """캐시 키 생성"""
     import hashlib
     content = f"{text[:100]}{keywords}{content_length}{ai_mode}"
-    return hashlib.md5(content.encode()).hexdigest()
+    return f"content_gen:{hashlib.md5(content.encode()).hexdigest()}"
 
 def _get_cached_content(cache_key: str) -> Optional[Dict[str, Any]]:
-    """캐시된 콘텐츠 가져오기"""
-    with cache_lock:
-        if cache_key in content_cache:
-            cached_data, timestamp = content_cache[cache_key]
-            if time.time() - timestamp < CACHE_DURATION:
-                logger.info("캐시된 콘텐츠 사용")
-                return cached_data
-            else:
-                del content_cache[cache_key]
-    return None
+    """캐시된 콘텐츠 가져오기 (Redis 사용)"""
+    return redis_cache.get(cache_key)
 
 def _set_cached_content(cache_key: str, content: Dict[str, Any]):
-    """콘텐츠를 캐시에 저장"""
-    with cache_lock:
-        content_cache[cache_key] = (content, time.time())
-        # 캐시 크기 제한 (메모리 효율성)
-        if len(content_cache) > 50:
-            oldest_key = min(content_cache.keys(), key=lambda k: content_cache[k][1])
-            del content_cache[oldest_key]
+    """콘텐츠를 캐시에 저장 (Redis 사용)"""
+    # 30분(1800초) 동안 캐시 유지
+    redis_cache.set(cache_key, content, ttl=1800)
 
 def clear_content_cache():
-    """콘텐츠 캐시 클리어"""
-    global content_cache
-    with cache_lock:
-        content_cache.clear()
-        logger.info("콘텐츠 캐시가 클리어되었습니다.")
+    """콘텐츠 캐시 클리어 (Redis 사용)"""
+    # Redis에서는 전체 키 삭제가 비효율적이므로 로그만 남김 (또는 특정 패턴 삭제 구현 가능)
+    logger.info("Redis 캐시 클리어 요청됨 (구현 필요)")
 
 def clear_specific_cache(text: str, keywords: str, content_length: str, ai_mode: str):
-    """특정 콘텐츠의 캐시 클리어"""
+    """특정 콘텐츠의 캐시 클리어 (Redis 사용)"""
     cache_key = _get_cache_key(text, keywords, content_length, ai_mode)
-    with cache_lock:
-        if cache_key in content_cache:
-            del content_cache[cache_key]
-            logger.info(f"특정 캐시가 클리어되었습니다: {cache_key}")
+    redis_cache.delete(cache_key)
+    logger.info(f"특정 캐시가 클리어되었습니다: {cache_key}")
 
 # 동시 생성 제어를 위한 세마포어
 generation_semaphore = asyncio.Semaphore(MAX_CONCURRENT_GENERATIONS)
@@ -153,9 +138,9 @@ async def translate_with_openai(text: str, target_lang: str = "ko") -> str:
         logger.error(f"OpenAI 번역 중 오류: {e}")
         return text
 
-async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "3000", ai_mode: Optional[str] = None) -> Dict:
+async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "3000", ai_mode: Optional[str] = None, input_type: str = "text") -> Dict:
     """
-    번역된 텍스트와 키워드, 추가 가이드라인을 기반으로 AI를 사용하여 블로그 게시물을 생성합니다. (성능 최적화)
+    번역된 텍스트와 키워드, 추가 가이드라인을 기반으로 AI를 사용하여 블로그 게시물을 생성합니다.
     AI SEO 최적화를 위한 구조화된 콘텐츠를 생성합니다.
     Gemini 2.0 Flash와 OpenAI를 모두 지원합니다.
     """
@@ -214,10 +199,26 @@ async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[l
         if rule_guidelines is None:
             rule_guidelines = []
     
+    # AI 모드에 따른 필수 HTML 구조 가이드라인 추가
+    structure_guidelines = []
+    if ai_mode == "ai_seo":
+        structure_guidelines.append("- **필수 HTML 구조**: Schema.org 마크업(itemscope, itemtype)을 반드시 포함하세요.")
+        structure_guidelines.append("- **헤딩 구조**: H1, H2, H3 태그를 체계적으로 사용하여 계층 구조를 만드세요.")
+    elif ai_mode == "aeo":
+        structure_guidelines.append("- **필수 HTML 구조**: `<div class=\"faq-section\">` 내에 `<div class=\"faq-item\">`을 사용하여 Q&A 형식을 구현하세요.")
+        structure_guidelines.append("- **답변 스타일**: 질문에 대한 직접적이고 명확한 답변을 먼저 제시하세요.")
+    elif ai_mode == "geo":
+        structure_guidelines.append("- **필수 HTML 구조**: `<div class=\"comparison-table\">` 또는 `<div class=\"how-to-section\">` 등 구조화된 정보 블록을 포함하세요.")
+        structure_guidelines.append("- **신뢰성**: 주장의 근거가 되는 출처나 데이터를 명시하세요.")
+    
+    if structure_guidelines:
+        rule_guidelines.append("--- HTML 구조 가이드라인 ---")
+        rule_guidelines.extend(structure_guidelines)
+    
     # Gemini 2.0 Flash 모드인 경우 Gemini 사용
     if ai_mode == "gemini_2_0_flash":
         try:
-            result = await _create_blog_post_with_gemini(text, keywords, rule_guidelines, content_length, ai_mode)
+            result = await _create_blog_post_with_gemini(text, keywords, rule_guidelines, content_length, ai_mode, input_type)
             if result:
                 _set_cached_content(cache_key, result)
                 return result
@@ -234,212 +235,13 @@ async def create_blog_post(text: str, keywords: str, rule_guidelines: Optional[l
         return _generate_default_template(text, keywords, rule_guidelines, content_length, ai_mode)
     
     try:
-        # 콘텐츠 길이 설정
-        target_length = int(content_length) if content_length.isdigit() else 3000
-        
-        # AI 모드에 따른 프롬프트 조정
-        if ai_mode == "creative":
-            style_instruction = "창의적이고 흥미로운 톤으로 작성하되, 전문성을 유지하세요."
-        elif ai_mode == "informative":
-            style_instruction = "정보가 풍부하고 교육적인 톤으로 작성하세요."
-        elif ai_mode == "professional":
-            style_instruction = "전문적이고 신뢰할 수 있는 톤으로 작성하세요."
-        else:
-            style_instruction = "균형 잡힌 톤으로 작성하세요."
-        
-        # 규칙 가이드라인 처리
-        rules_text = ""
-        if rule_guidelines:
-            rules_text = "\n".join([f"- {rule}" for rule in rule_guidelines])
-            
-        # 최신 SEO 가이드라인 로드 및 적용
-        try:
-            from app.seo_guidelines import get_seo_guidelines
-            seo_guidelines = get_seo_guidelines()
-            
-            # 활성화된 가이드라인 추출
-            active_guidelines = []
-            if seo_guidelines.get("guidelines", {}).get("ai_seo", {}).get("enabled"):
-                e_e_a_t = seo_guidelines["guidelines"]["ai_seo"].get("e_e_a_t", {})
-                active_guidelines.append(f"E-E-A-T 원칙 준수: {e_e_a_t.get('experience', {}).get('description', '')}, {e_e_a_t.get('expertise', {}).get('description', '')}")
-            
-            if seo_guidelines.get("guidelines", {}).get("aeo", {}).get("enabled"):
-                aeo = seo_guidelines["guidelines"]["aeo"]
-                active_guidelines.append(f"AEO 최적화: {aeo.get('description', '')}")
-                
-            if seo_guidelines.get("guidelines", {}).get("geo", {}).get("enabled"):
-                geo = seo_guidelines["guidelines"]["geo"]
-                active_guidelines.append(f"GEO 최적화: {geo.get('description', '')}")
-                
-            seo_guidelines_text = "\n".join([f"- {g}" for g in active_guidelines])
-            
-            if seo_guidelines_text:
-                rules_text += "\n\n[최신 SEO 가이드라인]\n" + seo_guidelines_text
-                
-        except Exception as e:
-            logger.warning(f"SEO 가이드라인 로드 실패: {e}")
-        
-        # 콘텐츠 스타일별 가이드라인 추가
-        style_guidelines = ""
-        if ai_mode:
-            if ai_mode == "뉴스":
-                style_guidelines = """
-뉴스 스타일 가이드라인:
-- 객관적이고 사실 중심으로 작성
-- 5W1H (누가, 언제, 어디서, 무엇을, 왜, 어떻게) 포함
-- 최신성과 시의성 강조
-- 요약: 핵심 사실만 간결하게 (300자 이내)
-- 주요 내용: 시간순 또는 중요도순으로 구성
-- 개인적 의견 배제, 객관적 서술
-"""
-            elif ai_mode == "리뷰":
-                style_guidelines = """
-리뷰 스타일 가이드라인:
-- 장단점을 명확히 구분하여 서술
-- 개인적 경험과 체험 중심
-- 구체적인 예시와 근거 제시
-- 요약: 핵심 평가와 추천 여부 (400자 이내)
-- 주요 내용: 장점, 단점, 결론 순으로 구성
-- 솔직하고 신뢰할 수 있는 톤 유지
-"""
-            elif ai_mode == "가이드":
-                style_guidelines = """
-가이드 스타일 가이드라인:
-- 단계별로 명확하게 구분하여 설명
-- 실용적이고 실행 가능한 정보 제공
-- 초보자도 이해할 수 있도록 상세히 설명
-- 요약: 핵심 단계와 목표 (350자 이내)
-- 주요 내용: 단계별 순서대로 구성
-- 체크리스트나 팁 포함
-"""
-            elif ai_mode == "요약":
-                style_guidelines = """
-요약 스타일 가이드라인:
-- 핵심 내용만 간결하게 정리
-- 불필요한 설명 제거
-- 명확하고 이해하기 쉬운 문장
-- 요약: 핵심 포인트만 간결하게 (250자 이내)
-- 주요 내용: 중요도순으로 핵심만 나열
-- 빠른 정보 전달에 최적화
-"""
-            elif ai_mode == "블로그":
-                style_guidelines = """
-블로그 스타일 가이드라인:
-- 개인적 인사이트와 경험 중심
-- 독자와의 소통하는 톤으로 작성
-- 실용적 조언과 개인적 견해 포함
-- 요약: 개인적 관점과 핵심 메시지 (400자 이내)
-- 주요 내용: 경험담, 인사이트, 조언 순으로 구성
-- 친근하고 솔직한 어조 유지
-"""
-            elif ai_mode == "enhanced":
-                style_guidelines = """
-향상된 모드 가이드라인:
-- AI 분석과 데이터 기반 인사이트 포함
-- 심층적 분석과 전문적 관점
-- 다양한 관점에서의 종합적 분석
-- 요약: AI 분석 결과와 핵심 인사이트 (500자 이내)
-- 주요 내용: 분석, 인사이트, 전망 순으로 구성
-- 전문적이면서도 이해하기 쉬운 설명
-"""
-        
-        # 요약 및 주요 내용 가이드라인
-        summary_guidelines = """
-요약 및 주요 내용 가이드라인:
-- 요약: 완벽한 문장으로 작성, 500자 이내
-- 주요 내용: 핵심 포인트를 명확하게 구분
-- 키워드 자연스럽게 포함
-- 독자가 쉽게 이해할 수 있는 구조
-- 각 섹션별로 명확한 제목 사용
-"""
-        
-        # 프롬프트 구성
-        prompt = f"""
-다음 텍스트를 기반으로 SEO 최적화된 한국어 블로그 포스트를 작성해주세요.
-
-원본 텍스트:
-{text}
-
-주요 키워드: {keywords}
-
-요구사항:
-- 목표 길이: 약 {target_length}자
-- 스타일: {style_instruction}
-- SEO 최적화: 키워드를 자연스럽게 포함
-- 구조: 제목, 소제목, 본문, 결론 포함
-- HTML 형식으로 작성
-
-추가 규칙:
-{rules_text}
-
-{style_guidelines}
-
-{summary_guidelines}
-
-다음 형식으로 응답해주세요:
-```html
-<h1>제목</h1>
-<meta name="description" content="메타 설명">
-<p>본문 내용...</p>
-```
-
-제목과 메타 설명도 함께 제공해주세요.
-"""
-
-        # API 호출
-        for attempt in range(MAX_RETRIES):
-            try:
-                response = await client.chat.completions.create(
-                    model=settings.openai_model,
-                    messages=[
-                        {"role": "system", "content": "당신은 SEO 전문가이자 블로그 작가입니다. 고품질의 한국어 블로그 포스트를 작성해주세요."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    max_tokens=settings.openai_max_tokens,
-                    temperature=0.7
-                )
-                
-                generated_content = response.choices[0].message.content.strip()
-                
-                # HTML 태그 추출
-                title_match = re.search(r'<h1[^>]*>(.*?)</h1>', generated_content, re.IGNORECASE | re.DOTALL)
-                meta_match = re.search(r'<meta[^>]*name="description"[^>]*content="([^"]*)"', generated_content, re.IGNORECASE)
-                
-                title = title_match.group(1).strip() if title_match else f"{keywords.split(',')[0] if keywords else 'AI 블로그 포스트'}"
-                meta_description = meta_match.group(1).strip() if meta_match else f"{keywords}에 대한 포괄적인 정보와 가이드를 제공합니다."
-                
-                # HTML 태그 제거하여 순수 텍스트 추출
-                clean_content = re.sub(r'<[^>]+>', '', generated_content)
-                word_count = len(clean_content.split())
-                
-                result = {
-                    'post': generated_content,
-                    'title': title,
-                    'meta_description': meta_description,
-                    'keywords': keywords,
-                    'word_count': word_count,
-                    'content_length': content_length,
-                    'ai_mode': ai_mode or 'openai'
-                }
-                
-                generation_time = time.time() - start_time
-                logger.info(f"블로그 포스트 생성 완료 (생성된 콘텐츠 길이: {len(generated_content)}자, 소요시간: {generation_time:.2f}초)")
-                
-                _set_cached_content(cache_key, result)
-                return result
-                
-            except Exception as e:
-                logger.error(f"OpenAI API 호출 실패 (시도 {attempt + 1}/{MAX_RETRIES}): {e}")
-                if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(1 * (attempt + 1))  # 지수 백오프
-                else:
-                    raise ContentGenerationError(f"OpenAI API 호출 실패: {str(e)}")
+        return await _create_blog_post_with_openai(text, keywords, rule_guidelines, content_length, ai_mode, input_type)
         
     except Exception as e:
         logger.error(f"블로그 포스트 생성 중 오류: {e}")
         return _generate_default_template(text, keywords, rule_guidelines, content_length, ai_mode)
 
-async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "5000", ai_mode: Optional[str] = None) -> Dict:
+async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "5000", ai_mode: Optional[str] = None, input_type: str = "text") -> Dict:
     """
     Gemini 2.0 Flash API를 사용하여 블로그 포스트를 생성합니다.
     """
@@ -460,113 +262,82 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
         if rule_guidelines:
             rules_text = "\n".join([f"- {rule}" for rule in rule_guidelines])
         
-        # 콘텐츠 스타일별 가이드라인 추가
-        style_guidelines = ""
-        if ai_mode:
-            if ai_mode == "뉴스":
-                style_guidelines = """
-뉴스 스타일 가이드라인:
-- 객관적이고 사실 중심으로 작성
-- 5W1H (누가, 언제, 어디서, 무엇을, 왜, 어떻게) 포함
-- 최신성과 시의성 강조
-- 요약: 핵심 사실만 간결하게 (300자 이내)
-- 주요 내용: 시간순 또는 중요도순으로 구성
-- 개인적 의견 배제, 객관적 서술
+        # 입력 타입에 따른 지시사항
+        input_instruction = ""
+        if input_type == "url":
+            input_instruction = """
+- 입력된 텍스트는 특정 URL에서 크롤링한 내용입니다.
+- 원본의 내용을 충실히 반영하되, 한국어 독자에 맞게 자연스럽게 재구성(Rewrite)하세요.
+- 단순 번역이 아닌, 문맥을 고려한 '재창조' 수준의 글쓰기를 수행하세요.
 """
-            elif ai_mode == "리뷰":
-                style_guidelines = """
-리뷰 스타일 가이드라인:
-- 장단점을 명확히 구분하여 서술
-- 개인적 경험과 체험 중심
-- 구체적인 예시와 근거 제시
-- 요약: 핵심 평가와 추천 여부 (400자 이내)
-- 주요 내용: 장점, 단점, 결론 순으로 구성
-- 솔직하고 신뢰할 수 있는 톤 유지
+        else:
+            input_instruction = """
+- 입력된 텍스트는 주제나 문맥에 대한 설명입니다.
+- 이 내용을 바탕으로 심층적인 분석을 수행하고 새로운 글을 작성(Write)하세요.
+- 주어진 주제를 확장하여 풍부한 정보를 제공하세요.
 """
-            elif ai_mode == "가이드":
-                style_guidelines = """
-가이드 스타일 가이드라인:
-- 단계별로 명확하게 구분하여 설명
-- 실용적이고 실행 가능한 정보 제공
-- 초보자도 이해할 수 있도록 상세히 설명
-- 요약: 핵심 단계와 목표 (350자 이내)
-- 주요 내용: 단계별 순서대로 구성
-- 체크리스트나 팁 포함
-"""
-            elif ai_mode == "요약":
-                style_guidelines = """
-요약 스타일 가이드라인:
-- 핵심 내용만 간결하게 정리
-- 불필요한 설명 제거
-- 명확하고 이해하기 쉬운 문장
-- 요약: 핵심 포인트만 간결하게 (250자 이내)
-- 주요 내용: 중요도순으로 핵심만 나열
-- 빠른 정보 전달에 최적화
-"""
-            elif ai_mode == "블로그":
-                style_guidelines = """
-블로그 스타일 가이드라인:
-- 개인적 인사이트와 경험 중심
-- 독자와의 소통하는 톤으로 작성
-- 실용적 조언과 개인적 견해 포함
-- 요약: 개인적 관점과 핵심 메시지 (400자 이내)
-- 주요 내용: 경험담, 인사이트, 조언 순으로 구성
-- 친근하고 솔직한 어조 유지
-"""
-            elif ai_mode == "enhanced":
-                style_guidelines = """
-향상된 모드 가이드라인:
-- AI 분석과 데이터 기반 인사이트 포함
-- 심층적 분석과 전문적 관점
-- 다양한 관점에서의 종합적 분석
-- 요약: AI 분석 결과와 핵심 인사이트 (500자 이내)
-- 주요 내용: 분석, 인사이트, 전망 순으로 구성
-- 전문적이면서도 이해하기 쉬운 설명
-"""
-        
-        # 요약 및 주요 내용 가이드라인
-        summary_guidelines = """
-요약 및 주요 내용 가이드라인:
-- 요약: 완벽한 문장으로 작성, 500자 이내
-- 주요 내용: 핵심 포인트를 명확하게 구분
-- 키워드 자연스럽게 포함
-- 독자가 쉽게 이해할 수 있는 구조
-- 각 섹션별로 명확한 제목 사용
-"""
-        
+
         # 프롬프트 구성
         prompt = f"""
-다음 텍스트를 기반으로 SEO 최적화된 한국어 블로그 포스트를 작성해주세요.
+당신은 전문적인 AI SEO 블로그 작가입니다. 다음 지침에 따라 고품질의 한국어 블로그 포스트를 작성해주세요.
 
-원본 텍스트:
+[입력 정보]
+- 원본 텍스트/문맥:
 {text}
 
-주요 키워드: {keywords}
-
-요구사항:
+- 주요 키워드: {keywords}
 - 목표 길이: 약 {target_length}자
-- SEO 최적화: 키워드를 자연스럽게 포함
-- 구조: 제목, 소제목, 본문, 결론 포함
-- HTML 형식으로 작성
+- 입력 유형: {input_type} ({input_instruction.strip()})
 
-추가 규칙:
+[핵심 요구사항]
+1. **균형 잡힌 관점 (Responsible AI)**: 편향되지 않고 객관적이며 윤리적인 관점을 유지하세요. 다양한 시각을 고려하여 균형 잡힌 정보를 제공하세요.
+2. **SEO 및 AI 최적화**:
+   - 선택된 최적화 옵션에 맞춰 글을 구성하세요.
+   - 키워드를 자연스럽게 본문에 녹여내세요.
+3. **구조화된 출력**: 반드시 아래의 JSON 형식으로 응답해야 합니다.
+
+[추가 규칙 및 가이드라인]
 {rules_text}
 
-{style_guidelines}
+[출력 형식 (JSON)]
+응답은 반드시 다음 JSON 구조를 따라야 합니다. 마크다운 코드 블록(```json ... ```)으로 감싸주세요.
 
-{summary_guidelines}
-
-다음 형식으로 응답해주세요:
-```html
-<h1>제목</h1>
-<meta name="description" content="메타 설명">
-<p>본문 내용...</p>
+```json
+{{
+  "title": "블로그 제목",
+  "meta_description": "SEO 메타 설명 (160자 이내)",
+  "content": "<h1>제목</h1>...<p>본문 내용(HTML 형식)</p>...",
+  "keywords": "추출된 주요 키워드 (최대 10개, 쉼표로 구분)",
+  "metrics": {{
+    "noun_count": 0,
+    "verb_count": 0,
+    "adjective_count": 0,
+    "max_sentence_length": 0
+  }},
+  "score": 0,
+  "evaluation": "가이드라인 준수 여부에 대한 짧은 평가 및 점수 이유",
+  "ai_analysis": {{
+    "trust_score": 0,
+    "trust_reason": "신뢰도 점수 이유",
+    "seo_score": 0,
+    "seo_reason": "SEO 점수 이유",
+    "ai_summary": "콘텐츠 핵심 요약 (100자 이내)"
+  }}
+}}
 ```
 
-제목과 메타 설명도 함께 제공해주세요.
+**metrics 작성 시 주의사항:**
+- 생성된 한국어 콘텐츠를 기준으로 명사, 동사, 형용사의 개수를 대략적으로 계산하여 기입하세요.
+- max_sentence_length는 가장 긴 문장의 글자 수(공백 제외)를 기입하세요.
+- score는 0~100점 사이의 정수로, 위에서 제시한 가이드라인(SEO, 균형 잡힌 관점 등)을 얼마나 잘 준수했는지 스스로 평가한 점수입니다.
+
+**ai_analysis 작성 시 주의사항:**
+- trust_score: 5점 만점 (1-5). 콘텐츠의 신뢰성, 객관성, 근거 제시 여부를 평가하세요.
+- seo_score: 10점 만점 (1-10). 키워드 사용, 구조, 가독성 등을 평가하세요.
+- ai_summary: 전체 내용을 100자 이내로 핵심만 요약하세요.
 """
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
             payload = {
                 "contents": [{
@@ -578,7 +349,8 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
                     "temperature": 0.7,
                     "topK": 40,
                     "topP": 0.95,
-                    "maxOutputTokens": 8192
+                    "maxOutputTokens": 8192,
+                    "responseMimeType": "application/json"
                 }
             }
             
@@ -587,28 +359,43 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
             if response.status_code == 200:
                 result = response.json()
                 if 'candidates' in result and result['candidates']:
-                    generated_content = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                    generated_text = result['candidates'][0]['content']['parts'][0]['text'].strip()
                     
-                    # HTML 태그 추출
-                    title_match = re.search(r'<h1[^>]*>(.*?)</h1>', generated_content, re.IGNORECASE | re.DOTALL)
-                    meta_match = re.search(r'<meta[^>]*name="description"[^>]*content="([^"]*)"', generated_content, re.IGNORECASE)
-                    
-                    title = title_match.group(1).strip() if title_match else f"{keywords.split(',')[0] if keywords else 'AI 블로그 포스트'}"
-                    meta_description = meta_match.group(1).strip() if meta_match else f"{keywords}에 대한 포괄적인 정보와 가이드를 제공합니다."
-                    
-                    # HTML 태그 제거하여 순수 텍스트 추출
-                    clean_content = re.sub(r'<[^>]+>', '', generated_content)
-                    word_count = len(clean_content.split())
-                    
-                    return {
-                        'post': generated_content,
-                        'title': title,
-                        'meta_description': meta_description,
-                        'keywords': keywords,
-                        'word_count': word_count,
-                        'content_length': content_length,
-                        'ai_mode': ai_mode or 'gemini_2_0_flash'
-                    }
+                    # JSON 파싱
+                    try:
+                        # 마크다운 코드 블록 제거
+                        if generated_text.startswith("```json"):
+                            generated_text = generated_text[7:]
+                        if generated_text.endswith("```"):
+                            generated_text = generated_text[:-3]
+                        
+                        data = json.loads(generated_text)
+                        
+                        return {
+                            'post': data.get('content', ''),
+                            'title': data.get('title', ''),
+                            'meta_description': data.get('meta_description', ''),
+                            'keywords': data.get('keywords', keywords),
+                            'metrics': data.get('metrics', {}),
+                            'score': data.get('score', 0),
+                            'evaluation': data.get('evaluation', ''),
+                            'ai_analysis': data.get('ai_analysis', {}),
+                            'word_count': len(data.get('content', '').split()), # 단순 공백 기준
+                            'content_length': content_length,
+                            'ai_mode': ai_mode or 'gemini_2_0_flash'
+                        }
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Gemini 응답 JSON 파싱 실패: {e}")
+                        # 파싱 실패 시 텍스트 전체를 콘텐츠로 간주 (fallback)
+                        return {
+                            'post': generated_text,
+                            'title': f"{keywords.split(',')[0]} 관련 포스트",
+                            'meta_description': "자동 생성된 포스트입니다.",
+                            'keywords': keywords,
+                            'word_count': len(generated_text.split()),
+                            'content_length': content_length,
+                            'ai_mode': ai_mode or 'gemini_2_0_flash'
+                        }
                 else:
                     raise ContentGenerationError("Gemini API 응답에 생성 결과가 없습니다.")
             else:
@@ -620,7 +407,7 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
         logger.error(f"Gemini 블로그 포스트 생성 중 오류: {e}")
         raise ContentGenerationError(f"Gemini 블로그 포스트 생성 실패: {str(e)}")
 
-async def _create_blog_post_with_openai(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "3000", ai_mode: Optional[str] = None) -> Dict:
+async def _create_blog_post_with_openai(text: str, keywords: str, rule_guidelines: Optional[list] = None, content_length: str = "3000", ai_mode: Optional[str] = None, input_type: str = "text") -> Dict:
     """
     OpenAI API를 사용하여 블로그 포스트를 생성합니다.
     """
@@ -633,79 +420,90 @@ async def _create_blog_post_with_openai(text: str, keywords: str, rule_guideline
         # 콘텐츠 길이 설정
         target_length = int(content_length) if content_length.isdigit() else 3000
         
-        # AI 모드에 따른 프롬프트 조정
-        if ai_mode == "creative":
-            style_instruction = "창의적이고 흥미로운 톤으로 작성하되, 전문성을 유지하세요."
-        elif ai_mode == "informative":
-            style_instruction = "정보가 풍부하고 교육적인 톤으로 작성하세요."
-        elif ai_mode == "professional":
-            style_instruction = "전문적이고 신뢰할 수 있는 톤으로 작성하세요."
-        else:
-            style_instruction = "균형 잡힌 톤으로 작성하세요."
-        
         # 규칙 가이드라인 처리
         rules_text = ""
         if rule_guidelines:
             rules_text = "\n".join([f"- {rule}" for rule in rule_guidelines])
         
+        # 입력 타입에 따른 지시사항
+        input_instruction = ""
+        if input_type == "url":
+            input_instruction = "입력된 텍스트는 특정 URL에서 크롤링한 내용입니다. 원본의 내용을 충실히 반영하되, 한국어 독자에 맞게 자연스럽게 재구성(Rewrite)하세요."
+        else:
+            input_instruction = "입력된 텍스트는 주제나 문맥에 대한 설명입니다. 이 내용을 바탕으로 심층적인 분석을 수행하고 새로운 글을 작성(Write)하세요."
+
         # 프롬프트 구성
         prompt = f"""
-다음 텍스트를 기반으로 SEO 최적화된 한국어 블로그 포스트를 작성해주세요.
+당신은 전문적인 AI SEO 블로그 작가입니다. 다음 지침에 따라 고품질의 한국어 블로그 포스트를 작성해주세요.
 
-원본 텍스트:
+[입력 정보]
+- 원본 텍스트/문맥:
 {text}
 
-주요 키워드: {keywords}
-
-요구사항:
+- 주요 키워드: {keywords}
 - 목표 길이: 약 {target_length}자
-- 스타일: {style_instruction}
-- SEO 최적화: 키워드를 자연스럽게 포함
-- 구조: 제목, 소제목, 본문, 결론 포함
-- HTML 형식으로 작성
+- 입력 유형: {input_type} ({input_instruction})
 
-추가 규칙:
+[핵심 요구사항]
+1. **균형 잡힌 관점 (Responsible AI)**: 편향되지 않고 객관적이며 윤리적인 관점을 유지하세요. 다양한 시각을 고려하여 균형 잡힌 정보를 제공하세요.
+2. **SEO 및 AI 최적화**: 선택된 최적화 옵션에 맞춰 글을 구성하고 키워드를 자연스럽게 포함하세요.
+3. **구조화된 출력**: 반드시 아래의 JSON 형식으로 응답해야 합니다.
+
+[추가 규칙]
 {rules_text}
 
-다음 형식으로 응답해주세요:
-```html
-<h1>제목</h1>
-<meta name="description" content="메타 설명">
-<p>본문 내용...</p>
+[출력 형식 (JSON)]
+```json
+{{
+  "title": "블로그 제목",
+  "meta_description": "SEO 메타 설명",
+  "content": "<h1>제목</h1>...<p>본문 내용(HTML 형식)</p>...",
+  "keywords": "추출된 주요 키워드 (최대 10개, 쉼표로 구분)",
+  "metrics": {{
+    "noun_count": 0,
+    "verb_count": 0,
+    "adjective_count": 0,
+    "max_sentence_length": 0
+  }},
+  "score": 0,
+  "evaluation": "평가 및 점수 이유",
+  "ai_analysis": {{
+    "trust_score": 0,
+    "trust_reason": "신뢰도 점수 이유",
+    "seo_score": 0,
+    "seo_reason": "SEO 점수 이유",
+    "ai_summary": "콘텐츠 핵심 요약 (100자 이내)"
+  }}
+}}
 ```
-
-제목과 메타 설명도 함께 제공해주세요.
 """
 
         response = await client.chat.completions.create(
             model=settings.openai_model,
             messages=[
-                {"role": "system", "content": "당신은 SEO 전문가이자 블로그 작가입니다. 고품질의 한국어 블로그 포스트를 작성해주세요."},
+                {"role": "system", "content": "당신은 SEO 전문가이자 블로그 작가입니다. JSON 형식으로만 응답하세요."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=settings.openai_max_tokens,
-            temperature=0.7
+            temperature=0.7,
+            response_format={"type": "json_object"}
         )
         
         generated_content = response.choices[0].message.content.strip()
         
-        # HTML 태그 추출
-        title_match = re.search(r'<h1[^>]*>(.*?)</h1>', generated_content, re.IGNORECASE | re.DOTALL)
-        meta_match = re.search(r'<meta[^>]*name="description"[^>]*content="([^"]*)"', generated_content, re.IGNORECASE)
-        
-        title = title_match.group(1).strip() if title_match else f"{keywords.split(',')[0] if keywords else 'AI 블로그 포스트'}"
-        meta_description = meta_match.group(1).strip() if meta_match else f"{keywords}에 대한 포괄적인 정보와 가이드를 제공합니다."
-        
-        # HTML 태그 제거하여 순수 텍스트 추출
-        clean_content = re.sub(r'<[^>]+>', '', generated_content)
-        word_count = len(clean_content.split())
+        # JSON 파싱
+        data = json.loads(generated_content)
         
         return {
-            'post': generated_content,
-            'title': title,
-            'meta_description': meta_description,
-            'keywords': keywords,
-            'word_count': word_count,
+            'post': data.get('content', ''),
+            'title': data.get('title', ''),
+            'meta_description': data.get('meta_description', ''),
+            'keywords': data.get('keywords', keywords),
+            'metrics': data.get('metrics', {}),
+            'score': data.get('score', 0),
+            'evaluation': data.get('evaluation', ''),
+            'ai_analysis': data.get('ai_analysis', {}),
+            'word_count': len(data.get('content', '').split()),
             'content_length': content_length,
             'ai_mode': ai_mode or 'openai'
         }

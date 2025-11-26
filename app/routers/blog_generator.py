@@ -498,6 +498,7 @@ async def generate_post_endpoint(req: PostRequest, db: Session = Depends(get_db)
         if req.url:
             logger.info(f"URL 입력으로 포스트 생성 시작: {req.url}")
             db_source_url = req.url
+            input_type = "url"
             try:
                 original_text = await get_text_from_url(req.url)
                 if not original_text or not original_text.strip():
@@ -514,6 +515,7 @@ async def generate_post_endpoint(req: PostRequest, db: Session = Depends(get_db)
         elif req.text:
             logger.info("텍스트 입력으로 포스트 생성 시작")
             db_source_url = "텍스트 직접 입력"
+            input_type = "text"
             original_text = req.text
             if not original_text or not original_text.strip():
                 raise HTTPException(
@@ -594,9 +596,16 @@ async def generate_post_endpoint(req: PostRequest, db: Session = Depends(get_db)
                 extracted_keywords, 
                 rule_guidelines=rule_guidelines,
                 content_length=content_length,
-                ai_mode=selected_mode
+                ai_mode=selected_mode,
+                input_type=input_type
             )
             generated_content = generation_result.get('post', generation_result.get('content', ''))
+            
+            # 추가 메트릭 및 점수 추출
+            metrics = generation_result.get('metrics', {})
+            score = generation_result.get('score', 0)
+            evaluation = generation_result.get('evaluation', '')
+            ai_analysis = generation_result.get('ai_analysis', {})
             generation_time = time.time() - start_time
             logger.info(f"블로그 포스트 생성 완료 (생성된 콘텐츠 길이: {len(generated_content)}자, 소요시간: {generation_time:.2f}초)")
             
@@ -690,7 +699,11 @@ async def generate_post_endpoint(req: PostRequest, db: Session = Depends(get_db)
                 "keywords": extracted_keywords,
                 "source_url": db_source_url,
                 "created_at": saved_post.created_at.isoformat() if 'saved_post' in locals() else datetime.now().isoformat(),
-                "ai_mode": selected_mode
+                "ai_mode": selected_mode,
+                "metrics": metrics,
+                "score": score,
+                "evaluation": evaluation,
+                "ai_analysis": ai_analysis
             }
         )
         
@@ -778,6 +791,9 @@ async def generate_post_gemini(req: PostRequest, db: Session = Depends(get_db)):
         logger.error(f"Gemini 블로그 포스트 생성 실패: {e}")
         raise HTTPException(status_code=500, detail=f"블로그 포스트 생성 중 오류가 발생했습니다: {str(e)}")
 
+
+
+
 @router.post("/generate-post-gemini-2-flash", response_model=PostResponse)
 async def generate_post_gemini_2_flash(req: PostRequest, db: Session = Depends(get_db)):
     """
@@ -787,6 +803,12 @@ async def generate_post_gemini_2_flash(req: PostRequest, db: Session = Depends(g
     
     try:
         # 입력 검증
+        if not req.url and not req.text:
+            raise HTTPException(status_code=400, detail="URL 또는 텍스트를 입력해야 합니다.")
+            
+        # ... (existing logic for gemini 2 flash) ...
+        # I will just add the new endpoints at the end of the file.
+
         if not req.url and not req.text:
             logger.error("❌ URL 또는 텍스트 입력 누락")
             raise HTTPException(status_code=400, detail="URL 또는 텍스트를 입력해야 합니다.")
@@ -1530,6 +1552,37 @@ async def generate_post_enhanced(req: PostRequest, db: Session = Depends(get_db)
             logger.info("✅ Google Docs Archive 비활성화됨")
         
         logger.info("🎉 향상된 블로그 포스트 생성 완료!")
+        logger.info(f"📈 최종 통계: 제목={db_post.title}, 키워드={db_post.keywords}, 생성시간={db_post.created_at}")
+        
+        return PostResponse(
+            success=True,
+            message="향상된 블로그 포스트가 성공적으로 생성되었습니다.",
+            data={
+                "id": db_post.id,
+                "title": db_post.title,
+                "content": db_post.content_html,
+                "keywords": db_post.keywords,
+                "source_url": db_post.original_url,
+                "created_at": db_post.created_at.isoformat(),
+                "ai_mode": req.ai_mode or "enhanced",
+                "word_count": result.get('word_count', 0),
+                "ai_analysis": result.get('ai_analysis', {}),
+                "guidelines_analysis": result.get('guidelines_analysis', {})
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"❌ 향상된 블로그 포스트 생성 실패: {e}")
+        logger.error(f"🔍 오류 상세: {type(e).__name__}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"블로그 포스트 생성 중 오류가 발생했습니다: {str(e)}")
+
+@router.post("/generate-post-enhanced-gemini-2-flash", response_model=PostResponse)
+async def generate_post_enhanced_gemini_2_flash(req: PostRequest, db: Session = Depends(get_db)):
+    """
+    Gemini 2.0 Flash를 사용하여 향상된 블로그 포스트를 생성합니다.
+    """
+    req.ai_mode = "gemini_2_0_flash"
+    return await generate_post_enhanced(req, db)
         logger.info(f"📈 최종 통계: 제목={db_post.title}, 키워드={db_post.keywords}, 생성시간={db_post.created_at}")
         
         # AI 분석 결과 포함하여 응답
