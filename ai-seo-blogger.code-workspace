@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../ai-seo-blogger-1"
 		}
 	],
 	"settings": {}
