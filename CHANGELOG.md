@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-11-26] - Enhanced Features Implementation
+
+### Added
+- **Enhanced Mode Endpoints**: Added `/generate-post-enhanced` and `/generate-post-enhanced-gemini-2-flash` to `app/routers/blog_generator.py`.
+  - Supports AI Analysis (Trust Score, SEO Score, AI Summary).
+  - Explicit integration with Gemini 2.0 Flash for enhanced content generation.
+- **AI Analysis Integration**: Updated `app/services/content_generator.py` to generate and return structured AI analysis data.
+- **Verification Tests**: Created `test_enhanced_features.py` to validate the new endpoints and data structures.
+
+### Updated
+- **SEO Guidelines**: Updated `app/seo_guidelines.py` to version `2025-11-26`.
+  - Added "Trust Score" requirement (> 4.5/5.0) to E-E-A-T guidelines.
+  - Added "SEO Score" requirement (> 9/10) to Content Quality guidelines.
+- **SEO Updater**: Updated `app/seo_updater.py` simulation data to reflect the new focus on Trust Scores and Automated SEO Scoring.
+
+---
+
 ## [2025-01-25] - Modern SEO Guidelines Implementation
 
 ### Added

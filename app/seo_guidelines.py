@@ -9,8 +9,8 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Version information
-SEO_VERSION = "2025-01-25"
-SEO_LAST_UPDATED = "2025-01-25T01:06:54+09:00"
+SEO_VERSION = "2025-11-26"
+SEO_LAST_UPDATED = "2025-11-26T23:30:00+09:00"
 
 # ============================================================================
 # AI SEO (AI Search Engine Optimization)
@@ -55,7 +55,8 @@ AI_SEO_GUIDELINES = {
             "requirements": [
                 "사실 확인",
                 "투명한 정보 제공",
-                "편향 없는 객관적 서술"
+                "편향 없는 객관적 서술",
+                "AI 신뢰도 점수 4.5/5.0 이상 목표"
             ]
         }
     },
@@ -66,7 +67,8 @@ AI_SEO_GUIDELINES = {
         "originality_required": True,
         "depth": "comprehensive",
         "freshness": "regular_updates",
-        "readability_level": "intermediate"
+        "readability_level": "intermediate",
+        "target_seo_score": "9/10"
     },
     
     "technical_requirements": {
@@ -75,7 +77,8 @@ AI_SEO_GUIDELINES = {
         "page_speed": "fast",
         "structured_data_types": ["Article", "FAQ", "HowTo", "BreadcrumbList"],
         "clean_html": True,
-        "semantic_markup": True
+        "semantic_markup": True,
+        "ai_analysis_required": True
     },
     
     "keyword_strategy": {

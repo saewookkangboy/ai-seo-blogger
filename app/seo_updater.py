@@ -106,7 +106,9 @@ class SEOGuidelineUpdater:
                 "User experience signals increasingly important",
                 "Core Web Vitals still a ranking factor",
                 "AI-generated content needs human oversight",
-                "Semantic search optimization essential"
+                "Semantic search optimization essential",
+                "Trust Score > 4.5 becomes industry standard",
+                "Automated SEO Scoring integration recommended"
             ],
             "aeo": [
                 "ChatGPT Search launched, optimize for citations",
@@ -134,7 +136,8 @@ class SEOGuidelineUpdater:
                 "Gemini Advanced search integration",
                 "AI crawlers need explicit permission",
                 "Clean HTML structure critical",
-                "Accessibility improves AI understanding"
+                "Accessibility improves AI understanding",
+                "AI Analysis metadata required for verification"
             ]
         }
         
