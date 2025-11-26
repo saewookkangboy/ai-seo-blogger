@@ -213,6 +213,7 @@ tmp/
 *.sqlite3
 !app/blog.db
 !app/news_archive.db
+!site_crawler_configs.json
 
 # Cache files
 .cache/
