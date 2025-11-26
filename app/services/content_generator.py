@@ -1202,7 +1202,11 @@ async def _create_enhanced_blog_post_with_gemini(text: str, keywords: str, rule_
 """
             elif ai_mode == "enhanced":
                 style_guidelines = """
-향상된 모드 가이드라인:
+향상된 모드 가이드라인 (2025 Advanced SEO):
+- AEO (답변 엔진 최적화): 각 섹션의 시작은 질문에 대한 40-60자 내외의 명확한 직접 답변(Direct Answer)으로 시작하세요.
+- AIO (AI Overviews): 대화체 톤을 유지하고, '제로 클릭' 검색을 위해 핵심 정보를 전면에 배치하세요.
+- GEO (생성형 엔진 최적화): 주제를 포괄적으로 다루고, 권위 있는 출처를 인용하거나 언급하여 신뢰도를 높이세요.
+- 구조: 질문(H2/H3) -> 직접 답변 -> 상세 설명 -> 예시/데이터 순서로 구성하세요.
 - AI 분석과 데이터 기반 인사이트 포함
 - 심층적 분석과 전문적 관점
 - 다양한 관점에서의 종합적 분석

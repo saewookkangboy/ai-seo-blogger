@@ -104,7 +104,9 @@ AEO_GUIDELINES = {
         "faq_sections": True,
         "direct_answers": True,
         "answer_first_structure": True,
-        "follow_up_questions": True
+        "follow_up_questions": True,
+        "answer_length_target": "40-60 words",
+        "structure": "Question -> Direct Answer -> Detailed Explanation"
     },
     
     "language_style": {
@@ -162,7 +164,9 @@ GEO_GUIDELINES = {
         "contextual_relevance": True,
         "topic_depth": "comprehensive",
         "citations_required": True,
-        "source_attribution": True
+        "source_attribution": True,
+        "citation_authority": "Include high-authority sources",
+        "semantic_expansion": "Cover related entities"
     },
     
     "entity_optimization": {
@@ -203,7 +207,9 @@ AIO_GUIDELINES = {
         "factual_content": True,
         "early_placement": True,
         "framework": "question_answer_expand",
-        "snippet_optimization": True
+        "snippet_optimization": True,
+        "zero_click_optimization": True,
+        "conversational_tone": True
     },
     
     "html_structure": {

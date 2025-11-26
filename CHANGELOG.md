@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-11-26] - Advanced SEO Guidelines Implementation
+
+### Added
+- **Advanced SEO Prompts**: Updated `app/services/content_generator.py` to include specific instructions for AEO, AIO, and GEO in "Enhanced Mode".
+  - **AEO**: Enforced "Question-First" structure with 40-60 word direct answers.
+  - **AIO**: Optimization for "zero-click" searches and conversational tone.
+  - **GEO**: Focus on comprehensive coverage and citation authority.
+- **Updated Guidelines**: Updated `app/seo_guidelines.py` to reflect late 2025 trends.
+
+### Updated
+- **SEO Guidelines Configuration**: Added specific metrics for answer length (40-60 words) and citation authority to `seo_guidelines.py`.
+
+---
+
 ## [2025-11-26] - Enhanced Features Implementation
 
 ### Added
