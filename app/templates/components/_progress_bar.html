@@ -1,0 +1,14 @@
+<!-- Progress Bar Component -->
+<div class="card-custom mb-4" id="progress-container" style="display: none;" role="region" aria-label="콘텐츠 생성 진행 상황">
+    <h5 class="section-title mb-3">생성 중...</h5>
+    <p class="text-muted mb-2" id="progress-message" aria-live="polite" aria-atomic="true">초기화 중...</p>
+    <div class="progress mb-3" style="height: 6px;" role="progressbar" 
+        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="생성 진행률">
+        <div class="progress-bar bg-dark" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div class="d-flex gap-4 text-sm text-muted">
+        <span>AI 상태: <span id="ai-status" class="fw-medium" aria-live="polite">대기 중</span></span>
+        <span>SEO 상태: <span id="seo-status" class="fw-medium" aria-live="polite">대기 중</span></span>
+    </div>
+</div>
+

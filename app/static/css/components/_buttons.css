@@ -1,0 +1,127 @@
+/* ========================================
+   버튼 컴포넌트
+   ======================================== */
+
+.btn-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-lg);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    min-height: 44px; /* 터치 친화적 크기 */
+}
+
+.btn-custom:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-custom:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-custom:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+}
+
+.btn-custom:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* 버튼 변형 */
+.btn-outline-custom {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.btn-outline-custom:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    background-color: var(--bg-secondary);
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--text-primary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background-color: var(--bg-secondary);
+}
+
+/* 버튼 크기 */
+.btn-sm {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    min-height: 36px;
+}
+
+.btn-lg {
+    padding: var(--spacing-4) var(--spacing-8);
+    font-size: var(--font-size-lg);
+    min-height: 52px;
+}
+
+/* 버튼 색상 변형 */
+.btn-success {
+    background-color: var(--color-success);
+    color: var(--text-inverse);
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #059669;
+}
+
+.btn-warning {
+    background-color: var(--color-warning);
+    color: var(--text-inverse);
+}
+
+.btn-warning:hover:not(:disabled) {
+    background-color: #d97706;
+}
+
+.btn-error {
+    background-color: var(--color-error);
+    color: var(--text-inverse);
+}
+
+.btn-error:hover:not(:disabled) {
+    background-color: #dc2626;
+}
+
+.btn-info {
+    background-color: var(--color-info);
+    color: var(--text-inverse);
+}
+
+.btn-info:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+}
+
+/* 버튼 그룹 */
+.btn-group {
+    display: inline-flex;
+    gap: var(--spacing-2);
+}
+
+/* 로딩 상태 */
+.btn-custom .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+

@@ -1,0 +1,39 @@
+<!-- Result Display Component -->
+<div class="card-custom" id="result-wrapper" role="region" aria-label="생성된 콘텐츠 결과">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">결과</h2>
+        <div class="d-flex gap-2">
+            <span class="badge-custom" id="content-status" aria-live="polite">준비됨</span>
+            <button id="copy-btn" class="btn-outline-custom py-1 px-3 d-none"
+                onclick="copyResult()" aria-label="결과 복사">복사</button>
+            <button id="download-btn" class="btn-outline-custom py-1 px-3 d-none"
+                onclick="downloadResult()" aria-label="결과 다운로드">다운로드</button>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    {% include 'components/_statistics_card.html' %}
+
+    <!-- Evaluation Score -->
+    <div class="mb-4">
+        <div class="p-3 bg-light rounded border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0 fw-bold">AI 가이드라인 준수 평가</h6>
+                <span class="badge bg-primary fs-6" id="eval-score" aria-live="polite">점수: -</span>
+            </div>
+            <p class="text-muted small mb-0" id="eval-reason" aria-live="polite">평가 대기 중...</p>
+        </div>
+    </div>
+
+    <!-- Guidelines Summary -->
+    <div id="guidelines-summary" style="display: none;" class="mb-4" aria-live="polite">
+        <div id="applied-guidelines-container"></div>
+    </div>
+
+    <!-- Result Content -->
+    <div id="result-container" class="p-4 bg-white border rounded" style="min-height: 300px;" 
+        role="article" aria-label="생성된 콘텐츠">
+        <p class="text-muted text-center">콘텐츠를 생성하면 여기에 표시됩니다.</p>
+    </div>
+</div>
+

@@ -1,0 +1,139 @@
+/* ========================================
+   반응형 디자인 유틸리티
+   ======================================== */
+
+/* 모바일 퍼스트 접근 */
+
+/* 기본 (모바일) */
+.container-responsive {
+    width: 100%;
+    padding: var(--spacing-4);
+}
+
+/* 태블릿 (768px 이상) */
+@media (min-width: 768px) {
+    .container-responsive {
+        max-width: var(--container-max-width);
+        margin: 0 auto;
+        padding: var(--spacing-6);
+    }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+    .container-responsive {
+        padding: var(--spacing-8);
+    }
+}
+
+/* 그리드 시스템 */
+.grid-responsive {
+    display: grid;
+    gap: var(--spacing-4);
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .grid-responsive {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-responsive {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 터치 친화적 버튼 크기 */
+.btn-touch {
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--spacing-3) var(--spacing-4);
+}
+
+/* 모바일에서 텍스트 크기 조정 */
+@media (max-width: 767px) {
+    .text-responsive {
+        font-size: var(--font-size-sm);
+    }
+    
+    .heading-responsive {
+        font-size: var(--font-size-xl);
+    }
+    
+    .card-custom {
+        padding: var(--spacing-4);
+    }
+    
+    .section-title {
+        font-size: var(--font-size-xl);
+    }
+}
+
+/* 이미지 반응형 */
+.img-responsive {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 테이블 반응형 */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+    .table-responsive table {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* 숨김 유틸리티 */
+.hide-mobile {
+    display: block;
+}
+
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+.hide-desktop {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .hide-desktop {
+        display: block !important;
+    }
+}
+
+/* 간격 조정 (모바일) */
+@media (max-width: 767px) {
+    .spacing-mobile-sm {
+        margin-bottom: var(--spacing-2);
+    }
+    
+    .spacing-mobile-md {
+        margin-bottom: var(--spacing-4);
+    }
+    
+    .spacing-mobile-lg {
+        margin-bottom: var(--spacing-6);
+    }
+}
+
+/* 폼 요소 반응형 */
+@media (max-width: 767px) {
+    .form-control-custom {
+        font-size: 16px; /* iOS 줌 방지 */
+    }
+    
+    select.form-control-custom {
+        font-size: 16px;
+    }
+}
+

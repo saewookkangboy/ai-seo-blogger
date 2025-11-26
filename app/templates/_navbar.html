@@ -1,32 +1,36 @@
-<nav class="navbar-custom">
+<nav class="navbar-custom" role="navigation" aria-label="주요 네비게이션">
   <div class="container-custom h-100 d-flex align-items-center justify-content-between">
-    <a class="navbar-brand-custom" href="/">AI Blog Generator</a>
+    <a class="navbar-brand-custom" href="/" aria-label="홈으로 이동">AI Blog Generator</a>
 
-    <div class="d-none d-md-flex align-items-center gap-4">
-      <a class="nav-link-custom {% if request.path == '/' %}active{% endif %}" href="/">생성하기</a>
-      <a class="nav-link-custom {% if '/history' in request.path %}active{% endif %}" href="/history">기록</a>
-      <a class="nav-link-custom {% if '/admin' in request.path %}active{% endif %}" href="/admin">관리자</a>
+    <div class="d-none d-md-flex align-items-center gap-4" role="menubar">
+      <a class="nav-link-custom {% if request.path == '/' %}active{% endif %}" href="/" role="menuitem" 
+         aria-current="{% if request.path == '/' %}page{% endif %}">생성하기</a>
+      <a class="nav-link-custom {% if '/history' in request.path %}active{% endif %}" href="/history" role="menuitem"
+         aria-current="{% if '/history' in request.path %}page{% endif %}">기록</a>
+      <a class="nav-link-custom {% if '/admin' in request.path %}active{% endif %}" href="/admin" role="menuitem"
+         aria-current="{% if '/admin' in request.path %}page{% endif %}">관리자</a>
 
       {% if request.session and request.session.get('admin_authenticated') %}
-      <a class="nav-link-custom" href="/logout">로그아웃</a>
+      <a class="nav-link-custom" href="/logout" role="menuitem">로그아웃</a>
       {% else %}
-      <a class="nav-link-custom" href="/login">로그인</a>
+      <a class="nav-link-custom" href="/login" role="menuitem">로그인</a>
       {% endif %}
     </div>
 
-    <!-- Mobile Menu Button (Simplified) -->
+    <!-- Mobile Menu Button -->
     <button class="d-md-none btn btn-link text-dark p-0" type="button" data-bs-toggle="collapse"
-      data-bs-target="#mobileMenu">
-      <i class="bi bi-list fs-4"></i>
+      data-bs-target="#mobileMenu" aria-label="모바일 메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
+      <i class="bi bi-list fs-4" aria-hidden="true"></i>
+      <span class="sr-only">메뉴</span>
     </button>
   </div>
 </nav>
 
 <!-- Mobile Menu -->
-<div class="collapse d-md-none bg-white border-bottom" id="mobileMenu">
+<div class="collapse d-md-none bg-white border-bottom" id="mobileMenu" role="menu" aria-label="모바일 메뉴">
   <div class="container-custom py-3 d-flex flex-column gap-2">
-    <a class="nav-link-custom" href="/">생성하기</a>
-    <a class="nav-link-custom" href="/history">기록</a>
-    <a class="nav-link-custom" href="/admin">관리자</a>
+    <a class="nav-link-custom" href="/" role="menuitem">생성하기</a>
+    <a class="nav-link-custom" href="/history" role="menuitem">기록</a>
+    <a class="nav-link-custom" href="/admin" role="menuitem">관리자</a>
   </div>
 </div>

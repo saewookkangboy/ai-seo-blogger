@@ -1,0 +1,102 @@
+/* ========================================
+   네비게이션 바
+   ======================================== */
+
+.navbar-custom {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(var(--blur-lg));
+    border-bottom: 1px solid var(--border-color);
+    height: var(--header-height);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    transition: all var(--transition-base);
+}
+
+.navbar-brand-custom {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: var(--letter-spacing-tight);
+    transition: color var(--transition-base);
+}
+
+.navbar-brand-custom:hover {
+    color: var(--color-accent);
+}
+
+.nav-link-custom {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-2) var(--spacing-4);
+    transition: color var(--transition-base);
+    text-decoration: none;
+    position: relative;
+}
+
+.nav-link-custom::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--spacing-4);
+    right: var(--spacing-4);
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transition: transform var(--transition-base);
+}
+
+.nav-link-custom:hover,
+.nav-link-custom.active {
+    color: var(--text-primary);
+}
+
+.nav-link-custom.active::after,
+.nav-link-custom:hover::after {
+    transform: scaleX(1);
+}
+
+/* 모바일 메뉴 */
+@media (max-width: 767px) {
+    .navbar-custom {
+        padding: var(--spacing-2) var(--spacing-4);
+    }
+    
+    .mobile-menu-button {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        font-size: var(--font-size-2xl);
+        padding: var(--spacing-2);
+        cursor: pointer;
+    }
+    
+    .mobile-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .mobile-menu.active {
+        display: block;
+    }
+    
+    .mobile-menu .nav-link-custom {
+        display: block;
+        padding: var(--spacing-3) var(--spacing-4);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .mobile-menu .nav-link-custom:last-child {
+        border-bottom: none;
+    }
+}
+

@@ -1,0 +1,25 @@
+<!-- Content Settings Component -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <label for="ai_mode" class="form-label-custom">콘텐츠 스타일</label>
+        <select class="form-control-custom" name="ai_mode" id="ai_mode" aria-label="콘텐츠 스타일 선택">
+            <option value="">기본</option>
+            <option value="뉴스">뉴스 (객관적)</option>
+            <option value="리뷰">리뷰 (경험적)</option>
+            <option value="가이드">가이드 (단계별)</option>
+            <option value="요약">요약 (간결함)</option>
+            <option value="블로그">블로그 (통찰력)</option>
+            <option value="enhanced">향상됨 (AI 분석)</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="content_length" class="form-label-custom">길이</label>
+        <select class="form-control-custom" name="content_length" id="content_length" aria-label="콘텐츠 길이 선택">
+            <option value="1000">1000자 (짧음)</option>
+            <option value="2000" selected>2000자 (중간)</option>
+            <option value="3000">3000자 (김)</option>
+            <option value="4000">4000자 (전문적)</option>
+        </select>
+    </div>
+</div>
+

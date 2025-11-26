@@ -1,0 +1,166 @@
+/* ========================================
+   메인 CSS 파일
+   모든 모듈을 여기서 import
+   ======================================== */
+
+/* 폰트 임포트 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@100;200;300;400;500;600;700&family=Noto+Sans+KR:wght@100..900&display=swap');
+
+/* ========================================
+   Base (기본 스타일)
+   ======================================== */
+@import 'base/_variables.css';
+@import 'base/_reset.css';
+@import 'base/_typography.css';
+@import 'base/_responsive.css';
+
+/* ========================================
+   Components (컴포넌트)
+   ======================================== */
+@import 'components/_buttons.css';
+@import 'components/_cards.css';
+@import 'components/_forms.css';
+@import 'components/_progress.css';
+@import 'components/_loading.css';
+
+/* ========================================
+   Layouts (레이아웃)
+   ======================================== */
+@import 'layouts/_navbar.css';
+
+/* ========================================
+   레이아웃 유틸리티
+   ======================================== */
+
+.container-custom {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+}
+
+/* ========================================
+   히어로 섹션
+   ======================================== */
+
+.hero-section {
+    padding: var(--spacing-24) 0 var(--spacing-16);
+    text-align: center;
+}
+
+.hero-title {
+    font-size: var(--font-size-5xl);
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-6);
+    background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-xl);
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto var(--spacing-10);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-relaxed);
+}
+
+/* ========================================
+   반응형 디자인
+   ======================================== */
+
+@media (max-width: 768px) {
+    .container-custom {
+        padding: 0 var(--spacing-4);
+    }
+
+    .hero-section {
+        padding: var(--spacing-12) 0 var(--spacing-8);
+    }
+
+    .hero-title {
+        font-size: var(--font-size-3xl);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .hero-subtitle {
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-8);
+    }
+
+    .card-custom {
+        padding: var(--spacing-5);
+    }
+
+    .section-title {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-4);
+    }
+
+    .btn-custom,
+    .btn-outline-custom {
+        padding: var(--spacing-2) var(--spacing-5);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* ========================================
+   유틸리티 클래스
+   ======================================== */
+
+/* 간격 유틸리티 */
+.mt-0 { margin-top: var(--spacing-0); }
+.mt-1 { margin-top: var(--spacing-1); }
+.mt-2 { margin-top: var(--spacing-2); }
+.mt-3 { margin-top: var(--spacing-3); }
+.mt-4 { margin-top: var(--spacing-4); }
+.mt-5 { margin-top: var(--spacing-5); }
+.mt-6 { margin-top: var(--spacing-6); }
+.mt-8 { margin-top: var(--spacing-8); }
+
+.mb-0 { margin-bottom: var(--spacing-0); }
+.mb-1 { margin-bottom: var(--spacing-1); }
+.mb-2 { margin-bottom: var(--spacing-2); }
+.mb-3 { margin-bottom: var(--spacing-3); }
+.mb-4 { margin-bottom: var(--spacing-4); }
+.mb-5 { margin-bottom: var(--spacing-5); }
+.mb-6 { margin-bottom: var(--spacing-6); }
+.mb-8 { margin-bottom: var(--spacing-8); }
+
+.p-0 { padding: var(--spacing-0); }
+.p-1 { padding: var(--spacing-1); }
+.p-2 { padding: var(--spacing-2); }
+.p-3 { padding: var(--spacing-3); }
+.p-4 { padding: var(--spacing-4); }
+.p-5 { padding: var(--spacing-5); }
+.p-6 { padding: var(--spacing-6); }
+.p-8 { padding: var(--spacing-8); }
+
+/* Flexbox 유틸리티 */
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.align-items-center { align-items: center; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.gap-1 { gap: var(--spacing-1); }
+.gap-2 { gap: var(--spacing-2); }
+.gap-3 { gap: var(--spacing-3); }
+.gap-4 { gap: var(--spacing-4); }
+
+/* Display 유틸리티 */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+
+@media (min-width: 768px) {
+    .d-md-none { display: none; }
+    .d-md-block { display: block; }
+    .d-md-flex { display: flex; }
+}
+

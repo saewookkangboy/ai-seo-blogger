@@ -1,0 +1,53 @@
+<!-- Statistics Card Component -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="p-3 bg-light rounded border">
+            <small class="text-muted d-block mb-1">키워드</small>
+            <div id="keywords-container" class="fw-medium" aria-live="polite">-</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="d-flex gap-3">
+            <div class="flex-fill p-3 bg-light rounded border text-center">
+                <small class="text-muted d-block mb-1">개수</small>
+                <div id="keyword-count-container" class="fw-bold" aria-live="polite">-</div>
+            </div>
+            <div class="flex-fill p-3 bg-light rounded border text-center">
+                <small class="text-muted d-block mb-1">길이</small>
+                <div id="content-length-container" class="fw-bold" aria-live="polite">-</div>
+            </div>
+            <div class="flex-fill p-3 bg-light rounded border text-center">
+                <small class="text-muted d-block mb-1">단어 수</small>
+                <div id="word-count-container" class="fw-bold" aria-live="polite">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-12">
+        <div class="p-3 bg-light rounded border">
+            <h6 class="fw-bold mb-3">상세 분석 지표</h6>
+            <div class="row text-center">
+                <div class="col-md-3 mb-2">
+                    <small class="text-muted d-block">명사</small>
+                    <span id="noun-count" class="fw-bold" aria-live="polite">-</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <small class="text-muted d-block">동사</small>
+                    <span id="verb-count" class="fw-bold" aria-live="polite">-</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <small class="text-muted d-block">형용사</small>
+                    <span id="adj-count" class="fw-bold" aria-live="polite">-</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <small class="text-muted d-block">최대 문장 길이</small>
+                    <span id="max-sent-len" class="fw-bold" aria-live="polite">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
