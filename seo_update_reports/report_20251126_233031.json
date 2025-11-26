@@ -1,0 +1,502 @@
+{
+  "timestamp": "2025-11-26T23:30:31.526330",
+  "current_version": "2025-11-26",
+  "research_summary": {
+    "total_queries": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "changes_detected": {
+    "new_trends": 28,
+    "significant": 0,
+    "minor": 0
+  },
+  "recommendation": "UPDATE",
+  "details": {
+    "significant": [],
+    "minor": [],
+    "new_trends": [
+      {
+        "type": "ai_seo",
+        "finding": "E-E-A-T remains critical in 2025",
+        "importance": "high"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "User experience signals increasingly important",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Core Web Vitals still a ranking factor",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "AI-generated content needs human oversight",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Semantic search optimization essential",
+        "importance": "high"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Trust Score > 4.5 becomes industry standard",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Automated SEO Scoring integration recommended",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "ChatGPT Search launched, optimize for citations",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Perplexity AI prioritizes structured Q&A",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Direct answers in first paragraph crucial",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "FAQ schema markup highly recommended",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Conversational tone improves AI visibility",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Google SGE expanding globally",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Bing Chat integration with GPT-4 Turbo",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Entity optimization more important",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Topic clusters boost generative results",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Source attribution required for citations",
+        "importance": "high"
+      },
+      {
+        "type": "aio",
+        "finding": "AI Overviews now in 100+ countries",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Featured snippets still valuable",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Question-Answer format preferred",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Fresh content gets priority",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Multimedia content increases visibility",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Claude 3 search capabilities improved",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Gemini Advanced search integration",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "AI crawlers need explicit permission",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Clean HTML structure critical",
+        "importance": "high"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Accessibility improves AI understanding",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "AI Analysis metadata required for verification",
+        "importance": "high"
+      }
+    ],
+    "summary": "Found 28 new trends across 5 guidelines"
+  },
+  "research_results": {
+    "ai_seo": {
+      "query": "AI SEO best practices 2025 latest E-E-A-T",
+      "findings": [
+        "E-E-A-T remains critical in 2025",
+        "User experience signals increasingly important",
+        "Core Web Vitals still a ranking factor",
+        "AI-generated content needs human oversight",
+        "Semantic search optimization essential",
+        "Trust Score > 4.5 becomes industry standard",
+        "Automated SEO Scoring integration recommended"
+      ],
+      "timestamp": "2025-11-26T23:30:31.122691",
+      "sources": []
+    },
+    "aeo": {
+      "query": "Answer Engine Optimization ChatGPT Perplexity 2025",
+      "findings": [
+        "ChatGPT Search launched, optimize for citations",
+        "Perplexity AI prioritizes structured Q&A",
+        "Direct answers in first paragraph crucial",
+        "FAQ schema markup highly recommended",
+        "Conversational tone improves AI visibility"
+      ],
+      "timestamp": "2025-11-26T23:30:31.224106",
+      "sources": [
+        "https://moz.com/blog/answer-engine-optimization-complete-guide",
+        "https://www.searchenginejournal.com/answer-engine-optimization-seo-strategy-2024",
+        "https://searchengineland.com/answer-engine-optimization-future-search-2024"
+      ]
+    },
+    "geo": {
+      "query": "Generative Engine Optimization Google SGE Bing Chat",
+      "findings": [
+        "Google SGE expanding globally",
+        "Bing Chat integration with GPT-4 Turbo",
+        "Entity optimization more important",
+        "Topic clusters boost generative results",
+        "Source attribution required for citations"
+      ],
+      "timestamp": "2025-11-26T23:30:31.324391",
+      "sources": [
+        "https://moz.com/blog/generative-engine-optimization-best-practices-2024",
+        "https://www.searchenginejournal.com/chatgpt-revolutionizing-seo-2024",
+        "https://searchengineland.com/generative-ai-seo-future-search-optimization"
+      ]
+    },
+    "aio": {
+      "query": "Google AI Overviews optimization strategies 2025",
+      "findings": [
+        "AI Overviews now in 100+ countries",
+        "Featured snippets still valuable",
+        "Question-Answer format preferred",
+        "Fresh content gets priority",
+        "Multimedia content increases visibility"
+      ],
+      "timestamp": "2025-11-26T23:30:31.425574",
+      "sources": [
+        "https://www.searchenginejournal.com/data-visualizations-seo-reporting/434909/",
+        "https://www.gartner.com/en/newsroom/press-releases/2023-08-01-gartner-identifies-top-trends-shaping-future-of-data-science-and-machine-learning",
+        "https://moz.com/blog/ai-integration-optimization-strategies-automation",
+        "https://www.searchenginejournal.com/ai-tools-transforming-seo-workflows",
+        "https://searchengineland.com/ai-integration-optimization-complete-guide"
+      ]
+    },
+    "ai_search": {
+      "query": "AI Search optimization trends 2025 latest",
+      "findings": [
+        "Claude 3 search capabilities improved",
+        "Gemini Advanced search integration",
+        "AI crawlers need explicit permission",
+        "Clean HTML structure critical",
+        "Accessibility improves AI understanding",
+        "AI Analysis metadata required for verification"
+      ],
+      "timestamp": "2025-11-26T23:30:31.525913",
+      "sources": []
+    }
+  },
+  "report_path": "seo_update_reports/report_20251126_233031.json",
+  "status": "UPDATED",
+  "new_version": "2025-11-26",
+  "guidelines_snapshot": {
+    "version": "2025-11-26",
+    "last_updated": "2025-11-26T23:30:31.526486",
+    "guidelines": {
+      "ai_seo": {
+        "enabled": true,
+        "version": "2025-01-25",
+        "last_updated": "2025-01-25T01:06:54+09:00",
+        "description": "AI 기반 검색 엔진 최적화 - E-E-A-T 원칙 기반",
+        "e_e_a_t": {
+          "experience": {
+            "enabled": true,
+            "description": "실제 경험 기반 콘텐츠 작성",
+            "requirements": [
+              "실제 사용 경험 포함",
+              "구체적인 사례 제시",
+              "개인적 인사이트 추가"
+            ]
+          },
+          "expertise": {
+            "enabled": true,
+            "description": "전문성 입증",
+            "requirements": [
+              "출처 인용 및 데이터 기반",
+              "전문 용어 정확한 사용",
+              "최신 정보 반영"
+            ]
+          },
+          "authoritativeness": {
+            "enabled": true,
+            "description": "권위 있는 정보 제공",
+            "requirements": [
+              "신뢰할 수 있는 출처 참조",
+              "업계 표준 준수",
+              "검증된 정보 제공"
+            ]
+          },
+          "trustworthiness": {
+            "enabled": true,
+            "description": "신뢰성 및 정확성",
+            "requirements": [
+              "사실 확인",
+              "투명한 정보 제공",
+              "편향 없는 객관적 서술"
+            ]
+          }
+        },
+        "content_quality": {
+          "min_length": 1500,
+          "max_length": 5000,
+          "originality_required": true,
+          "depth": "comprehensive",
+          "freshness": "regular_updates",
+          "readability_level": "intermediate"
+        },
+        "technical_requirements": {
+          "schema_markup": true,
+          "mobile_first": true,
+          "page_speed": "fast",
+          "structured_data_types": [
+            "Article",
+            "FAQ",
+            "HowTo",
+            "BreadcrumbList"
+          ],
+          "clean_html": true,
+          "semantic_markup": true
+        },
+        "keyword_strategy": {
+          "type": "long_tail",
+          "conversational": true,
+          "natural_language": true,
+          "user_intent_focused": true,
+          "semantic_variations": true
+        }
+      },
+      "aeo": {
+        "enabled": true,
+        "version": "2025-01-25",
+        "last_updated": "2025-01-25T01:06:54+09:00",
+        "description": "답변 엔진 최적화 - ChatGPT, Perplexity AI 등",
+        "content_format": {
+          "qa_sections": true,
+          "faq_sections": true,
+          "direct_answers": true,
+          "answer_first_structure": true,
+          "follow_up_questions": true
+        },
+        "language_style": {
+          "clarity": "simple",
+          "sentence_length": "short",
+          "tone": "conversational",
+          "jargon_level": "minimal",
+          "active_voice": true,
+          "plain_language": true
+        },
+        "content_structure": {
+          "headings": [
+            "H2",
+            "H3",
+            "H4"
+          ],
+          "lists": {
+            "bullet_points": true,
+            "numbered_lists": true,
+            "definition_lists": true
+          },
+          "tables": true,
+          "callout_boxes": true
+        },
+        "schema_markup": {
+          "types": [
+            "FAQPage",
+            "HowTo",
+            "QAPage"
+          ],
+          "required": true
+        },
+        "optimization_targets": [
+          "ChatGPT",
+          "Perplexity AI",
+          "Claude",
+          "Gemini",
+          "Answer engines"
+        ]
+      },
+      "geo": {
+        "enabled": true,
+        "version": "2025-01-25",
+        "last_updated": "2025-01-25T01:06:54+09:00",
+        "description": "생성형 엔진 최적화 - Google SGE, Bing Chat 등",
+        "target_platforms": [
+          "Google SGE (Search Generative Experience)",
+          "Bing Chat (Microsoft Copilot)",
+          "Perplexity AI",
+          "ChatGPT Search"
+        ],
+        "content_structure": {
+          "clear_hierarchy": true,
+          "contextual_relevance": true,
+          "topic_depth": "comprehensive",
+          "citations_required": true,
+          "source_attribution": true
+        },
+        "entity_optimization": {
+          "brand_mentions": true,
+          "entity_recognition": true,
+          "topic_clusters": true,
+          "internal_linking": true,
+          "related_entities": true
+        },
+        "technical_requirements": {
+          "crawlable": true,
+          "clean_html": true,
+          "structured_data": true,
+          "ai_bot_accessible": true,
+          "robots_txt_optimized": true
+        },
+        "content_quality": {
+          "accuracy": "high",
+          "comprehensiveness": "detailed",
+          "relevance": "contextual",
+          "authority": "established"
+        }
+      },
+      "aio": {
+        "enabled": true,
+        "version": "2025-01-25",
+        "last_updated": "2025-01-25T01:06:54+09:00",
+        "description": "Google AI Overviews 최적화",
+        "google_ai_overviews": {
+          "concise_answers": true,
+          "factual_content": true,
+          "early_placement": true,
+          "framework": "question_answer_expand",
+          "snippet_optimization": true
+        },
+        "html_structure": {
+          "clear_headings": true,
+          "heading_hierarchy": [
+            "H1",
+            "H2",
+            "H3"
+          ],
+          "bullet_points": true,
+          "numbered_lists": true,
+          "tables": true,
+          "semantic_html": true
+        },
+        "content_freshness": {
+          "regular_updates": true,
+          "latest_data": true,
+          "current_statistics": true,
+          "date_stamping": true
+        },
+        "multimedia": {
+          "images": true,
+          "alt_text_required": true,
+          "descriptive_captions": true,
+          "videos": false,
+          "infographics": true
+        },
+        "optimization_tactics": [
+          "Top 10 organic ranking",
+          "Featured snippet targeting",
+          "Schema markup implementation",
+          "E-E-A-T signals",
+          "Topic authority building"
+        ]
+      },
+      "ai_search": {
+        "enabled": true,
+        "version": "2025-01-25",
+        "last_updated": "2025-01-25T01:06:54+09:00",
+        "description": "통합 AI 검색 플랫폼 최적화",
+        "target_platforms": [
+          "ChatGPT",
+          "Claude",
+          "Perplexity AI",
+          "Google Gemini",
+          "Bing AI",
+          "Other AI assistants"
+        ],
+        "core_principles": {
+          "clarity": "maximum",
+          "authority": "established",
+          "usefulness": "high",
+          "accessibility": "universal"
+        },
+        "crawler_accessibility": {
+          "gptbot_allowed": true,
+          "google_extended_allowed": true,
+          "other_ai_bots_allowed": true,
+          "robots_txt_configured": true
+        },
+        "content_formatting": {
+          "clean_code": true,
+          "proper_html_tags": true,
+          "semantic_structure": true,
+          "minimal_javascript": true,
+          "fast_loading": true
+        },
+        "optimization_focus": [
+          "Direct answer provision",
+          "Structured information",
+          "Authoritative sources",
+          "Clear formatting",
+          "Comprehensive coverage"
+        ]
+      }
+    },
+    "metadata": {
+      "total_guidelines": 5,
+      "all_enabled": true,
+      "implementation_date": "2025-01-25",
+      "next_review_date": "2025-04-25"
+    }
+  }
+}

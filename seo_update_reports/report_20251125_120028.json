@@ -1,0 +1,226 @@
+{
+  "timestamp": "2025-11-25T12:00:28.262032",
+  "current_version": "2025-01-25",
+  "research_summary": {
+    "total_queries": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "changes_detected": {
+    "new_trends": 25,
+    "significant": 0,
+    "minor": 0
+  },
+  "recommendation": "UPDATE",
+  "details": {
+    "significant": [],
+    "minor": [],
+    "new_trends": [
+      {
+        "type": "ai_seo",
+        "finding": "E-E-A-T remains critical in 2025",
+        "importance": "high"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "User experience signals increasingly important",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Core Web Vitals still a ranking factor",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "AI-generated content needs human oversight",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_seo",
+        "finding": "Semantic search optimization essential",
+        "importance": "high"
+      },
+      {
+        "type": "aeo",
+        "finding": "ChatGPT Search launched, optimize for citations",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Perplexity AI prioritizes structured Q&A",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Direct answers in first paragraph crucial",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "FAQ schema markup highly recommended",
+        "importance": "medium"
+      },
+      {
+        "type": "aeo",
+        "finding": "Conversational tone improves AI visibility",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Google SGE expanding globally",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Bing Chat integration with GPT-4 Turbo",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Entity optimization more important",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Topic clusters boost generative results",
+        "importance": "medium"
+      },
+      {
+        "type": "geo",
+        "finding": "Source attribution required for citations",
+        "importance": "high"
+      },
+      {
+        "type": "aio",
+        "finding": "AI Overviews now in 100+ countries",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Featured snippets still valuable",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Question-Answer format preferred",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Fresh content gets priority",
+        "importance": "medium"
+      },
+      {
+        "type": "aio",
+        "finding": "Multimedia content increases visibility",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Claude 3 search capabilities improved",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Gemini Advanced search integration",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "AI crawlers need explicit permission",
+        "importance": "medium"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Clean HTML structure critical",
+        "importance": "high"
+      },
+      {
+        "type": "ai_search",
+        "finding": "Accessibility improves AI understanding",
+        "importance": "medium"
+      }
+    ],
+    "summary": "Found 25 new trends across 5 guidelines"
+  },
+  "research_results": {
+    "ai_seo": {
+      "query": "AI SEO best practices 2025 latest E-E-A-T",
+      "findings": [
+        "E-E-A-T remains critical in 2025",
+        "User experience signals increasingly important",
+        "Core Web Vitals still a ranking factor",
+        "AI-generated content needs human oversight",
+        "Semantic search optimization essential"
+      ],
+      "timestamp": "2025-11-25T12:00:27.856169",
+      "sources": []
+    },
+    "aeo": {
+      "query": "Answer Engine Optimization ChatGPT Perplexity 2025",
+      "findings": [
+        "ChatGPT Search launched, optimize for citations",
+        "Perplexity AI prioritizes structured Q&A",
+        "Direct answers in first paragraph crucial",
+        "FAQ schema markup highly recommended",
+        "Conversational tone improves AI visibility"
+      ],
+      "timestamp": "2025-11-25T12:00:27.957382",
+      "sources": [
+        "https://moz.com/blog/answer-engine-optimization-complete-guide",
+        "https://www.searchenginejournal.com/answer-engine-optimization-seo-strategy-2024",
+        "https://searchengineland.com/answer-engine-optimization-future-search-2024"
+      ]
+    },
+    "geo": {
+      "query": "Generative Engine Optimization Google SGE Bing Chat",
+      "findings": [
+        "Google SGE expanding globally",
+        "Bing Chat integration with GPT-4 Turbo",
+        "Entity optimization more important",
+        "Topic clusters boost generative results",
+        "Source attribution required for citations"
+      ],
+      "timestamp": "2025-11-25T12:00:28.058609",
+      "sources": [
+        "https://moz.com/blog/generative-engine-optimization-best-practices-2024",
+        "https://www.searchenginejournal.com/chatgpt-revolutionizing-seo-2024",
+        "https://searchengineland.com/generative-ai-seo-future-search-optimization"
+      ]
+    },
+    "aio": {
+      "query": "Google AI Overviews optimization strategies 2025",
+      "findings": [
+        "AI Overviews now in 100+ countries",
+        "Featured snippets still valuable",
+        "Question-Answer format preferred",
+        "Fresh content gets priority",
+        "Multimedia content increases visibility"
+      ],
+      "timestamp": "2025-11-25T12:00:28.159926",
+      "sources": [
+        "https://www.searchenginejournal.com/data-visualizations-seo-reporting/434909/",
+        "https://www.gartner.com/en/newsroom/press-releases/2023-08-01-gartner-identifies-top-trends-shaping-future-of-data-science-and-machine-learning",
+        "https://moz.com/blog/ai-integration-optimization-strategies-automation",
+        "https://www.searchenginejournal.com/ai-tools-transforming-seo-workflows",
+        "https://searchengineland.com/ai-integration-optimization-complete-guide"
+      ]
+    },
+    "ai_search": {
+      "query": "AI Search optimization trends 2025 latest",
+      "findings": [
+        "Claude 3 search capabilities improved",
+        "Gemini Advanced search integration",
+        "AI crawlers need explicit permission",
+        "Clean HTML structure critical",
+        "Accessibility improves AI understanding"
+      ],
+      "timestamp": "2025-11-25T12:00:28.261201",
+      "sources": []
+    }
+  },
+  "report_path": "seo_update_reports/report_20251125_120028.json",
+  "status": "UPDATE_FAILED",
+  "update_error": "too many values to unpack (expected 2)"
+}

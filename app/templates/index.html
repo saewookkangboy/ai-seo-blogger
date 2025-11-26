@@ -463,13 +463,25 @@
                 return;
             }
 
-            // UI 상태 초기화
-            generateBtn.disabled = true;
-            btnSpinner.classList.remove('d-none');
-            copyBtn.classList.add('d-none');
-            downloadBtn.classList.add('d-none');
-            progressContainer.style.display = 'block';
-            cancelBtn.style.display = 'inline-block';
+            // UI 상태 초기화 (null 체크 포함)
+            if (generateBtn) {
+                generateBtn.disabled = true;
+            }
+            if (btnSpinner) {
+                btnSpinner.classList.remove('d-none');
+            }
+            if (copyBtn) {
+                copyBtn.classList.add('d-none');
+            }
+            if (downloadBtn) {
+                downloadBtn.classList.add('d-none');
+            }
+            if (progressContainer) {
+                progressContainer.style.display = 'block';
+            }
+            if (cancelBtn) {
+                cancelBtn.style.display = 'inline-block';
+            }
 
             // 결과 컨테이너 초기화
             resultDiv.innerHTML = `
@@ -486,11 +498,19 @@
             contentStatus.textContent = '생성 중';
             contentStatus.className = 'badge bg-warning me-2';
 
-            // 진행률 초기화
-            progressBar.style.width = '0%';
-            progressMessage.textContent = '초기화 중...';
-            aiStatus.textContent = '대기 중';
-            seoStatus.textContent = '대기 중';
+            // 진행률 초기화 (null 체크 포함)
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            if (progressMessage) {
+                progressMessage.textContent = '초기화 중...';
+            }
+            if (aiStatus) {
+                aiStatus.textContent = '대기 중';
+            }
+            if (seoStatus) {
+                seoStatus.textContent = '대기 중';
+            }
 
             // AbortController 설정
             currentAbortController = new AbortController();
@@ -538,16 +558,24 @@
                     policy_auto: policyAuto
                 };
 
-                // 진행률 업데이트
-                progressBar.style.width = '25%';
-                progressMessage.textContent = 'AI 모델 초기화 중...';
-                aiStatus.textContent = '처리 중';
+                // 진행률 업데이트 (null 체크 포함)
+                if (progressBar) {
+                    progressBar.style.width = '25%';
+                }
+                if (progressMessage) {
+                    progressMessage.textContent = 'AI 모델 초기화 중...';
+                }
+                if (aiStatus) {
+                    aiStatus.textContent = '처리 중';
+                }
 
                 // API 엔드포인트 선택 - 견고한 파이프라인 우선 사용
                 let apiEndpoint;
                 if (useRobustPipeline) {
                     apiEndpoint = '/api/v1/generate-post-pipeline-robust';
-                    progressMessage.textContent = '견고한 파이프라인으로 처리 중...';
+                    if (progressMessage) {
+                        progressMessage.textContent = '견고한 파이프라인으로 처리 중...';
+                    }
                 } else {
                     apiEndpoint = '/api/v1/generate-post-gemini-2-flash';
                     if (aiMode === 'enhanced') {
@@ -569,19 +597,33 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                // 진행률 업데이트
-                progressBar.style.width = '75%';
-                progressMessage.textContent = 'SEO 분석 중...';
-                seoStatus.textContent = '처리 중';
+                // 진행률 업데이트 (null 체크 포함)
+                if (progressBar) {
+                    progressBar.style.width = '75%';
+                }
+                if (progressMessage) {
+                    progressMessage.textContent = 'SEO 분석 중...';
+                }
+                if (seoStatus) {
+                    seoStatus.textContent = '처리 중';
+                }
 
                 const result = await response.json();
 
                 if (result.success) {
-                    // 진행률 완료
-                    progressBar.style.width = '100%';
-                    progressMessage.textContent = '완료!';
-                    aiStatus.textContent = '완료';
-                    seoStatus.textContent = '완료';
+                    // 진행률 완료 (null 체크 포함)
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                    }
+                    if (progressMessage) {
+                        progressMessage.textContent = '완료!';
+                    }
+                    if (aiStatus) {
+                        aiStatus.textContent = '완료';
+                    }
+                    if (seoStatus) {
+                        seoStatus.textContent = '완료';
+                    }
 
                     // 결과 표시 - 새로운 템플릿 사용
                     const data = result.data;
@@ -844,11 +886,19 @@
                 contentLengthDiv.textContent = '-';
                 wordCountDiv.textContent = '-';
             } finally {
-                // UI 상태 복원
-                generateBtn.disabled = false;
-                btnSpinner.classList.add('d-none');
-                progressContainer.style.display = 'none';
-                cancelBtn.style.display = 'none';
+                // UI 상태 복원 (null 체크 포함)
+                if (generateBtn) {
+                    generateBtn.disabled = false;
+                }
+                if (btnSpinner) {
+                    btnSpinner.classList.add('d-none');
+                }
+                if (progressContainer) {
+                    progressContainer.style.display = 'none';
+                }
+                if (cancelBtn) {
+                    cancelBtn.style.display = 'none';
+                }
                 currentAbortController = null;
             }
         }
@@ -3158,11 +3208,15 @@
             const progressBar = document.getElementById('progress-bar');
             const progressMessage = document.getElementById('progress-message');
 
-            // 진행 상황 표시
+            // 진행 상황 표시 (null 체크 포함)
             if (progressContainer) {
                 progressContainer.style.display = 'block';
-                progressBar.style.width = '25%';
-                progressMessage.textContent = '개선 제안 분석 중...';
+                if (progressBar) {
+                    progressBar.style.width = '25%';
+                }
+                if (progressMessage) {
+                    progressMessage.textContent = '개선 제안 분석 중...';
+                }
             }
 
             try {
@@ -3170,24 +3224,36 @@
                 const suggestions = generateImprovementSuggestions(currentComplianceAnalysis);
 
                 if (progressContainer) {
-                    progressBar.style.width = '50%';
-                    progressMessage.textContent = '콘텐츠 개선 중...';
+                    if (progressBar) {
+                        progressBar.style.width = '50%';
+                    }
+                    if (progressMessage) {
+                        progressMessage.textContent = '콘텐츠 개선 중...';
+                    }
                 }
 
                 // AI를 통한 콘텐츠 개선 (AbortController 사용)
                 const improvementResult = await improveContentWithAI(currentGeneratedContent, suggestions);
 
                 if (progressContainer) {
-                    progressBar.style.width = '75%';
-                    progressMessage.textContent = '개선된 콘텐츠 적용 중...';
+                    if (progressBar) {
+                        progressBar.style.width = '75%';
+                    }
+                    if (progressMessage) {
+                        progressMessage.textContent = '개선된 콘텐츠 적용 중...';
+                    }
                 }
 
                 // 개선된 콘텐츠로 UI 업데이트
                 updateContentWithImprovements(improvementResult.improved_content, improvementResult);
 
                 if (progressContainer) {
-                    progressBar.style.width = '100%';
-                    progressMessage.textContent = '개선 완료!';
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                    }
+                    if (progressMessage) {
+                        progressMessage.textContent = '개선 완료!';
+                    }
 
                     setTimeout(() => {
                         progressContainer.style.display = 'none';
