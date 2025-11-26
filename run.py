@@ -48,11 +48,15 @@ def main():
     print("💚 헬스체크: http://localhost:8000/health")
     print("=" * 50)
     
+    reload_enabled = os.getenv("UVICORN_RELOAD", "true").lower() == "true"
+    reload_dirs = [str(project_root / "app")] if reload_enabled else None
+    
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
+        reload=reload_enabled,
+        reload_dirs=reload_dirs,
         log_level="info"
     )
 

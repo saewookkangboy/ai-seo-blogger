@@ -252,13 +252,47 @@ class AutoUpdateMonitor:
         """작업 스케줄링"""
         try:
             if task.schedule.startswith("*/"):
-                # 간격 기반 스케줄링
                 interval = int(task.schedule.split("*/")[1].split()[0])
                 schedule.every(interval).minutes.do(self._execute_task, task.name)
+                return
+            
+            parts = task.schedule.split()
+            if len(parts) < 5:
+                raise ValueError("지원하지 않는 스케줄 형식")
+            
+            minute, hour, day, month, weekday = parts[:5]
+            
+            day_constraint = int(day) if day != "*" else None
+            month_constraint = int(month) if month != "*" else None
+            weekday_constraint = weekday if weekday != "*" else None
+            
+            # 시간 필드 와일드카드 처리
+            if hour == "*" and minute.isdigit():
+                minute_marker = f":{int(minute):02d}"
+                
+                if not day_constraint and not month_constraint and not weekday_constraint:
+                    schedule.every().hour.at(minute_marker).do(self._execute_task, task.name)
+                else:
+                    schedule.every().hour.at(minute_marker).do(
+                        self._execute_with_constraints,
+                        task.name,
+                        day_constraint,
+                        weekday_constraint,
+                        month_constraint
+                    )
+                return
+            
+            time_str = self._format_time(hour, minute)
+            
+            if day_constraint is None and weekday_constraint is None and month_constraint is None:
+                schedule.every().day.at(time_str).do(self._execute_task, task.name)
             else:
-                # cron 형식 스케줄링
-                schedule.every().day.at(task.schedule.split()[1] + ":" + task.schedule.split()[0]).do(
-                    self._execute_task, task.name
+                schedule.every().day.at(time_str).do(
+                    self._execute_with_constraints,
+                    task.name,
+                    day_constraint,
+                    weekday_constraint,
+                    month_constraint
                 )
         except Exception as e:
             comprehensive_logger.log(
@@ -267,6 +301,71 @@ class AutoUpdateMonitor:
                 f"작업 스케줄링 실패: {task.name}",
                 {"error": str(e)}
             )
+
+    def _format_time(self, hour: str, minute: str) -> str:
+        """cron 시간 필드를 Schedule 형식으로 변환"""
+        if hour == "*" or minute == "*":
+            raise ValueError("시간 필드는 반드시 숫자여야 합니다")
+        return f"{int(hour):02d}:{int(minute):02d}"
+    
+    def _execute_if_day_matches(self, task_name: str, day_of_month: int, month: Optional[int]):
+        """월별/일자 기반 작업을 실행 조건에 맞게 처리"""
+        today = datetime.now()
+        if today.day == day_of_month and (month is None or today.month == month):
+            self._execute_task(task_name)
+    
+    def _execute_if_weekday_matches(self, task_name: str, weekday: str, month: Optional[int]):
+        """요일 및 월 조건을 만족할 때 작업 실행"""
+        today = datetime.now()
+        cron_weekday = today.strftime("%w")  # 0=일요일, 6=토요일
+        if cron_weekday == weekday and (month is None or today.month == month):
+            self._execute_task(task_name)
+    
+    def _execute_if_month_matches(self, task_name: str, month: int):
+        """특정 월에만 작업 실행"""
+        if datetime.now().month == month:
+            self._execute_task(task_name)
+    
+    def _execute_with_constraints(
+        self,
+        task_name: str,
+        day_of_month: Optional[int] = None,
+        weekday: Optional[str] = None,
+        month: Optional[int] = None
+    ):
+        """여러 cron 제약 조건을 동시에 확인해 작업 실행"""
+        today = datetime.now()
+        
+        if month is not None and today.month != month:
+            return
+        
+        if day_of_month is not None and today.day != day_of_month:
+            return
+        
+        if weekday is not None:
+            cron_weekday = int(today.strftime("%w"))
+            if not self._weekday_matches(weekday, cron_weekday):
+                return
+        
+        self._execute_task(task_name)
+    
+    def _weekday_matches(self, constraint: str, current_weekday: int) -> bool:
+        """cron 요일 제약을 확인 (단일 값, 범위, 리스트 지원)"""
+        try:
+            parts = [p.strip() for p in constraint.split(",")]
+            for part in parts:
+                if "-" in part:
+                    start_str, end_str = part.split("-", 1)
+                    start = int(start_str)
+                    end = int(end_str)
+                    if start <= current_weekday <= end:
+                        return True
+                else:
+                    if current_weekday == int(part):
+                        return True
+        except ValueError:
+            return constraint == str(current_weekday)
+        return False
     
     def start_monitoring(self):
         """모니터링 시작"""
