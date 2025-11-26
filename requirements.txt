@@ -21,3 +21,5 @@ webdriver-manager
 itsdangerous
 python-multipart
 aiohttp
+jinja2
+redis
