@@ -472,131 +472,144 @@ async def get_daily_stats(
 # 애플리케이션 시작 이벤트
 @app.on_event("startup")
 async def startup_event():
-    """애플리케이션 시작 시 실행되는 이벤트"""
+    """애플리케이션 시작 시 실행되는 이벤트 (최적화: 빠른 시작)"""
     logger.info("=== AI SEO Blog Generator 시작 ===")
-    log_system("애플리케이션 시작", {"timestamp": datetime.now().isoformat()})
     
-    # 최적화 로깅 설정
+    # 필수 작업만 동기적으로 실행 (서버 시작을 빠르게)
     try:
+        # 최적화 로깅 설정 (최소한만)
         setup_optimized_logging(
             log_dir="logs",
             log_level=settings.log_level,
             enable_file=settings.log_enable_file,
             enable_console=settings.log_enable_console
         )
-        logger.info("✅ 최적화된 로깅 설정 완료")
+        logger.info("✅ 로깅 설정 완료")
     except Exception as e:
         logger.warning(f"로깅 설정 중 오류: {e}")
     
-    # 오래된 로그 압축
-    try:
-        compressed_count = compress_old_logs("logs", days=settings.log_compress_after_days)
-        if compressed_count > 0:
-            logger.info(f"✅ {compressed_count}개의 오래된 로그 파일 압축 완료")
-    except Exception as e:
-        logger.warning(f"로그 압축 중 오류: {e}")
-    
-    # 데이터베이스 인덱스 생성
+    # 데이터베이스 인덱스 생성 (필수)
     try:
         create_indexes()
         logger.info("✅ 데이터베이스 인덱스 생성 완료")
     except Exception as e:
         logger.warning(f"인덱스 생성 중 오류: {e}")
     
-    # 메모리 관리 시작
-    try:
-        memory_manager.start_monitoring()
-        logger.info("✅ 메모리 모니터링 시작")
-    except Exception as e:
-        logger.warning(f"메모리 모니터링 시작 실패: {e}")
-    
-    # Redis 캐시 초기화
+    # Redis 캐시 초기화 (빠른 작업)
     try:
         redis_cache = get_redis_cache()
-        stats = redis_cache.get_stats()
-        logger.info(f"✅ Redis 캐시 초기화 완료: {stats.get('type', 'unknown')}")
+        logger.info("✅ 캐시 초기화 완료")
     except Exception as e:
-        logger.warning(f"Redis 캐시 초기화 실패: {e}")
+        logger.warning(f"캐시 초기화 실패: {e}")
     
-    # 백그라운드 작업 큐 시작
+    # 백그라운드 작업 큐 시작 (필수)
     try:
         background_queue.start()
         logger.info("✅ 백그라운드 작업 큐 시작")
     except Exception as e:
         logger.warning(f"백그라운드 작업 큐 시작 실패: {e}")
     
-    # 우선순위 크롤러 초기화
-    try:
-        asyncio.create_task(priority_crawler.initialize())
-        logger.info("✅ 우선순위 크롤러 초기화")
-    except Exception as e:
-        logger.warning(f"우선순위 크롤러 초기화 실패: {e}")
+    # 나머지 작업들은 비동기로 백그라운드에서 실행
+    asyncio.create_task(_run_background_startup_tasks())
     
-    # PostgreSQL 최적화 (PostgreSQL 사용 시)
+    logger.info("✅ 서버 시작 완료 (백그라운드 초기화 진행 중)")
+
+
+async def _run_background_startup_tasks():
+    """백그라운드에서 실행되는 초기화 작업들"""
     try:
-        if settings.database_url.startswith("postgresql"):
-            postgresql_optimizer = get_postgresql_optimizer()
-            postgresql_optimizer.optimize_query_performance()
-            logger.info("✅ PostgreSQL 최적화 완료")
-    except Exception as e:
-        logger.warning(f"PostgreSQL 최적화 실패: {e}")
-    
-    # 설정 유효성 검사
-    errors = settings.validate_settings()
-    if errors:
-        logger.warning("설정 경고:")
-        for error in errors:
-            logger.warning(f"  - {error}")
-        log_error("설정 검증 실패", {"errors": errors})
-    
-    # 기본 키워드 데이터 초기화
-    try:
-        db = SessionLocal()
+        # 로그 압축 (무거운 작업)
         try:
-            # 키워드가 없으면 기본 키워드 추가
-            keyword_count = db.query(models.KeywordList).count()
-            if keyword_count == 0:
-                logger.info("기본 키워드 데이터를 초기화합니다...")
-                crud.initialize_default_keywords(db)
-                logger.info("기본 키워드 데이터 초기화 완료")
-                log_system("기본 키워드 데이터 초기화 완료")
-            else:
-                logger.info(f"기존 키워드 데이터 {keyword_count}개가 있습니다.")
-                log_system("기존 키워드 데이터 확인", {"count": keyword_count})
-        finally:
-            db.close()
+            compressed_count = compress_old_logs("logs", days=settings.log_compress_after_days)
+            if compressed_count > 0:
+                logger.info(f"✅ {compressed_count}개의 오래된 로그 파일 압축 완료")
+        except Exception as e:
+            logger.warning(f"로그 압축 중 오류: {e}")
+        
+        # 메모리 관리 시작
+        try:
+            memory_manager.start_monitoring()
+            logger.info("✅ 메모리 모니터링 시작")
+        except Exception as e:
+            logger.warning(f"메모리 모니터링 시작 실패: {e}")
+        
+        # 우선순위 크롤러 초기화
+        try:
+            await priority_crawler.initialize()
+            logger.info("✅ 우선순위 크롤러 초기화")
+        except Exception as e:
+            logger.warning(f"우선순위 크롤러 초기화 실패: {e}")
+        
+        # PostgreSQL 최적화 (PostgreSQL 사용 시)
+        try:
+            if settings.database_url.startswith("postgresql"):
+                postgresql_optimizer = get_postgresql_optimizer()
+                postgresql_optimizer.optimize_query_performance()
+                logger.info("✅ PostgreSQL 최적화 완료")
+        except Exception as e:
+            logger.warning(f"PostgreSQL 최적화 실패: {e}")
+        
+        # 설정 유효성 검사
+        errors = settings.validate_settings()
+        if errors:
+            logger.warning("설정 경고:")
+            for error in errors:
+                logger.warning(f"  - {error}")
+            log_error("설정 검증 실패", {"errors": errors})
+        
+        # 기본 키워드 데이터 초기화
+        try:
+            db = SessionLocal()
+            try:
+                keyword_count = db.query(models.KeywordList).count()
+                if keyword_count == 0:
+                    logger.info("기본 키워드 데이터를 초기화합니다...")
+                    crud.initialize_default_keywords(db)
+                    logger.info("기본 키워드 데이터 초기화 완료")
+                    log_system("기본 키워드 데이터 초기화 완료")
+                else:
+                    logger.info(f"기존 키워드 데이터 {keyword_count}개가 있습니다.")
+                    log_system("기존 키워드 데이터 확인", {"count": keyword_count})
+            finally:
+                db.close()
+        except Exception as e:
+            logger.error(f"기본 키워드 초기화 중 오류: {e}")
+            log_error("기본 키워드 초기화 실패", {"error": str(e)})
+        
+        # 크롤링 모니터 시작
+        try:
+            crawling_monitor.start_monitoring()
+            logger.info("크롤링 모니터가 시작되었습니다.")
+            log_system("크롤링 모니터 시작")
+        except Exception as e:
+            logger.error(f"크롤링 모니터 시작 실패: {e}")
+            log_error("크롤링 모니터 시작 실패", {"error": str(e)})
+        
+        # 성능 모니터 시작
+        try:
+            performance_monitor.start_monitoring()
+            logger.info("백그라운드 성능 모니터링이 시작되었습니다.")
+            log_system("성능 모니터 시작")
+        except Exception as e:
+            logger.error(f"성능 모니터 시작 실패: {e}")
+            log_error("성능 모니터 시작 실패", {"error": str(e)})
+        
+        # 자동 업데이트 모니터 시작
+        try:
+            auto_update_monitor.start_monitoring()
+            logger.info("자동 업데이트 모니터가 시작되었습니다.")
+            log_system("자동 업데이트 모니터 시작")
+        except Exception as e:
+            logger.error(f"자동 업데이트 모니터 시작 실패: {e}")
+            log_error("자동 업데이트 모니터 시작 실패", {"error": str(e)})
+        
+        # 시스템 로깅
+        log_system("애플리케이션 시작", {"timestamp": datetime.now().isoformat()})
+        
     except Exception as e:
-        logger.error(f"기본 키워드 초기화 중 오류: {e}")
-        log_error("기본 키워드 초기화 실패", {"error": str(e)})
+        logger.error(f"백그라운드 초기화 작업 중 오류: {e}")
     
-    # 크롤링 모니터 시작
-    try:
-        crawling_monitor.start_monitoring()
-        logger.info("크롤링 모니터가 시작되었습니다.")
-        log_system("크롤링 모니터 시작")
-    except Exception as e:
-        logger.error(f"크롤링 모니터 시작 실패: {e}")
-        log_error("크롤링 모니터 시작 실패", {"error": str(e)})
-    
-    # 성능 모니터 시작
-    try:
-        performance_monitor.start_monitoring()
-        logger.info("백그라운드 성능 모니터링이 시작되었습니다.")
-        log_system("성능 모니터 시작")
-    except Exception as e:
-        logger.error(f"성능 모니터 시작 실패: {e}")
-        log_error("성능 모니터 시작 실패", {"error": str(e)})
-    
-    # 자동 업데이트 모니터 시작
-    try:
-        auto_update_monitor.start_monitoring()
-        logger.info("자동 업데이트 모니터가 시작되었습니다.")
-        log_system("자동 업데이트 모니터 시작")
-    except Exception as e:
-        logger.error(f"자동 업데이트 모니터 시작 실패: {e}")
-        log_error("자동 업데이트 모니터 시작 실패", {"error": str(e)})
-    
-    # 무거운 진단/업데이트 작업은 서버 기동 이후 비동기로 실행
+    # 무거운 진단/업데이트 작업은 더 나중에 실행
     asyncio.create_task(_run_post_startup_tasks())
 
 
