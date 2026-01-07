@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Index, Boolean, Date
+from sqlalchemy import Column, Integer, String, Text, DateTime, Index, Boolean, Date, JSON, Float
 from sqlalchemy.sql import func
 from .database import Base
 from datetime import datetime
@@ -19,6 +19,10 @@ class BlogPost(Base):
     description = Column(String(500))
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # AI 윤리 평가 결과 필드
+    ai_ethics_score = Column(Float, default=None)  # 종합 점수 (0-100)
+    ai_ethics_evaluation = Column(JSON, default=None)  # 전체 평가 결과 JSON
+    ai_ethics_evaluated_at = Column(DateTime(timezone=True), default=None)  # 평가 일시
 
     __table_args__ = (
         Index('idx_title_keywords', 'title', 'keywords'),

@@ -48,7 +48,8 @@ def main():
     print("💚 헬스체크: http://localhost:8000/health")
     print("=" * 50)
     
-    reload_enabled = os.getenv("UVICORN_RELOAD", "true").lower() == "true"
+    # reload 모드는 포트 충돌을 일으킬 수 있으므로 기본적으로 비활성화
+    reload_enabled = os.getenv("UVICORN_RELOAD", "false").lower() == "true"
     reload_dirs = [str(project_root / "app")] if reload_enabled else None
     
     uvicorn.run(
