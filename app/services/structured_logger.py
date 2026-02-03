@@ -97,9 +97,14 @@ class StructuredLogger:
             log_level: 로그 레벨
         """
         self.name = name
-        self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
-        
+        _dir = Path("/tmp/logs") if os.environ.get("VERCEL") == "1" else Path(log_dir)
+        try:
+            _dir.mkdir(parents=True, exist_ok=True)
+            self.log_dir = _dir
+            _enable_file = enable_file_logging
+        except OSError:
+            self.log_dir = Path(log_dir)
+            _enable_file = False
         self.logger = logging.getLogger(name)
         self.logger.setLevel(log_level)
         
@@ -110,7 +115,7 @@ class StructuredLogger:
         formatter = StructuredFormatter()
         
         # 파일 로깅 설정
-        if enable_file_logging:
+        if _enable_file:
             log_file = self.log_dir / f"{name}.log"
             file_handler = CompressedRotatingFileHandler(
                 str(log_file),
@@ -189,20 +194,23 @@ def setup_optimized_logging(log_dir: str = "logs",
     # 구조화된 포맷터
     formatter = StructuredFormatter()
     
-    # 파일 로깅
+    # 파일 로깅 (Vercel/읽기전용에서는 스킵)
     if enable_file:
-        log_file = Path(log_dir) / "app.log"
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        file_handler = CompressedRotatingFileHandler(
-            str(log_file),
-            maxBytes=10 * 1024 * 1024,  # 10MB
-            backupCount=5,
-            encoding='utf-8'
-        )
-        file_handler.setLevel(log_level)
-        file_handler.setFormatter(formatter)
-        root_logger.addHandler(file_handler)
+        _log_dir = Path("/tmp/logs") if os.environ.get("VERCEL") == "1" else Path(log_dir)
+        try:
+            _log_dir.mkdir(parents=True, exist_ok=True)
+            log_file = _log_dir / "app.log"
+            file_handler = CompressedRotatingFileHandler(
+                str(log_file),
+                maxBytes=10 * 1024 * 1024,  # 10MB
+                backupCount=5,
+                encoding='utf-8'
+            )
+            file_handler.setLevel(log_level)
+            file_handler.setFormatter(formatter)
+            root_logger.addHandler(file_handler)
+        except OSError:
+            pass  # 읽기 전용 파일시스템
     
     # 콘솔 로깅
     if enable_console:

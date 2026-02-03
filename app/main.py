@@ -25,10 +25,8 @@ import time
 import sys
 import types
 
-# Vercel: comprehensive_logger를 더미로 미리 등록해 읽기 전용 FS에서 크래시 방지
+# Vercel: comprehensive_logger만 더미로 등록 (app.services 패키지는 그대로 두어야 함)
 if os.environ.get("VERCEL") == "1":
-    if "app.services" not in sys.modules:
-        sys.modules["app.services"] = types.ModuleType("app.services")
     _dummy_cl = types.ModuleType("app.services.comprehensive_logger")
     class _DummyLogger:
         def log(self, *args, **kwargs): pass
@@ -138,12 +136,30 @@ if _BASE_DIR.exists():
     app.mount("/crawling_stats.json", StaticFiles(html=True, directory=str(_BASE_DIR)), name="crawling_stats_json")
 templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
-# 라우터 등록
-from app.routers import blog_generator, feature_updates, news_archive, google_drive
-app.include_router(blog_generator.router, prefix="/api/v1")
-app.include_router(feature_updates.router, prefix="/api/v1/feature-updates")
-app.include_router(news_archive.router, prefix="/api/v1/news-archive")
-app.include_router(google_drive.router, prefix="/api/v1")
+# 라우터 등록 (Vercel 등에서 일부 실패해도 앱은 기동)
+def _register_routers():
+    try:
+        from app.routers import blog_generator
+        app.include_router(blog_generator.router, prefix="/api/v1")
+    except Exception as e:
+        logger.warning("blog_generator 라우터 스킵: %s", e)
+    try:
+        from app.routers import feature_updates
+        app.include_router(feature_updates.router, prefix="/api/v1/feature-updates")
+    except Exception as e:
+        logger.warning("feature_updates 라우터 스킵: %s", e)
+    try:
+        from app.routers import news_archive
+        app.include_router(news_archive.router, prefix="/api/v1/news-archive")
+    except Exception as e:
+        logger.warning("news_archive 라우터 스킵: %s", e)
+    try:
+        from app.routers import google_drive
+        app.include_router(google_drive.router, prefix="/api/v1")
+    except Exception as e:
+        logger.warning("google_drive 라우터 스킵: %s", e)
+
+_register_routers()
 
 # 의존성 주입 함수
 def get_db():
@@ -510,12 +526,13 @@ async def _run_all_startup_tasks():
         # 최적화 로깅 설정 (블로킹이므로 스레드 풀에서 실행해 이벤트 루프가 멈추지 않도록 함)
         try:
             loop = asyncio.get_event_loop()
+            _enable_file = settings.log_enable_file and os.environ.get("VERCEL") != "1"
             await loop.run_in_executor(
                 None,
                 lambda: setup_optimized_logging(
                     log_dir="logs",
                     log_level=settings.log_level,
-                    enable_file=settings.log_enable_file,
+                    enable_file=_enable_file,
                     enable_console=settings.log_enable_console,
                 ),
             )
@@ -553,9 +570,10 @@ async def _run_all_startup_tasks():
 async def _run_background_startup_tasks():
     """백그라운드에서 실행되는 초기화 작업들"""
     try:
-        # 로그 압축 (무거운 작업)
+        # 로그 압축 (무거운 작업, Vercel에서는 스킵)
         try:
-            compressed_count = compress_old_logs("logs", days=settings.log_compress_after_days)
+            _log_dir = "/tmp/logs" if os.environ.get("VERCEL") == "1" else "logs"
+            compressed_count = compress_old_logs(_log_dir, days=settings.log_compress_after_days)
             if compressed_count > 0:
                 logger.info(f"✅ {compressed_count}개의 오래된 로그 파일 압축 완료")
         except Exception as e:
