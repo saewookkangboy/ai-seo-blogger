@@ -89,6 +89,7 @@ logger = setup_logger(__name__, "app.log")
 
 # 데이터베이스 테이블 생성
 models.Base.metadata.create_all(bind=engine)
+create_indexes()
 
 # FastAPI 애플리케이션 생성
 app = FastAPI(

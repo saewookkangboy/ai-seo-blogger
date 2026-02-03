@@ -157,5 +157,4 @@ def create_indexes():
     except Exception as e:
         logger.error(f"❌ 인덱스 생성 중 오류: {e}")
 
-# 애플리케이션 시작 시 인덱스 생성
-create_indexes()
+# 주의: create_indexes()는 main.py에서 create_all() 이후에 호출됨 (테이블 생성 순서)

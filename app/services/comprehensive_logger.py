@@ -77,8 +77,17 @@ class ComprehensiveLogger:
         self.enable_file_logging = enable_file_logging
         self.enable_console_logging = enable_console_logging
 
-        # 로그 디렉토리 생성 (Vercel에서는 /tmp/logs)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
+        # 로그 디렉토리 생성. 읽기 전용 파일시스템(예: Vercel)이면 파일/DB 로깅 비활성화
+        try:
+            self.log_dir.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            self.log_dir = Path("/tmp/logs")
+            try:
+                self.log_dir.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                self.enable_file_logging = False
+                self.enable_database_logging = False
+                self.log_dir = Path(log_dir)  # 경로만 유지, 실제 쓰기 안 함
         
         # 로그 큐 (비동기 처리를 위한)
         self.log_queue = queue.Queue()
