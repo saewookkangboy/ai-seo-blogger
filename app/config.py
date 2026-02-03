@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # API Keys
     openai_api_key: Optional[str] = None
     google_api_key: Optional[str] = None
-    gemini_api_key: Optional[str] = "AIzaSyDsBBgP9R8NrLaseWWFDcdYFGrrUNbIX9A"
+    gemini_api_key: Optional[str] = None
     deepl_api_key: Optional[str] = None
     
     # Database

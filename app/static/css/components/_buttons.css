@@ -40,6 +40,8 @@
     outline-offset: 2px;
 }
 
+/* 모노크롬: primary는 이미 흑/백 사용 */
+
 /* 버튼 변형 */
 .btn-outline-custom {
     background-color: transparent;
@@ -109,7 +111,7 @@
 }
 
 .btn-info:hover:not(:disabled) {
-    background-color: var(--color-accent-hover);
+    background-color: var(--color-primary-hover);
 }
 
 /* 버튼 그룹 */

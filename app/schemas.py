@@ -14,16 +14,25 @@ class PostRequest(BaseModel):
     
     @validator('url')
     def validate_url(cls, v):
-        if v and not v.startswith(('http://', 'https://')):
+        if not v:
+            return v
+        if len(v) > 2000:
+            raise ValueError('URL은 2000자 이하여야 합니다.')
+        if not v.startswith(('http://', 'https://')):
             return f'https://{v}'
         return v
-    
+
     @validator('text')
     def validate_text(cls, v):
-        if v and len(v.strip()) < 5:
+        if not v:
+            return v
+        s = v.strip()
+        if len(s) < 5:
             raise ValueError('텍스트는 최소 5자 이상이어야 합니다.')
+        if len(s) > 100000:
+            raise ValueError('텍스트는 100000자 이하여야 합니다.')
         return v
-    
+
     @validator('keywords')
     def validate_keywords(cls, v):
         if v and len(v.strip()) < 2:

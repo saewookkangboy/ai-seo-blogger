@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends, status, File, UploadFile
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, Dict
 from fastapi import Request
 from fastapi.responses import StreamingResponse, JSONResponse
 import io
@@ -25,6 +25,7 @@ from app.services.keyword_manager import keyword_manager
 from app.services.content_length_controller import content_length_controller
 from app.services.seo_analyzer import seo_analyzer
 from app.services.google_docs_service import google_docs_service
+from app.services.ai_ethics_evaluator import ai_ethics_evaluator
 from app import crud, models, exceptions
 from app.database import SessionLocal, engine
 from app.schemas import PostRequest, PostResponse, BlogPostResponse, ErrorResponse
@@ -57,6 +58,43 @@ def get_cached_data(key: str):
 def set_cached_data(key: str, data):
     """데이터를 캐시에 저장합니다."""
     api_cache[key] = (data, datetime.now())
+
+async def evaluate_and_save_ai_ethics(db_post: models.BlogPost, content: str, title: str, metadata: Optional[Dict] = None) -> Optional[Dict]:
+    """
+    AI 윤리 평가를 수행하고 결과를 데이터베이스에 저장하는 헬퍼 함수
+    
+    Args:
+        db_post: 데이터베이스 포스트 객체
+        content: 평가할 콘텐츠
+        title: 콘텐츠 제목
+        metadata: 추가 메타데이터
+    
+    Returns:
+        평가 결과 딕셔너리 또는 None
+    """
+    try:
+        if not metadata:
+            metadata = {}
+        
+        # AI 윤리 평가 수행
+        ethics_evaluation = await ai_ethics_evaluator.evaluate_content(
+            content,
+            title,
+            metadata
+        )
+        
+        # 평가 결과를 데이터베이스에 저장
+        db_post.ai_ethics_score = ethics_evaluation['overall_score']
+        db_post.ai_ethics_evaluation = ethics_evaluation
+        db_post.ai_ethics_evaluated_at = datetime.now()
+        
+        logger.info(f"AI 윤리 평가 완료 (포스트 ID: {db_post.id}): 종합 점수 {ethics_evaluation['overall_score']:.2f}/100")
+        
+        return ethics_evaluation
+        
+    except Exception as e:
+        logger.error(f"AI 윤리 평가 중 오류 (포스트 ID: {db_post.id}): {e}")
+        return None
 
 async def archive_blog_post_to_google_docs(blog_post_data: dict, db_post: models.BlogPost) -> Optional[str]:
     """블로그 포스트를 Google Docs로 Archive 저장합니다."""
@@ -197,10 +235,13 @@ async def generate_post_with_progress(req: PostRequest, db: Session):
             
             logger.info(f"선택된 RULE: {req.rules}, MODE: {req.ai_mode}, 길이: {req.content_length}")
             
-            # 적용할 가이드라인 결정
+            # 적용할 가이드라인 결정 (리스트 또는 쉼표 구분 문자열)
             rule_guidelines = []
             if req.rules:
-                rule_guidelines = req.rules.split(',')
+                if isinstance(req.rules, list):
+                    rule_guidelines = [r.strip() for r in req.rules if r]
+                else:
+                    rule_guidelines = [r.strip() for r in str(req.rules).split(',') if r.strip()]
             logger.info(f"적용할 가이드라인: {rule_guidelines}")
             
             logger.info("AI 블로그 포스트 생성 시작")
@@ -287,6 +328,36 @@ async def generate_post_with_progress(req: PostRequest, db: Session):
                 
                 logger.info(f"데이터베이스 저장 완료 (ID: {blog_post.id})")
 
+                # 7.5단계: AI 윤리 평가
+                yield f"data: {json.dumps({'step': 7.5, 'message': 'AI 윤리 평가 중...', 'progress': 97})}\n\n"
+                await asyncio.sleep(0.1)
+                
+                try:
+                    # AI 윤리 평가 수행
+                    metadata = {
+                        'ai_mode': req.ai_mode,
+                        'keywords': extracted_keywords,
+                        'created_at': blog_post.created_at.isoformat() if blog_post.created_at else None
+                    }
+                    ethics_evaluation = await ai_ethics_evaluator.evaluate_content(
+                        result['post'],
+                        result['title'],
+                        metadata
+                    )
+                    
+                    # 평가 결과를 데이터베이스에 저장
+                    blog_post.ai_ethics_score = ethics_evaluation['overall_score']
+                    blog_post.ai_ethics_evaluation = ethics_evaluation
+                    blog_post.ai_ethics_evaluated_at = datetime.now()
+                    db.commit()
+                    db.refresh(blog_post)
+                    
+                    logger.info(f"AI 윤리 평가 완료: 종합 점수 {ethics_evaluation['overall_score']:.2f}/100")
+                    
+                except Exception as e:
+                    logger.error(f"AI 윤리 평가 중 오류: {e}")
+                    # 평가 실패해도 계속 진행
+
                 # 8단계: 완료
                 yield f"data: {json.dumps({'step': 8, 'message': '완료!', 'progress': 100})}\n\n"
                 await asyncio.sleep(0.1)
@@ -303,7 +374,9 @@ async def generate_post_with_progress(req: PostRequest, db: Session):
                         'source_url': db_source_url,
                         'created_at': blog_post.created_at.isoformat(),
                         'ai_mode': req.ai_mode,
-                        'length_report': length_report
+                        'length_report': length_report,
+                        'ai_ethics_score': blog_post.ai_ethics_score,
+                        'ai_ethics_evaluation': blog_post.ai_ethics_evaluation
                     }
                 }
                 
@@ -319,8 +392,12 @@ async def generate_post_with_progress(req: PostRequest, db: Session):
 
 @router.post("/generate-post-stream")
 async def generate_post_stream_endpoint(req: PostRequest, db: Session = Depends(get_db)):
-    """실시간 진행 상황을 전송하는 콘텐츠 생성 엔드포인트"""
-    return await generate_post_with_progress(req, db)
+    """실시간 진행 상황을 전송하는 콘텐츠 생성 엔드포인트 (SSE)"""
+    return StreamingResponse(
+        generate_post_with_progress(req, db),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+    )
 
 @router.post("/generate-post-pipeline")
 async def generate_post_pipeline_endpoint(req: PostRequest, db: Session = Depends(get_db)):
@@ -2981,6 +3058,162 @@ async def export_keywords_admin(db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"키워드 내보내기 오류: {e}")
         raise HTTPException(status_code=500, detail="키워드 내보내기 중 오류가 발생했습니다.")
+
+@router.get("/posts/{post_id}/ai-ethics")
+async def get_ai_ethics_evaluation(post_id: int, db: Session = Depends(get_db)):
+    """
+    특정 포스트의 AI 윤리 평가 결과를 조회합니다.
+    
+    Args:
+        post_id: 포스트 ID
+        db: 데이터베이스 세션
+    
+    Returns:
+        AI 윤리 평가 결과
+    """
+    try:
+        post = crud.get_post(db, post_id)
+        if not post:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"포스트 ID {post_id}를 찾을 수 없습니다."
+            )
+        
+        if not post.ai_ethics_evaluation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="이 포스트에 대한 AI 윤리 평가 결과가 없습니다."
+            )
+        
+        return JSONResponse({
+            "success": True,
+            "post_id": post_id,
+            "title": post.title,
+            "ai_ethics_score": post.ai_ethics_score,
+            "evaluation": post.ai_ethics_evaluation,
+            "evaluated_at": post.ai_ethics_evaluated_at.isoformat() if post.ai_ethics_evaluated_at else None
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"AI 윤리 평가 결과 조회 중 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"AI 윤리 평가 결과 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+
+@router.post("/posts/{post_id}/evaluate-ai-ethics")
+async def evaluate_post_ai_ethics(post_id: int, db: Session = Depends(get_db)):
+    """
+    특정 포스트에 대해 AI 윤리 평가를 수행합니다.
+    
+    Args:
+        post_id: 포스트 ID
+        db: 데이터베이스 세션
+    
+    Returns:
+        평가 결과
+    """
+    try:
+        post = crud.get_post(db, post_id)
+        if not post:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"포스트 ID {post_id}를 찾을 수 없습니다."
+            )
+        
+        # 메타데이터 준비
+        metadata = {
+            'ai_mode': getattr(post, 'ai_mode', None),
+            'keywords': post.keywords,
+            'created_at': post.created_at.isoformat() if post.created_at else None
+        }
+        
+        # AI 윤리 평가 수행
+        ethics_evaluation = await evaluate_and_save_ai_ethics(
+            post,
+            post.content_html,
+            post.title,
+            metadata
+        )
+        
+        if not ethics_evaluation:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="AI 윤리 평가 수행 중 오류가 발생했습니다."
+            )
+        
+        db.commit()
+        db.refresh(post)
+        
+        return JSONResponse({
+            "success": True,
+            "message": "AI 윤리 평가가 완료되었습니다.",
+            "post_id": post_id,
+            "ai_ethics_score": post.ai_ethics_score,
+            "evaluation": post.ai_ethics_evaluation,
+            "evaluated_at": post.ai_ethics_evaluated_at.isoformat() if post.ai_ethics_evaluated_at else None
+        })
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"AI 윤리 평가 수행 중 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"AI 윤리 평가 수행 중 오류가 발생했습니다: {str(e)}"
+        )
+
+@router.get("/posts/ai-ethics/stats")
+async def get_ai_ethics_stats(db: Session = Depends(get_db)):
+    """
+    전체 포스트의 AI 윤리 평가 통계를 조회합니다.
+    
+    Returns:
+        AI 윤리 평가 통계
+    """
+    try:
+        posts = crud.get_posts(db, skip=0, limit=10000)
+        
+        evaluated_posts = [p for p in posts if p.ai_ethics_score is not None]
+        
+        if not evaluated_posts:
+            return JSONResponse({
+                "success": True,
+                "total_posts": len(posts),
+                "evaluated_posts": 0,
+                "message": "평가된 포스트가 없습니다."
+            })
+        
+        scores = [p.ai_ethics_score for p in evaluated_posts]
+        
+        # 통계 계산
+        stats = {
+            "total_posts": len(posts),
+            "evaluated_posts": len(evaluated_posts),
+            "average_score": sum(scores) / len(scores),
+            "min_score": min(scores),
+            "max_score": max(scores),
+            "score_distribution": {
+                "excellent": len([s for s in scores if s >= 90]),
+                "good": len([s for s in scores if 80 <= s < 90]),
+                "fair": len([s for s in scores if 70 <= s < 80]),
+                "poor": len([s for s in scores if s < 70])
+            }
+        }
+        
+        return JSONResponse({
+            "success": True,
+            "stats": stats
+        })
+        
+    except Exception as e:
+        logger.error(f"AI 윤리 평가 통계 조회 중 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"AI 윤리 평가 통계 조회 중 오류가 발생했습니다: {str(e)}"
+        )
 
 @router.post("/posts/generate-from-keyword")
 async def generate_post_from_keyword(keyword_data: dict, db: Session = Depends(get_db)):

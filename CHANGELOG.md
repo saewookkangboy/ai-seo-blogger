@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-02-03] - 역할별 업데이트 및 서비스 연동 정리 (Dev Agent Kit)
+
+### Fixed
+- **API 경로**: 프론트엔드 콘텐츠 생성 스트리밍을 `/api/v1/generate-post-stream`로 통일, SSE `Content-Type: text/event-stream` 적용.
+- **스트리밍**: `StreamingResponse`로 스트림 래핑, 진행 단계(step) 이벤트로 진행률 표시 연동.
+- **규칙 파라미터**: `req.rules`가 리스트일 때도 처리하도록 `blog_generator` 수정.
+
+### Added
+- **SSE 파싱**: 청크 경계를 고려한 버퍼 파싱으로 스트리밍 안정성 향상.
+- **입력 검증**: `PostRequest`에 URL 2000자, 텍스트 100000자 상한 추가 (보안·안정성).
+- **마이그레이션**: `migrate_db.py`에 AI 윤리 컬럼(`ai_ethics_score`, `ai_ethics_evaluation`, `ai_ethics_evaluated_at`) 추가.
+
+### Security
+- **설정**: `config.py`에서 Gemini API 키 기본값 제거(환경 변수만 사용).
+
+### Documentation
+- **역할별 업데이트**: `docs/ROLE_UPDATES.md`, `TODO.md`, `.project-data/todos.json`로 역할별 To-do 및 체크리스트 정리.
+- **README**: Spec·To-do·역할별 업데이트 링크 반영.
+
+---
+
 ## [2025-11-26] - Advanced SEO Guidelines Implementation
 
 ### Added

@@ -36,6 +36,92 @@
             </p>
         </section>
 
+        <!-- Target Analyzer Section -->
+        <section id="target-analyzer" class="target-analyzer-section mb-5">
+            <div class="card-custom">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 class="section-title mb-0">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        타겟 분석
+                    </h2>
+                    <span class="badge-custom">AI 분석</span>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <label for="target_keyword" class="form-label-custom">분석할 타겟 키워드 또는 주제</label>
+                        <input 
+                            type="text" 
+                            class="form-control-custom" 
+                            id="target_keyword" 
+                            placeholder="예: 인공지능, 마케팅 전략, 타겟 고객 등"
+                        >
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="target_type" class="form-label-custom">분석 유형</label>
+                        <select class="form-control-custom" id="target_type">
+                            <option value="keyword">키워드 분석</option>
+                            <option value="audience">오디언스 분석</option>
+                            <option value="competitor">경쟁자 분석</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="ai_provider" class="form-label-custom">AI 제공자</label>
+                        <select class="form-control-custom" id="ai_provider">
+                            <option value="openai">OpenAI</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="additional_context" class="form-label-custom">추가 컨텍스트 (선택사항)</label>
+                        <textarea 
+                            class="form-control-custom" 
+                            id="additional_context" 
+                            rows="3"
+                            placeholder="추가로 제공할 컨텍스트 정보를 입력하세요..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <button 
+                            type="button" 
+                            class="btn-custom btn-primary" 
+                            id="analyze_target_btn"
+                        >
+                            <i class="bi bi-search me-2"></i>
+                            분석 시작
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Analysis Results -->
+                <div id="target_analysis_results" class="mt-4" style="display: none;">
+                    <div class="card-custom bg-light">
+                        <div class="card-body">
+                            <h5 class="mb-3">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                분석 결과
+                            </h5>
+                            <div id="target_analysis_content" class="analysis-content">
+                                <!-- 분석 결과가 여기에 표시됩니다 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="target_analysis_loading" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">분석 중...</span>
+                    </div>
+                    <p class="mt-2">AI가 타겟을 분석하고 있습니다...</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Generator Form -->
         {% include 'components/_generator_form.html' %}
         

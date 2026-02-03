@@ -1,152 +1,149 @@
 /* ========================================
-   CSS 변수 시스템 (Design Tokens)
+   CSS 변수 시스템 — 모노크롬·미니멀 디자인 (UI/UX 리뉴얼)
    ======================================== */
 
 :root {
     /* ========================================
-       색상 시스템 (Color System)
+       색상 시스템 — 단조로운 그레이 스케일만 사용
        ======================================== */
-    
-    /* 기본 색상 */
-    --color-primary: #111827;
+
+    /* 기본 액션/강조 (흑에 가까운 그레이) */
+    --color-primary: #0a0a0a;
     --color-primary-hover: #000000;
-    --color-secondary: #6b7280;
-    --color-accent: #3b82f6;
-    --color-accent-hover: #2563eb;
-    
-    /* 배경 색상 */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9fafb;
-    --bg-tertiary: #f3f4f6;
-    --bg-overlay: rgba(0, 0, 0, 0.5);
-    
-    /* 텍스트 색상 */
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-tertiary: #9ca3af;
-    --text-accent: #3b82f6;
-    --text-inverse: #ffffff;
-    --text-muted: #6b7280;
-    
-    /* 상태 색상 */
-    --color-success: #10b981;
-    --color-success-bg: #d1fae5;
-    --color-warning: #f59e0b;
-    --color-warning-bg: #fef3c7;
-    --color-error: #ef4444;
-    --color-error-bg: #fee2e2;
-    --color-info: #3b82f6;
-    --color-info-bg: #dbeafe;
-    
-    /* 테두리 색상 */
-    --border-color: #e5e7eb;
-    --border-hover: #d1d5db;
-    --border-focus: #3b82f6;
-    --border-error: #ef4444;
-    
+
+    /* 보조 (중간 그레이, 액센트 대체) */
+    --color-secondary: #525252;
+    --color-accent: #404040;
+    --color-accent-hover: #262626;
+
+    /* 배경 */
+    --bg-primary: #fafafa;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #e5e5e5;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+
+    /* 텍스트 */
+    --text-primary: #0a0a0a;
+    --text-secondary: #525252;
+    --text-tertiary: #737373;
+    --text-accent: #262626;
+    --text-inverse: #fafafa;
+    --text-muted: #737373;
+
+    /* 상태 — 그레이 스케일 내 구분 */
+    --color-success: #404040;
+    --color-success-bg: #e5e5e5;
+    --color-warning: #525252;
+    --color-warning-bg: #f0f0f0;
+    --color-error: #171717;
+    --color-error-bg: #e5e5e5;
+    --color-info: #404040;
+    --color-info-bg: #f0f0f0;
+
+    /* 테두리 */
+    --border-color: #e5e5e5;
+    --border-hover: #a3a3a3;
+    --border-focus: #0a0a0a;
+    --border-error: #171717;
+
     /* ========================================
-       타이포그래피 (Typography)
+       타이포그래피
        ======================================== */
-    
-    /* 폰트 패밀리 */
-    --font-family-base: 'IBM Plex Sans KR', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-family-mono: 'Courier New', monospace;
-    
-    /* 폰트 크기 */
-    --font-size-xs: 0.75rem;      /* 12px */
-    --font-size-sm: 0.875rem;    /* 14px */
-    --font-size-base: 1rem;      /* 16px */
-    --font-size-lg: 1.125rem;    /* 18px */
-    --font-size-xl: 1.25rem;     /* 20px */
-    --font-size-2xl: 1.5rem;     /* 24px */
-    --font-size-3xl: 1.875rem;   /* 30px */
-    --font-size-4xl: 2.25rem;    /* 36px */
-    --font-size-5xl: 3rem;       /* 48px */
-    
-    /* 폰트 굵기 */
+
+    --font-family-base: 'IBM Plex Sans KR', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-family-mono: ui-monospace, 'Cascadia Code', monospace;
+
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+
     --font-weight-light: 300;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --font-weight-extrabold: 800;
-    
-    /* 줄 간격 */
+
     --line-height-tight: 1.25;
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.75;
-    
-    /* 글자 간격 */
-    --letter-spacing-tight: -0.05em;
+
+    --letter-spacing-tight: -0.04em;
     --letter-spacing-normal: 0;
-    --letter-spacing-wide: 0.025em;
-    
+    --letter-spacing-wide: 0.02em;
+
     /* ========================================
-       간격 시스템 (Spacing System)
+       간격 (Spacing)
        ======================================== */
-    
+
     --spacing-0: 0;
-    --spacing-1: 0.25rem;   /* 4px */
-    --spacing-2: 0.5rem;    /* 8px */
-    --spacing-3: 0.75rem;   /* 12px */
-    --spacing-4: 1rem;      /* 16px */
-    --spacing-5: 1.25rem;   /* 20px */
-    --spacing-6: 1.5rem;    /* 24px */
-    --spacing-8: 2rem;      /* 32px */
-    --spacing-10: 2.5rem;   /* 40px */
-    --spacing-12: 3rem;     /* 48px */
-    --spacing-16: 4rem;     /* 64px */
-    --spacing-20: 5rem;     /* 80px */
-    --spacing-24: 6rem;     /* 96px */
-    
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-5: 1.25rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+    --spacing-20: 5rem;
+    --spacing-24: 6rem;
+
     /* ========================================
-       레이아웃 (Layout)
+       레이아웃
        ======================================== */
-    
-    --container-max-width: 1200px;
+
+    --container-max-width: 720px;
     --container-padding: 1.5rem;
-    --header-height: 70px;
-    --sidebar-width: 280px;
-    --footer-height: 60px;
-    
+    --header-height: 64px;
+    --sidebar-width: 260px;
+    --footer-height: 56px;
+
     /* ========================================
-       테두리 반경 (Border Radius)
+       테두리 반경 — 절제된 라운드
        ======================================== */
-    
+
     --radius-none: 0;
-    --radius-sm: 0.25rem;    /* 4px */
-    --radius-md: 0.375rem;   /* 6px */
-    --radius-lg: 0.5rem;     /* 8px */
-    --radius-xl: 0.75rem;    /* 12px */
-    --radius-2xl: 1rem;      /* 16px */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.5rem;
+    --radius-2xl: 0.75rem;
     --radius-full: 9999px;
-    
+
     /* ========================================
-       그림자 (Shadows)
+       그림자 — 미니멀
        ======================================== */
-    
+
     --shadow-none: none;
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-    
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.1);
+    --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+
     /* ========================================
-       전환 효과 (Transitions)
+       전환
        ======================================== */
-    
+
     --transition-fast: 0.15s ease;
     --transition-base: 0.2s ease;
-    --transition-slow: 0.3s ease;
-    --transition-slower: 0.5s ease;
-    
+    --transition-slow: 0.25s ease;
+    --transition-slower: 0.4s ease;
+
     /* ========================================
-       Z-Index 레이어 (Z-Index Layers)
+       Z-Index
        ======================================== */
-    
+
     --z-base: 0;
     --z-dropdown: 1000;
     --z-sticky: 1020;
@@ -156,26 +153,20 @@
     --z-popover: 1060;
     --z-tooltip: 1070;
     --z-toast: 1080;
-    
+
     /* ========================================
-       브레이크포인트 (Breakpoints)
+       브레이크포인트
        ======================================== */
-    
+
     --breakpoint-sm: 640px;
     --breakpoint-md: 768px;
     --breakpoint-lg: 1024px;
     --breakpoint-xl: 1280px;
     --breakpoint-2xl: 1536px;
-    
-    /* ========================================
-       기타 (Miscellaneous)
-       ======================================== */
-    
-    /* 투명도 */
-    --opacity-disabled: 0.6;
-    --opacity-hover: 0.8;
-    
-    /* 블러 효과 */
+
+    --opacity-disabled: 0.5;
+    --opacity-hover: 0.85;
+
     --blur-sm: 4px;
     --blur-md: 8px;
     --blur-lg: 12px;
@@ -183,28 +174,36 @@
 }
 
 /* ========================================
-   다크 모드 지원 (Dark Mode Support)
+   다크 모드 — 모노크롬 유지
    ======================================== */
 
 @media (prefers-color-scheme: dark) {
     :root {
-        /* 배경 색상 */
-        --bg-primary: #1a1a1a;
-        --bg-secondary: #2d2d2d;
-        --bg-tertiary: #3a3a3a;
-        
-        /* 텍스트 색상 */
-        --text-primary: #ffffff;
-        --text-secondary: #d1d5db;
-        --text-tertiary: #9ca3af;
-        
-        /* 테두리 색상 */
-        --border-color: #404040;
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #171717;
+        --bg-tertiary: #262626;
+
+        --text-primary: #fafafa;
+        --text-secondary: #a3a3a3;
+        --text-tertiary: #737373;
+        --text-accent: #e5e5e5;
+        --text-inverse: #0a0a0a;
+
+        --border-color: #262626;
         --border-hover: #525252;
-        
-        /* 그림자 조정 */
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        --border-focus: #fafafa;
+
+        --color-primary: #fafafa;
+        --color-primary-hover: #ffffff;
+        --color-accent: #a3a3a3;
+        --color-accent-hover: #d4d4d4;
+
+        --color-success-bg: #262626;
+        --color-warning-bg: #262626;
+        --color-error-bg: #262626;
+        --color-info-bg: #262626;
+
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 }
-

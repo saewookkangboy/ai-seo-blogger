@@ -112,6 +112,12 @@ make help        # 도움말 표시
 
 ```
 ai-seo-blogger/
+├── .spec-kit/                    # dev-agent-kit 사양 문서
+│   ├── 00-ai-seo-blogger-overview.md
+│   ├── 01-blog-generation-api.md
+│   └── 02-seo-geo-aio.md
+├── .project-data/                # dev-agent-kit To-do (JSON)
+│   └── todos.json
 ├── app/                          # 메인 애플리케이션 디렉토리
 │   ├── main.py                   # FastAPI 애플리케이션 진입점
 │   ├── config.py                 # 설정 관리
@@ -121,27 +127,49 @@ ai-seo-blogger/
 │   ├── schemas.py                # Pydantic 스키마
 │   ├── routers/                  # API 라우터
 │   │   ├── blog_generator.py     # 블로그 생성 API
-│   │   ├── feature_updates.py     # 기능 업데이트 API
+│   │   ├── feature_updates.py    # 기능 업데이트 API
 │   │   ├── news_archive.py       # 뉴스 아카이브 API
-│   │   └── google_drive.py       # Google Drive API
+│   │   └── google_drive.py      # Google Drive API
 │   ├── services/                 # 비즈니스 로직 서비스
-│   │   ├── content_generator.py  # AI 콘텐츠 생성
-│   │   ├── translator.py         # 번역 서비스
-│   │   ├── seo_analyzer.py       # SEO 분석
-│   │   ├── crawler.py            # 웹 크롤러
-│   │   └── ...                   # 기타 서비스
+│   │   ├── content_generator.py # AI 콘텐츠 생성
+│   │   ├── translator.py        # 번역 서비스
+│   │   ├── seo_analyzer.py      # SEO 분석
+│   │   ├── crawler.py           # 웹 크롤러
+│   │   └── ...                  # 기타 서비스
 │   ├── templates/                # HTML 템플릿
-│   │   ├── index.html            # 메인 페이지
-│   │   ├── admin.html            # 관리자 페이지
+│   │   ├── index.html           # 메인 페이지
+│   │   ├── admin.html           # 관리자 페이지
 │   │   └── ...
 │   └── static/                   # 정적 파일
 ├── tests/                        # 테스트 코드
+├── TODO.md                       # dev-agent-kit To-do (마크다운)
 ├── requirements.txt              # Python 의존성
 ├── Dockerfile                    # Docker 설정
 ├── docker-compose.yml            # Docker Compose 설정
 ├── Makefile                      # 빌드 스크립트
 └── README.md                     # 프로젝트 문서
 ```
+
+## 🤖 Cursor Dev Agent Kit 스킬
+
+이 프로젝트에는 [dev-agent-kit](https://github.com/saewookkangboy/dev-agent-kit) 기능을 Cursor에서 사용할 수 있는 **프로젝트 스킬**이 포함되어 있습니다.
+
+- **위치**: `.cursor/skills/dev-agent-kit/`
+- **기능**: Spec-kit 사양 문서, To-do 관리, Agent Role 기반 개발, SEO/AI SEO/GEO/AIO 최적화, API 키 관리
+- **사용법**: 채팅에서 "사양 문서 만들어줘", "To-do 추가해줘", "Backend 역할로 API 리뷰해줘", "SEO·GEO 분석해줘" 등으로 요청하면 해당 워크플로우가 적용됩니다.
+
+### dev-agent-kit 참조 링크
+
+| 항목 | 경로/문서 |
+|------|-----------|
+| **역할별 업데이트** | [docs/ROLE_UPDATES.md](docs/ROLE_UPDATES.md) — PM, Frontend, Backend, Server/DB, Security, UI/UX, AI Marketing 역할별 진행 항목 |
+| **To-do** | [TODO.md](TODO.md), [.project-data/todos.json](.project-data/todos.json) |
+| **Spec (사양)** | [.spec-kit/](.spec-kit/), [docs/specs/](docs/specs/) — 사양 문서 |
+| **Role (역할)** | [.cursor/skills/dev-agent-kit/reference.md](.cursor/skills/dev-agent-kit/reference.md) — PM, Frontend, Backend, Security, UI/UX, AI Marketing Researcher |
+| **SEO / GEO** | [AI_SEO_AEO_GEO_GUIDELINES_REPORT.md](AI_SEO_AEO_GEO_GUIDELINES_REPORT.md), [.spec-kit/02-seo-geo-aio.md](.spec-kit/02-seo-geo-aio.md) |
+| **상세 템플릿·예시** | [.cursor/skills/dev-agent-kit/reference.md](.cursor/skills/dev-agent-kit/reference.md), [examples.md](.cursor/skills/dev-agent-kit/examples.md) |
+
+각 업무 역할별로 진행할 업데이트는 [docs/ROLE_UPDATES.md](docs/ROLE_UPDATES.md)를 참고하고, 채팅에서 "PM 역할로 To-do 검토해줘", "Frontend 역할로 결과 화면 점검해줘"처럼 **역할을 지정**해 요청하면 해당 관점으로 진행할 수 있습니다.
 
 ## 📚 추가 문서
 

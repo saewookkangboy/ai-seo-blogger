@@ -7,6 +7,9 @@
          aria-current="{% if request.path == '/' %}page{% endif %}">생성하기</a>
       <a class="nav-link-custom {% if '/history' in request.path %}active{% endif %}" href="/history" role="menuitem"
          aria-current="{% if '/history' in request.path %}page{% endif %}">기록</a>
+      <a class="nav-link-custom {% if request.path == '/' %}active{% endif %}" href="/#target-analyzer" role="menuitem"
+         aria-current="{% if request.path == '/' %}page{% endif %}">
+        <i class="bi bi-graph-up-arrow me-1"></i>타겟 분석</a>
       <a class="nav-link-custom {% if '/admin' in request.path %}active{% endif %}" href="/admin" role="menuitem"
          aria-current="{% if '/admin' in request.path %}page{% endif %}">관리자</a>
 
@@ -31,6 +34,8 @@
   <div class="container-custom py-3 d-flex flex-column gap-2">
     <a class="btn-custom text-decoration-none" href="/" role="menuitem">생성하기</a>
     <a class="nav-link-custom" href="/history" role="menuitem">기록</a>
+    <a class="nav-link-custom" href="/#target-analyzer" role="menuitem">
+      <i class="bi bi-graph-up-arrow me-1"></i>타겟 분석</a>
     <a class="nav-link-custom" href="/admin" role="menuitem">관리자</a>
   </div>
 </div>

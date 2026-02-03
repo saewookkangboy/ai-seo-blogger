@@ -31,7 +31,10 @@ def migrate_database():
             new_columns = [
                 ("category", "VARCHAR(50) DEFAULT '기타'"),
                 ("status", "VARCHAR(20) DEFAULT 'draft'"),
-                ("description", "VARCHAR(500)")
+                ("description", "VARCHAR(500)"),
+                ("ai_ethics_score", "REAL"),
+                ("ai_ethics_evaluation", "TEXT"),
+                ("ai_ethics_evaluated_at", "DATETIME"),
             ]
             
             for col_name, col_type in new_columns:

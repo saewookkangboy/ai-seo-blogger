@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Depends, HTTPException, Body, Query, Form, status
+from typing import Optional
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -472,10 +473,10 @@ async def get_daily_stats(
 # 애플리케이션 시작 이벤트
 @app.on_event("startup")
 async def startup_event():
-    """애플리케이션 시작 시 실행되는 이벤트 (최적화: 빠른 시작)"""
+    """애플리케이션 시작 시 실행되는 이벤트 (최적화: 즉시 시작)"""
     logger.info("=== AI SEO Blog Generator 시작 ===")
     
-    # 필수 작업만 동기적으로 실행 (서버 시작을 빠르게)
+    # 최소한의 작업만 동기적으로 실행 (서버를 즉시 시작 가능하게)
     try:
         # 최적화 로깅 설정 (최소한만)
         setup_optimized_logging(
@@ -488,31 +489,41 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"로깅 설정 중 오류: {e}")
     
-    # 데이터베이스 인덱스 생성 (필수)
+    # 모든 초기화 작업을 백그라운드로 이동 (서버를 즉시 시작)
+    asyncio.create_task(_run_all_startup_tasks())
+    
+    logger.info("✅ 서버 시작 완료 (초기화 작업은 백그라운드에서 진행 중)")
+
+
+async def _run_all_startup_tasks():
+    """모든 초기화 작업을 백그라운드에서 실행"""
     try:
-        create_indexes()
-        logger.info("✅ 데이터베이스 인덱스 생성 완료")
+        # 데이터베이스 인덱스 생성
+        try:
+            create_indexes()
+            logger.info("✅ 데이터베이스 인덱스 생성 완료")
+        except Exception as e:
+            logger.warning(f"인덱스 생성 중 오류: {e}")
+        
+        # Redis 캐시 초기화
+        try:
+            redis_cache = get_redis_cache()
+            logger.info("✅ 캐시 초기화 완료")
+        except Exception as e:
+            logger.warning(f"캐시 초기화 실패: {e}")
+        
+        # 백그라운드 작업 큐 시작
+        try:
+            background_queue.start()
+            logger.info("✅ 백그라운드 작업 큐 시작")
+        except Exception as e:
+            logger.warning(f"백그라운드 작업 큐 시작 실패: {e}")
+        
+        # 나머지 무거운 작업들
+        await _run_background_startup_tasks()
+        
     except Exception as e:
-        logger.warning(f"인덱스 생성 중 오류: {e}")
-    
-    # Redis 캐시 초기화 (빠른 작업)
-    try:
-        redis_cache = get_redis_cache()
-        logger.info("✅ 캐시 초기화 완료")
-    except Exception as e:
-        logger.warning(f"캐시 초기화 실패: {e}")
-    
-    # 백그라운드 작업 큐 시작 (필수)
-    try:
-        background_queue.start()
-        logger.info("✅ 백그라운드 작업 큐 시작")
-    except Exception as e:
-        logger.warning(f"백그라운드 작업 큐 시작 실패: {e}")
-    
-    # 나머지 작업들은 비동기로 백그라운드에서 실행
-    asyncio.create_task(_run_background_startup_tasks())
-    
-    logger.info("✅ 서버 시작 완료 (백그라운드 초기화 진행 중)")
+        logger.error(f"초기화 작업 중 오류: {e}")
 
 
 async def _run_background_startup_tasks():
@@ -2080,6 +2091,103 @@ async def get_readme_update_history(limit: int = 10):
     except Exception as e:
         log_error("README 업데이트 이력 조회 실패", {"error": str(e)})
         raise HTTPException(status_code=500, detail=f"README 업데이트 이력 조회 실패: {e}")
+
+# 타겟 분석 API 엔드포인트
+from app.services.target_analyzer import analyze_target
+
+@app.post("/api/v1/target/analyze")
+async def analyze_target_endpoint(
+    target_keyword: str = Body(..., description="분석할 타겟 키워드 또는 주제"),
+    target_type: str = Body("keyword", description="분석 유형: keyword, audience, competitor"),
+    additional_context: Optional[str] = Body(None, description="추가 컨텍스트 정보"),
+    use_gemini: bool = Body(False, description="Gemini API 사용 여부")
+):
+    """AI를 사용하여 타겟 분석을 수행합니다."""
+    try:
+        logger.info(f"타겟 분석 요청: {target_keyword} ({target_type})")
+        
+        # 타겟 타입 검증
+        if target_type not in ["keyword", "audience", "competitor"]:
+            raise HTTPException(
+                status_code=400,
+                detail="target_type은 'keyword', 'audience', 'competitor' 중 하나여야 합니다."
+            )
+        
+        # 타겟 분석 수행
+        result = await analyze_target(
+            target_keyword=target_keyword,
+            target_type=target_type,
+            additional_context=additional_context,
+            use_gemini=use_gemini
+        )
+        
+        log_system("타겟 분석 완료", {
+            "target": target_keyword,
+            "type": target_type,
+            "model": "gemini" if use_gemini else "openai"
+        })
+        
+        return {
+            "success": True,
+            "data": result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"타겟 분석 중 오류: {e}")
+        log_error("타겟 분석 실패", {"error": str(e), "target": target_keyword})
+        raise HTTPException(
+            status_code=500,
+            detail=f"타겟 분석 실패: {str(e)}"
+        )
+
+@app.get("/api/v1/target/analyze")
+async def analyze_target_get(
+    target_keyword: str = Query(..., description="분석할 타겟 키워드 또는 주제"),
+    target_type: str = Query("keyword", description="분석 유형: keyword, audience, competitor"),
+    additional_context: Optional[str] = Query(None, description="추가 컨텍스트 정보"),
+    use_gemini: bool = Query(False, description="Gemini API 사용 여부")
+):
+    """AI를 사용하여 타겟 분석을 수행합니다. (GET 방식)"""
+    try:
+        logger.info(f"타겟 분석 요청 (GET): {target_keyword} ({target_type})")
+        
+        # 타겟 타입 검증
+        if target_type not in ["keyword", "audience", "competitor"]:
+            raise HTTPException(
+                status_code=400,
+                detail="target_type은 'keyword', 'audience', 'competitor' 중 하나여야 합니다."
+            )
+        
+        # 타겟 분석 수행
+        result = await analyze_target(
+            target_keyword=target_keyword,
+            target_type=target_type,
+            additional_context=additional_context,
+            use_gemini=use_gemini
+        )
+        
+        log_system("타겟 분석 완료", {
+            "target": target_keyword,
+            "type": target_type,
+            "model": "gemini" if use_gemini else "openai"
+        })
+        
+        return {
+            "success": True,
+            "data": result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"타겟 분석 중 오류: {e}")
+        log_error("타겟 분석 실패", {"error": str(e), "target": target_keyword})
+        raise HTTPException(
+            status_code=500,
+            detail=f"타겟 분석 실패: {str(e)}"
+        )
 
 if __name__ == "__main__":
     uvicorn.run(

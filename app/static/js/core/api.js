@@ -9,15 +9,19 @@ export class APIClient {
     }
 
     /**
-     * 콘텐츠 생성 (스트리밍)
+     * 콘텐츠 생성 (스트리밍) — /api/v1/generate-post-stream 사용
      */
     async *generateContentStream(data) {
-        const response = await fetch(`${this.baseURL}/api/generate`, {
+        const body = {
+            ...data,
+            content_length: data.content_length != null ? String(data.content_length) : '3000',
+        };
+        const response = await fetch(`${this.baseURL}/api/v1/generate-post-stream`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -26,14 +30,17 @@ export class APIClient {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let buffer = '';
 
         try {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                const chunk = value ? decoder.decode(value, { stream: true }) : '';
+                if (chunk) buffer += chunk;
+                if (done && !buffer.trim()) break;
 
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
+                const lines = buffer.split('\n');
+                buffer = done ? '' : (lines.pop() ?? '');
 
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
@@ -45,6 +52,7 @@ export class APIClient {
                         }
                     }
                 }
+                if (done) break;
             }
         } finally {
             reader.releaseLock();
@@ -52,15 +60,19 @@ export class APIClient {
     }
 
     /**
-     * 콘텐츠 생성 (일반)
+     * 콘텐츠 생성 (일반, 비스트리밍)
      */
     async generateContent(data) {
-        const response = await fetch(`${this.baseURL}/api/generate`, {
+        const body = {
+            ...data,
+            content_length: data.content_length != null ? String(data.content_length) : '3000',
+        };
+        const response = await fetch(`${this.baseURL}/api/v1/generate-post`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -89,6 +101,48 @@ export class APIClient {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return await response.json();
+    }
+
+    /**
+     * POST 요청 (범용)
+     */
+    async post(url, data) {
+        const response = await fetch(`${this.baseURL}${url}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
+            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    }
+
+    /**
+     * GET 요청 (범용)
+     */
+    async get(url, params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const fullUrl = queryString ? `${this.baseURL}${url}?${queryString}` : `${this.baseURL}${url}`;
+        
+        const response = await fetch(fullUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
+            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        }
+
         return await response.json();
     }
 }

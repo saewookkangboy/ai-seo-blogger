@@ -71,6 +71,15 @@ export class ContentGenerator {
                     break;
                 }
 
+                // 백엔드 step 이벤트 (progress, message)
+                if (chunk.step !== undefined && chunk.message !== undefined) {
+                    onProgress?.({
+                        content: fullContent,
+                        progress: chunk.progress ?? 0,
+                        message: chunk.message || '처리 중...',
+                    });
+                    continue;
+                }
                 if (chunk.type === 'content') {
                     fullContent += chunk.data;
                     onProgress?.({
@@ -78,9 +87,19 @@ export class ContentGenerator {
                         progress: chunk.progress || 0,
                         message: chunk.message || '생성 중...',
                     });
-                } else if (chunk.type === 'complete') {
-                    onComplete?.(chunk.data);
+                } else if (chunk.success && chunk.data) {
+                    // 최종 결과 (AI 윤리 평가 결과 포함)
+                    const completeData = {
+                        ...chunk.data,
+                        content: chunk.data.content || fullContent,
+                    };
+                    onComplete?.(completeData);
                     break;
+                } else if (chunk.type === 'complete') {
+                    onComplete?.(chunk.data || { content: fullContent });
+                    break;
+                } else if (chunk.error) {
+                    throw new Error(chunk.error || '생성 중 오류가 발생했습니다.');
                 } else if (chunk.type === 'error') {
                     throw new Error(chunk.message || '생성 중 오류가 발생했습니다.');
                 }

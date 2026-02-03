@@ -1,0 +1,33 @@
+# Dev Agent Kit — 다중 역할 PR 코드리뷰 자동화
+# PR 생성/업데이트 시 7가지 역할(PM, Frontend, Backend, Server/DB, Security, UI/UX, AI Marketing Researcher) 체크리스트 기반 리뷰 생성
+
+name: PR Review (Dev Agent Kit)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write   # PR 코멘트 게시용
+
+jobs:
+  pr-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Run multi-role PR review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/pr_review_multi_role.py --pr ${{ github.event.pull_request.number }} --post
+        continue-on-error: true  # 실패해도 PR 상태에 영향 없음

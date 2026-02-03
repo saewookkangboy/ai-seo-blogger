@@ -38,6 +38,8 @@
     padding: 0 var(--container-padding);
 }
 
+/* 모노크롬 리뉴얼: 단조로운 톤 유지 */
+
 /* ========================================
    히어로 섹션
    ======================================== */
@@ -53,16 +55,13 @@
     letter-spacing: var(--letter-spacing-tight);
     line-height: var(--line-height-tight);
     margin-bottom: var(--spacing-6);
-    background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .hero-subtitle {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     color: var(--text-secondary);
-    max-width: 600px;
+    max-width: 540px;
     margin: 0 auto var(--spacing-10);
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-relaxed);

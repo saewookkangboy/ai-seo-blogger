@@ -84,6 +84,16 @@ def clear_specific_cache(text: str, keywords: str, content_length: str, ai_mode:
 # 동시 생성 제어를 위한 세마포어
 generation_semaphore = asyncio.Semaphore(MAX_CONCURRENT_GENERATIONS)
 
+# dev-agent-kit / .spec-kit/03-content-creation.md 기반 콘텐츠 품질 체크리스트 (AI SEO·GEO·AIO)
+def _get_content_quality_checklist() -> str:
+    """프롬프트에 주입할 콘텐츠 품질·최적화 체크리스트 문자열. AI SEO, GEO, 시맨틱 HTML 요구사항 반영."""
+    return """
+[콘텐츠 품질 및 최적화 체크리스트]
+- **AI SEO**: 타겟 키워드와 LSI 키워드를 제목·헤딩·첫 문단에 자연스럽게 포함. 키워드 밀도와 가독성 유지(과도한 삽입 금지). 제목 60자 이내, 메타 설명 160자 이내.
+- **GEO(생성형 엔진)**: FAQ 스키마 친화(질문-답변 블록 또는 faq-section), HowTo/단계별 가이드(번호 리스트·단계 구분), Article 스키마 친화(명확한 본문·리스트). 인용·출처·신뢰도 강화(주장 시 근거·출처 언급). AI 엔진 친화적 명확한 문단·리스트·소제목 구조.
+- **시맨틱 HTML**: H1 1회, H2/H3 계층 준수, <p>, <ul>/<ol>, <section> 등 의미 구조. E-E-A-T(경험·전문성·권위·신뢰성) 신호 강화.
+"""
+
 def is_gemini_quota_exceeded(error_message: str) -> bool:
     """Gemini API 할당량 초과 오류인지 확인"""
     quota_error_patterns = [
@@ -277,7 +287,8 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
 - 주어진 주제를 확장하여 풍부한 정보를 제공하세요.
 """
 
-        # 프롬프트 구성
+        # 프롬프트 구성 (dev-agent-kit / .spec-kit/03-content-creation 반영)
+        content_checklist = _get_content_quality_checklist()
         prompt = f"""
 당신은 전문적인 AI SEO 블로그 작가입니다. 다음 지침에 따라 고품질의 한국어 블로그 포스트를 작성해주세요.
 
@@ -291,10 +302,10 @@ async def _create_blog_post_with_gemini(text: str, keywords: str, rule_guideline
 
 [핵심 요구사항]
 1. **균형 잡힌 관점 (Responsible AI)**: 편향되지 않고 객관적이며 윤리적인 관점을 유지하세요. 다양한 시각을 고려하여 균형 잡힌 정보를 제공하세요.
-2. **SEO 및 AI 최적화**:
-   - 선택된 최적화 옵션에 맞춰 글을 구성하세요.
-   - 키워드를 자연스럽게 본문에 녹여내세요.
+2. **SEO 및 AI 최적화**: 선택된 최적화 옵션에 맞춰 글을 구성하고, 키워드를 자연스럽게 본문에 녹여내세요.
 3. **구조화된 출력**: 반드시 아래의 JSON 형식으로 응답해야 합니다.
+
+{content_checklist}
 
 [추가 규칙 및 가이드라인]
 {rules_text}
@@ -432,7 +443,8 @@ async def _create_blog_post_with_openai(text: str, keywords: str, rule_guideline
         else:
             input_instruction = "입력된 텍스트는 주제나 문맥에 대한 설명입니다. 이 내용을 바탕으로 심층적인 분석을 수행하고 새로운 글을 작성(Write)하세요."
 
-        # 프롬프트 구성
+        # 프롬프트 구성 (dev-agent-kit / .spec-kit/03-content-creation 반영)
+        content_checklist = _get_content_quality_checklist()
         prompt = f"""
 당신은 전문적인 AI SEO 블로그 작가입니다. 다음 지침에 따라 고품질의 한국어 블로그 포스트를 작성해주세요.
 
@@ -449,14 +461,17 @@ async def _create_blog_post_with_openai(text: str, keywords: str, rule_guideline
 2. **SEO 및 AI 최적화**: 선택된 최적화 옵션에 맞춰 글을 구성하고 키워드를 자연스럽게 포함하세요.
 3. **구조화된 출력**: 반드시 아래의 JSON 형식으로 응답해야 합니다.
 
+{content_checklist}
+
 [추가 규칙]
 {rules_text}
 
 [출력 형식 (JSON)]
+- meta_description은 반드시 160자 이내로 작성하세요.
 ```json
 {{
-  "title": "블로그 제목",
-  "meta_description": "SEO 메타 설명",
+  "title": "블로그 제목 (60자 이내)",
+  "meta_description": "SEO 메타 설명 (160자 이내)",
   "content": "<h1>제목</h1>...<p>본문 내용(HTML 형식)</p>...",
   "keywords": "추출된 주요 키워드 (최대 10개, 쉼표로 구분)",
   "metrics": {{
@@ -481,7 +496,7 @@ async def _create_blog_post_with_openai(text: str, keywords: str, rule_guideline
         response = await client.chat.completions.create(
             model=settings.openai_model,
             messages=[
-                {"role": "system", "content": "당신은 SEO 전문가이자 블로그 작가입니다. JSON 형식으로만 응답하세요."},
+                {"role": "system", "content": "당신은 SEO·AI SEO·GEO에 능통한 블로그 작가입니다. 콘텐츠 품질 체크리스트를 준수하고 JSON 형식으로만 응답하세요."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=settings.openai_max_tokens,

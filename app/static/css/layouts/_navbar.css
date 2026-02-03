@@ -3,8 +3,7 @@
    ======================================== */
 
 .navbar-custom {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(var(--blur-lg));
+    background-color: var(--bg-primary);
     border-bottom: 1px solid var(--border-color);
     height: var(--header-height);
     position: sticky;
@@ -23,7 +22,7 @@
 }
 
 .navbar-brand-custom:hover {
-    color: var(--color-accent);
+    color: var(--text-secondary);
 }
 
 .nav-link-custom {
@@ -42,8 +41,8 @@
     bottom: 0;
     left: var(--spacing-4);
     right: var(--spacing-4);
-    height: 2px;
-    background-color: var(--color-accent);
+    height: 1.5px;
+    background-color: var(--text-primary);
     transform: scaleX(0);
     transition: transform var(--transition-base);
 }

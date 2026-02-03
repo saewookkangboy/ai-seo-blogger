@@ -25,6 +25,205 @@
         </div>
     </div>
 
+    <!-- AI 윤리 평가 결과 -->
+    <div id="ai-ethics-evaluation" class="mb-4" style="display: none;" aria-live="polite">
+        <div class="card border">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-check"></i> Responsible AI 평가 결과
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 종합 점수 -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold">종합 점수</h6>
+                        <span class="badge fs-5" id="ethics-overall-score" style="background-color: #28a745;">-</span>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar" id="ethics-progress-bar" role="progressbar" 
+                             style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
+
+                <!-- 세부 평가 항목 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">편향성 (Bias)</small>
+                                <span class="badge" id="ethics-bias-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-bias-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">공정성 (Fairness)</small>
+                                <span class="badge" id="ethics-fairness-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-fairness-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">투명성 (Transparency)</small>
+                                <span class="badge" id="ethics-transparency-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-transparency-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">프라이버시 (Privacy)</small>
+                                <span class="badge" id="ethics-privacy-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-privacy-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">해로운 콘텐츠 (Harmful Content)</small>
+                                <span class="badge" id="ethics-harmful-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-harmful-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">정확성 (Accuracy)</small>
+                                <span class="badge" id="ethics-accuracy-score">-</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="ethics-accuracy-progress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 권장사항 -->
+                <div class="mt-3">
+                    <h6 class="mb-2 fw-bold">개선 권장사항</h6>
+                    <ul id="ethics-recommendations" class="list-unstyled mb-0">
+                        <li class="text-muted small">평가 중...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 출처 및 인용 분석 결과 -->
+    <div id="citation-analysis" class="mb-4" style="display: none;" aria-live="polite">
+        <div class="card border">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-link-45deg"></i> 출처 및 인용 분석
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 출처 점수 -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold">출처 및 인용 점수</h6>
+                        <span class="badge fs-5" id="citation-score-badge" style="background-color: #17a2b8;">-</span>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-info" id="citation-progress-bar" role="progressbar" 
+                             style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
+
+                <!-- URL 정보 -->
+                <div class="mb-3">
+                    <h6 class="mb-2 fw-bold">발견된 URL</h6>
+                    <div id="citation-urls" class="mb-2">
+                        <p class="text-muted small mb-0">분석 중...</p>
+                    </div>
+                    <div class="small">
+                        <span class="badge bg-success" id="valid-url-count">유효: 0</span>
+                        <span class="badge bg-danger" id="invalid-url-count">무효: 0</span>
+                    </div>
+                </div>
+
+                <!-- 출처 신뢰도 -->
+                <div class="mb-3">
+                    <h6 class="mb-2 fw-bold">출처 신뢰도</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="fw-bold text-success" id="high-credibility-count">0</div>
+                                <small class="text-muted">높음</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="fw-bold text-info" id="medium-credibility-count">0</div>
+                                <small class="text-muted">중간</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="fw-bold text-warning" id="low-credibility-count">0</div>
+                                <small class="text-muted">낮음</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="fw-bold text-secondary" id="unknown-credibility-count">0</div>
+                                <small class="text-muted">알 수 없음</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="small text-muted">
+                        평균 신뢰도: <span id="avg-credibility-score" class="fw-bold">-</span>
+                    </div>
+                </div>
+
+                <!-- 인용 형식 -->
+                <div class="mb-3">
+                    <h6 class="mb-2 fw-bold">감지된 인용 형식</h6>
+                    <div id="citation-formats" class="mb-2">
+                        <span class="badge bg-secondary">없음</span>
+                    </div>
+                </div>
+
+                <!-- 출처 완전성 -->
+                <div class="mb-3">
+                    <h6 class="mb-2 fw-bold">출처 완전성</h6>
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar" id="completeness-progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <div id="completeness-issues" class="small text-muted">
+                        <p class="mb-0">분석 중...</p>
+                    </div>
+                </div>
+
+                <!-- 출처 관련 권장사항 -->
+                <div class="mt-3">
+                    <h6 class="mb-2 fw-bold">출처 개선 권장사항</h6>
+                    <ul id="citation-recommendations" class="list-unstyled mb-0">
+                        <li class="text-muted small">분석 중...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Guidelines Summary -->
     <div id="guidelines-summary" style="display: none;" class="mb-4" aria-live="polite">
         <div id="applied-guidelines-container"></div>
