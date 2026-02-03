@@ -66,15 +66,19 @@ class ComprehensiveLogger:
                  enable_file_logging: bool = True,
                  enable_console_logging: bool = True):
         
-        self.log_dir = Path(log_dir)
+        # Vercel 서버리스: 읽기 전용 파일시스템이므로 /tmp 사용
+        if os.environ.get("VERCEL") == "1":
+            self.log_dir = Path("/tmp/logs")
+        else:
+            self.log_dir = Path(log_dir)
         self.max_file_size = max_file_size
         self.max_files = max_files
         self.enable_database_logging = enable_database_logging
         self.enable_file_logging = enable_file_logging
         self.enable_console_logging = enable_console_logging
-        
-        # 로그 디렉토리 생성
-        self.log_dir.mkdir(exist_ok=True)
+
+        # 로그 디렉토리 생성 (Vercel에서는 /tmp/logs)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
         
         # 로그 큐 (비동기 처리를 위한)
         self.log_queue = queue.Queue()
