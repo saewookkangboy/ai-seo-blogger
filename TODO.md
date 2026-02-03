@@ -38,6 +38,14 @@ JSON 형식 To-do: [.project-data/todos.json](.project-data/todos.json)
 
 ---
 
+## Vercel 배포 (Server/DB)
+
+- [x] (high) **Vercel 배포 사양·진입점·vercel.json 적용** (`.spec-kit/04-vercel-deployment.md`) — 완료
+- [ ] (high) Vercel 환경 변수(DB, API 키, SESSION_SECRET) 설정 및 문서화 — 의존: Vercel 1
+- [ ] (medium) vercel deploy 또는 CLI/Claim URL로 실제 배포 및 /health 검증 — 의존: Vercel 2
+
+---
+
 ## 진행 방법
 
 - 역할을 지정해 작업 시: "PM 역할로 To-do 검토해줘", "Frontend 역할로 결과 화면 점검해줘" 등으로 요청

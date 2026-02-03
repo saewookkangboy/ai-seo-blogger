@@ -473,31 +473,30 @@ async def get_daily_stats(
 # 애플리케이션 시작 이벤트
 @app.on_event("startup")
 async def startup_event():
-    """애플리케이션 시작 시 실행되는 이벤트 (최적화: 즉시 시작)"""
-    logger.info("=== AI SEO Blog Generator 시작 ===")
-    
-    # 최소한의 작업만 동기적으로 실행 (서버를 즉시 시작 가능하게)
-    try:
-        # 최적화 로깅 설정 (최소한만)
-        setup_optimized_logging(
-            log_dir="logs",
-            log_level=settings.log_level,
-            enable_file=settings.log_enable_file,
-            enable_console=settings.log_enable_console
-        )
-        logger.info("✅ 로깅 설정 완료")
-    except Exception as e:
-        logger.warning(f"로깅 설정 중 오류: {e}")
-    
-    # 모든 초기화 작업을 백그라운드로 이동 (서버를 즉시 시작)
+    """애플리케이션 시작 시 실행되는 이벤트 (최적화: 즉시 바인딩)"""
+    # 로깅 설정을 포함한 모든 초기화를 백그라운드로 이동해 서버가 즉시 포트에 바인딩되도록 함
     asyncio.create_task(_run_all_startup_tasks())
-    
-    logger.info("✅ 서버 시작 완료 (초기화 작업은 백그라운드에서 진행 중)")
+    logger.info("=== AI SEO Blog Generator 시작 (초기화는 백그라운드에서 진행) ===")
 
 
 async def _run_all_startup_tasks():
     """모든 초기화 작업을 백그라운드에서 실행"""
     try:
+        # 최적화 로깅 설정 (블로킹이므로 스레드 풀에서 실행해 이벤트 루프가 멈추지 않도록 함)
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: setup_optimized_logging(
+                    log_dir="logs",
+                    log_level=settings.log_level,
+                    enable_file=settings.log_enable_file,
+                    enable_console=settings.log_enable_console,
+                ),
+            )
+            logger.info("✅ 로깅 설정 완료")
+        except Exception as e:
+            logger.warning(f"로깅 설정 중 오류: {e}")
         # 데이터베이스 인덱스 생성
         try:
             create_indexes()

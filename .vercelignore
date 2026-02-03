@@ -1,0 +1,47 @@
+# Tests and tooling (reduce bundle size)
+tests/
+pytest.ini
+*test_*.py
+comprehensive_performance_test.py
+system_performance_test.py
+tools/
+custom_crawlers/
+
+# Docs and backups
+docs/
+backups/
+.spec-kit/
+*.md
+!README.md
+
+# Git and env
+.git/
+.env
+.env.*
+!.env.example
+
+# AWS / local infra (not needed on Vercel)
+aws/
+docker-compose.yml
+Dockerfile
+*.tf
+*.tfvars*
+
+# Scripts not needed at runtime
+scripts/
+Makefile
+migrate_db.py
+create_tables.py
+init_db.py
+google_drive_setup.py
+optimize_system.py
+
+# Large or sensitive
+*.tar.gz
+credentials.json
+token.json
+cookies.txt
+
+# Optional: exclude heavy crawlers (selenium not installed on Vercel)
+app/services/selenium_crawler.py
+app/services/advanced_selenium_crawler.py

@@ -1,0 +1,24 @@
+# Vercel 배포용 경량 의존성 (250MB 제한 대응)
+# 제외: selenium, webdriver-manager, pandas, openpyxl, redis, psycopg2-binary
+# Vercel에서는 SQLite 사용 권장 (DATABASE_URL=sqlite:///./blog.db)
+
+fastapi
+uvicorn[standard]
+uvloop
+sqlalchemy
+pydantic-settings
+httpx
+requests
+beautifulsoup4
+openai
+psutil
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+schedule
+google-generativeai
+itsdangerous
+python-multipart
+aiohttp
+jinja2

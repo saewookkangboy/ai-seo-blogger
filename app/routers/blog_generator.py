@@ -6,7 +6,12 @@ from typing import Optional, Dict
 from fastapi import Request
 from fastapi.responses import StreamingResponse, JSONResponse
 import io
-import openpyxl
+OPENPYXL_AVAILABLE = False
+try:
+    import openpyxl
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    openpyxl = None
 from functools import lru_cache
 from datetime import datetime, timedelta
 import json
@@ -1133,6 +1138,11 @@ async def export_posts_xlsx(ids: Optional[str] = None, db: Session = Depends(get
     선택한 포스트(또는 전체) 엑셀(xlsx)로 내보내기
     ids=1,2,3
     """
+    if not OPENPYXL_AVAILABLE or openpyxl is None:
+        raise HTTPException(
+            status_code=503,
+            detail="엑셀 내보내기는 이 환경에서 비활성화되어 있습니다. (openpyxl 미설치)"
+        )
     id_list = [int(i) for i in ids.split(",") if i.strip()] if ids else None
     posts = crud.export_posts(db, id_list)
     wb = openpyxl.Workbook()

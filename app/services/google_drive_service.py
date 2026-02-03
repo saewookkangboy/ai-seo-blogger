@@ -1,6 +1,11 @@
 import os
 import json
-import pandas as pd
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    pd = None
+    PANDAS_AVAILABLE = False
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from google.oauth2.credentials import Credentials
@@ -201,9 +206,12 @@ class GoogleDriveService:
             logger.error(f"파일 업로드 실패: {e}")
             return None
     
-    def upload_dataframe(self, df: pd.DataFrame, file_name: str, folder_id: str = None) -> Optional[str]:
+    def upload_dataframe(self, df: "Any", file_name: str, folder_id: str = None) -> Optional[str]:
         """DataFrame을 CSV 파일로 변환하여 Google Drive에 업로드합니다."""
         try:
+            if not PANDAS_AVAILABLE or df is None:
+                logger.warning("pandas 미설치: DataFrame 업로드 불가")
+                return None
             if not self.service:
                 if not self.authenticate():
                     return None
@@ -240,6 +248,8 @@ class GoogleDriveService:
     def export_database_to_drive(self, db: Session, folder_name: str = None) -> Dict[str, Any]:
         """데이터베이스의 모든 테이블을 Google Drive에 내보냅니다."""
         try:
+            if not PANDAS_AVAILABLE:
+                return {"success": False, "error": "pandas가 설치되지 않아 내보내기를 사용할 수 없습니다."}
             if not folder_name:
                 folder_name = f"AI_SEO_Blogger_Export_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             

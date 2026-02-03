@@ -92,6 +92,16 @@ cd app
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
+### Vercel 배포
+
+[Vercel](https://vercel.com)에 배포하려면 저장소 연결 또는 CLI(`vercel deploy`)를 사용하세요. 사양 및 환경 변수는 [.spec-kit/04-vercel-deployment.md](.spec-kit/04-vercel-deployment.md)를 참고하세요.
+
+```bash
+# 로컬에서 Vercel 동작 확인 (CLI 48.1.8+)
+pip install -r requirements.txt
+vercel dev
+```
+
 ## 🛠️ Makefile 명령어
 
 ```bash
