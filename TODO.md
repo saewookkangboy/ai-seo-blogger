@@ -38,9 +38,12 @@ JSON 형식 To-do: [.project-data/todos.json](.project-data/todos.json)
 
 ---
 
-## Vercel 배포 (Server/DB)
+## Vercel 배포 (Server/DB) — P0 안정화
 
 - [x] (high) **Vercel 배포 사양·진입점·vercel.json 적용** (`.spec-kit/04-vercel-deployment.md`) — 완료
+- [x] (P0) **main.py _register_routers() 문법 오류 수정** — 라우터 등록 정상화
+- [x] (P0) **SESSION_SECRET 환경변수 적용** — 프로덕션 보안 (config.session_secret, SESSION_SECRET)
+- [x] (P0) **Vercel comprehensive_logger 더미** — LogLevel, LogCategory export 추가
 - [ ] (high) Vercel 환경 변수(DB, API 키, SESSION_SECRET) 설정 및 문서화 — 의존: Vercel 1
 - [ ] (medium) vercel deploy 또는 CLI/Claim URL로 실제 배포 및 /health 검증 — 의존: Vercel 2
 

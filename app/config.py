@@ -30,7 +30,9 @@ class Settings(BaseSettings):
         env_file='.env',
         env_file_encoding='utf-8',
         case_sensitive=False,
-        extra='ignore'  # .env 파일의 추가 필드 무시
+        extra='ignore',  # .env 파일의 추가 필드 무시
+        # SESSION_SECRET, DATABASE_URL 등 환경변수 매핑
+        env_prefix='',
     )
         
     def __init__(self, **kwargs):
@@ -61,6 +63,7 @@ class Settings(BaseSettings):
     # Admin
     admin_username: str = "admin"
     admin_password: str = "1234"
+    session_secret: str = "ai-seo-blogger-secret-key-2024"  # 프로덕션에서는 SESSION_SECRET 환경변수 사용 필수
     
     # 네이버 검색광고 API 연동용
     naver_client_id: Optional[str] = None
@@ -101,7 +104,7 @@ class Settings(BaseSettings):
     crawler_queue_size: int = 100  # 크롤러 큐 크기
     
     # 낮은 우선순위 최적화 설정
-    enable_postgresql_optimization: bool = True  # PostgreSQL 최적화 활성화
+    enable_postgresql_optimization: bool = True  # PostgreSQL 최적화 (Vercel SQLite 환경에서는 미적용)
     session_storage: str = "memory"  # 세션 저장소 (memory, redis)
     enable_horizontal_scaling: bool = True  # 수평 확장 지원 활성화
     

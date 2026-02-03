@@ -27,7 +27,25 @@ import types
 
 # Vercel: comprehensive_logger만 더미로 등록 (app.services 패키지는 그대로 두어야 함)
 if os.environ.get("VERCEL") == "1":
+    from enum import Enum as _Enum
     _dummy_cl = types.ModuleType("app.services.comprehensive_logger")
+    class _LogLevel(_Enum):
+        DEBUG = "DEBUG"
+        INFO = "INFO"
+        WARNING = "WARNING"
+        ERROR = "ERROR"
+        CRITICAL = "CRITICAL"
+    class _LogCategory(_Enum):
+        SYSTEM = "SYSTEM"
+        API = "API"
+        DATABASE = "DATABASE"
+        CRAWLING = "CRAWLING"
+        CONTENT_GENERATION = "CONTENT_GENERATION"
+        TRANSLATION = "TRANSLATION"
+        PERFORMANCE = "PERFORMANCE"
+        SECURITY = "SECURITY"
+        USER_ACTION = "USER_ACTION"
+        ERROR = "ERROR"
     class _DummyLogger:
         def log(self, *args, **kwargs): pass
         def stop(self): pass
@@ -36,6 +54,8 @@ if os.environ.get("VERCEL") == "1":
         def get_daily_stats(self, days=7): return {}
         def export_logs(self, *args, **kwargs): return False
         def cleanup_old_logs(self, days=7): pass
+    _dummy_cl.LogLevel = _LogLevel
+    _dummy_cl.LogCategory = _LogCategory
     _dummy_cl.comprehensive_logger = _DummyLogger()
     def _noop(*a, **k): pass
     _dummy_cl.log_system = _dummy_cl.log_api = _dummy_cl.log_error = _noop
@@ -115,8 +135,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# SessionMiddleware를 라우터 등록 등 모든 코드보다 먼저 추가
-app.add_middleware(SessionMiddleware, secret_key="ai-seo-blogger-secret-key-2024")
+# SessionMiddleware: SESSION_SECRET 환경변수 사용 (프로덕션 필수)
+_session_secret = os.environ.get("SESSION_SECRET") or settings.session_secret
+app.add_middleware(SessionMiddleware, secret_key=_session_secret)
 
 # CORS 미들웨어 추가
 app.add_middleware(
@@ -146,9 +167,9 @@ def _register_routers():
     try:
         from app.routers import feature_updates
         app.include_router(feature_updates.router, prefix="/api/v1/feature-updates")
-    except BaseException as e:
     except Exception as e:
         logger.warning("feature_updates 라우터 스킵: %s", e, exc_info=True)
+    try:
         from app.routers import news_archive
         app.include_router(news_archive.router, prefix="/api/v1/news-archive")
     except Exception as e:
@@ -157,13 +178,11 @@ def _register_routers():
     try:
         from app.routers import google_drive
         app.include_router(google_drive.router, prefix="/api/v1")
-    try:
-        from app.routers import google_drive
-        app.include_router(google_drive.router, prefix="/api/v1")
     except Exception as e:
+        logger.warning("google_drive 라우터 스킵: %s", e, exc_info=True)
+
+
 _register_routers()
-    import traceback
-    logger.exception("라우터 등록 실패(전체): %s", e)
 
 # 의존성 주입 함수
 def get_db():
