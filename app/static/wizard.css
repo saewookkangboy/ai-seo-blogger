@@ -114,22 +114,22 @@
     margin-bottom: 0;
 }
 
-/* Terminal Window */
+/* Terminal Window — 모노크롬 */
 .terminal-window {
-    background: #1e1e1e;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    background: var(--text-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-family: var(--font-family-mono);
     margin-top: 2rem;
 }
 
 .terminal-header {
-    background: #2d2d2d;
+    background: var(--bg-tertiary);
     padding: 10px 15px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .terminal-dot {
@@ -141,19 +141,19 @@
 }
 
 .terminal-dot.red {
-    background: #ff5f56;
+    background: var(--text-tertiary);
 }
 
 .terminal-dot.yellow {
-    background: #ffbd2e;
+    background: var(--text-secondary);
 }
 
 .terminal-dot.green {
-    background: #27c93f;
+    background: var(--border-hover);
 }
 
 .terminal-title {
-    color: #999;
+    color: var(--text-tertiary);
     font-size: 0.8rem;
     margin-left: 10px;
     flex-grow: 1;
@@ -162,7 +162,7 @@
 
 .terminal-body {
     padding: 15px;
-    color: #f0f0f0;
+    color: var(--text-inverse);
     font-size: 0.9rem;
     height: 200px;
     overflow-y: auto;

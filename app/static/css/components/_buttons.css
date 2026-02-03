@@ -40,8 +40,6 @@
     outline-offset: 2px;
 }
 
-/* 모노크롬: primary는 이미 흑/백 사용 */
-
 /* 버튼 변형 */
 .btn-outline-custom {
     background-color: transparent;

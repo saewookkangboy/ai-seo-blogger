@@ -28,6 +28,7 @@ JSON 형식 To-do: [.project-data/todos.json](.project-data/todos.json)
 - [ ] (medium) 사용자 입력 검증·이스케이프(OWASP) 점검 — 의존: Security 1
 
 ### UI/UX Designer
+- [x] (high) **전체 디자인 리뉴얼 — 모노크롬·미니멀** (`.spec-kit/03-ui-ux-renewal.md`) — 완료
 - [ ] (medium) 결과 플로우(생성→윤리/인용 표시) 사용자 플로우 정리 — 의존: Frontend 1
 - [ ] (low) 네비게이션·디자인 시스템 일관성 점검 — 의존: UI/UX 1
 

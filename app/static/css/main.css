@@ -38,8 +38,6 @@
     padding: 0 var(--container-padding);
 }
 
-/* 모노크롬 리뉴얼: 단조로운 톤 유지 */
-
 /* ========================================
    히어로 섹션
    ======================================== */
@@ -161,5 +159,93 @@
     .d-md-none { display: none; }
     .d-md-block { display: block; }
     .d-md-flex { display: flex; }
+}
+
+/* ========================================
+   Bootstrap 모노크롬 오버라이드 (단조로운 디자인)
+   ======================================== */
+
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.bg-light {
+    background-color: var(--bg-secondary) !important;
+}
+
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+.btn-outline-danger {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.spinner-border.text-primary {
+    border-color: currentColor;
+    border-right-color: transparent;
+}
+
+/* Bootstrap badge — 그레이 스케일 */
+.badge.bg-primary,
+.badge.bg-success {
+    background-color: var(--color-primary) !important;
+}
+
+.badge.bg-warning,
+.badge.bg-info,
+.badge.bg-secondary {
+    background-color: var(--text-secondary) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--text-primary) !important;
+}
+
+.badge.bg-dark {
+    background-color: var(--text-primary) !important;
+}
+
+.badge.bg-light {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Progress bar — 모노크롬 */
+.progress-bar,
+.progress-bar.bg-primary,
+.progress-bar.bg-success {
+    background-color: var(--color-primary) !important;
+}
+
+.progress-bar.bg-warning,
+.progress-bar.bg-info {
+    background-color: var(--text-secondary) !important;
+}
+
+.progress-bar.bg-danger,
+.progress-bar.bg-dark {
+    background-color: var(--text-primary) !important;
+}
+
+.card-header.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.card-header.bg-primary.text-white,
+.card-header.bg-primary .text-white {
+    color: var(--text-inverse) !important;
+}
+
+#ethics-overall-score[style*="background-color"],
+#citation-score-badge[style*="background-color"] {
+    background-color: var(--color-primary) !important;
 }
 

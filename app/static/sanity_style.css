@@ -3,7 +3,6 @@
 :root {
     --font-sans: var(--font-family-base);
     --container-width: var(--container-max-width);
-    --header-height: var(--header-height);
 }
 
 body {
