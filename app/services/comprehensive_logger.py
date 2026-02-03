@@ -66,28 +66,25 @@ class ComprehensiveLogger:
                  enable_file_logging: bool = True,
                  enable_console_logging: bool = True):
         
-        # Vercel 서버리스: 읽기 전용 파일시스템이므로 /tmp 사용
-        if os.environ.get("VERCEL") == "1":
-            self.log_dir = Path("/tmp/logs")
-        else:
-            self.log_dir = Path(log_dir)
         self.max_file_size = max_file_size
         self.max_files = max_files
         self.enable_database_logging = enable_database_logging
         self.enable_file_logging = enable_file_logging
         self.enable_console_logging = enable_console_logging
 
-        # 로그 디렉토리 생성. 읽기 전용 파일시스템(예: Vercel)이면 파일/DB 로깅 비활성화
-        try:
-            self.log_dir.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            self.log_dir = Path("/tmp/logs")
+        # 로그 디렉토리: Vercel/읽기전용에서는 /tmp 사용. mkdir은 반드시 try 안에서만.
+        self.log_dir = None
+        for candidate in (Path("/tmp/logs") if os.environ.get("VERCEL") == "1" else Path(log_dir), Path("/tmp/logs"), Path(log_dir)):
             try:
-                self.log_dir.mkdir(parents=True, exist_ok=True)
+                candidate.mkdir(parents=True, exist_ok=True)
+                self.log_dir = candidate
+                break
             except OSError:
-                self.enable_file_logging = False
-                self.enable_database_logging = False
-                self.log_dir = Path(log_dir)  # 경로만 유지, 실제 쓰기 안 함
+                continue
+        if self.log_dir is None:
+            self.enable_file_logging = False
+            self.enable_database_logging = False
+            self.log_dir = Path(log_dir)  # 쓰기 안 함, 경로만 유지
         
         # 로그 큐 (비동기 처리를 위한)
         self.log_queue = queue.Queue()
