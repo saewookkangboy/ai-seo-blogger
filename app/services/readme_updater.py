@@ -20,8 +20,19 @@ class ReadmeUpdater:
     
     def __init__(self, readme_path: str = "README.md"):
         self.readme_path = Path(readme_path)
-        self.backup_dir = Path("backups/readme")
-        self.backup_dir.mkdir(parents=True, exist_ok=True)
+        # Vercel 서버리스: 읽기 전용 파일시스템이므로 /tmp 사용
+        if os.environ.get("VERCEL") == "1":
+            self.backup_dir = Path("/tmp/backups/readme")
+        else:
+            self.backup_dir = Path("backups/readme")
+        try:
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            try:
+                self.backup_dir = Path("/tmp/backups/readme")
+                self.backup_dir.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                self.backup_dir = None  # 백업 불가 환경(읽기 전용)
         
         # 업데이트 이력
         self.update_history = []
@@ -105,6 +116,8 @@ class ReadmeUpdater:
     
     def _create_backup(self):
         """README 백업 생성"""
+        if self.backup_dir is None:
+            return
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_file = self.backup_dir / f"README_backup_{timestamp}.md"
@@ -297,10 +310,11 @@ python3 optimize_system.py
         
         self.update_history.append(update_record)
         
-        # 이력 파일 저장
-        history_file = self.backup_dir / "update_history.json"
-        with open(history_file, 'w', encoding='utf-8') as f:
-            json.dump(self.update_history, f, ensure_ascii=False, indent=2)
+        # 이력 파일 저장 (backup_dir 없으면 스킵)
+        if self.backup_dir is not None:
+            history_file = self.backup_dir / "update_history.json"
+            with open(history_file, 'w', encoding='utf-8') as f:
+                json.dump(self.update_history, f, ensure_ascii=False, indent=2)
     
     def generate_improvement_summary(self) -> Dict[str, Any]:
         """개선 사항 요약 생성"""
