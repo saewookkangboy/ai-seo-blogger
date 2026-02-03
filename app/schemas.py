@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl, validator, field_serializer
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class PostRequest(BaseModel):
@@ -84,6 +84,28 @@ class ErrorResponse(BaseModel):
     """에러 응답 모델"""
     detail: str
     error_code: Optional[str] = None
+
+
+# 콘텐츠 개선 / 키워드 생성 관련 스키마
+class GenerateFromKeywordRequest(BaseModel):
+    """키워드 기반 포스트 생성 요청 모델 (FR-B07)"""
+    keyword_id: int
+
+
+class ImproveContentRequest(BaseModel):
+    """콘텐츠 개선 요청 모델 (FR-B08)"""
+    original_content: str
+    suggestions: Optional[List[Dict[str, Any]]] = []
+    improvement_prompt: Optional[str] = ""
+
+
+class ImproveContentSuggestionRequest(BaseModel):
+    """개별 제안사항 적용 요청 모델 (FR-B08)"""
+    content: str
+    action: Optional[str] = None  # addHeadings, addFAQ, addSources, expandContent, addBalance, addStructuredData
+    suggestion: Optional[Dict[str, Any]] = None
+    keywords: Optional[str] = ""
+
 
 # API Key 관련 스키마
 class APIKeyBase(BaseModel):

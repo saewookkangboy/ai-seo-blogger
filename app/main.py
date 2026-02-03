@@ -141,31 +141,27 @@ def _register_routers():
     try:
         from app.routers import blog_generator
         app.include_router(blog_generator.router, prefix="/api/v1")
-    except BaseException as e:
-        import traceback
-        logger.warning("blog_generator 라우터 스킵: %s\n%s", e, traceback.format_exc())
+    except Exception as e:
+        logger.warning("blog_generator 라우터 스킵: %s", e, exc_info=True)
     try:
         from app.routers import feature_updates
         app.include_router(feature_updates.router, prefix="/api/v1/feature-updates")
     except BaseException as e:
-        import traceback
-        logger.warning("feature_updates 라우터 스킵: %s\n%s", e, traceback.format_exc())
-    try:
+    except Exception as e:
+        logger.warning("feature_updates 라우터 스킵: %s", e, exc_info=True)
         from app.routers import news_archive
         app.include_router(news_archive.router, prefix="/api/v1/news-archive")
-    except BaseException as e:
+    except Exception as e:
         import traceback
         logger.warning("news_archive 라우터 스킵: %s\n%s", e, traceback.format_exc())
     try:
         from app.routers import google_drive
         app.include_router(google_drive.router, prefix="/api/v1")
-    except BaseException as e:
-        import traceback
-        logger.warning("google_drive 라우터 스킵: %s\n%s", e, traceback.format_exc())
-
-try:
-    _register_routers()
-except BaseException as e:
+    try:
+        from app.routers import google_drive
+        app.include_router(google_drive.router, prefix="/api/v1")
+    except Exception as e:
+_register_routers()
     import traceback
     logger.exception("라우터 등록 실패(전체): %s", e)
 

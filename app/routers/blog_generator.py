@@ -33,7 +33,15 @@ from app.services.google_docs_service import google_docs_service
 from app.services.ai_ethics_evaluator import ai_ethics_evaluator
 from app import crud, models, exceptions
 from app.database import SessionLocal, engine
-from app.schemas import PostRequest, PostResponse, BlogPostResponse, ErrorResponse
+from app.schemas import (
+    PostRequest,
+    PostResponse,
+    BlogPostResponse,
+    ErrorResponse,
+    GenerateFromKeywordRequest,
+    ImproveContentRequest,
+    ImproveContentSuggestionRequest,
+)
 from app.utils.logger import setup_logger
 from app.services.rules import AI_RULES
 from app.config import settings
@@ -1907,12 +1915,12 @@ async def generate_post_pipeline_robust(req: PostRequest, db: Session = Depends(
         )
 
 @router.post("/improve-content")
-async def improve_content(request: dict):
+async def improve_content(request: ImproveContentRequest):
     """콘텐츠 개선 API"""
     try:
-        original_content = request.get("original_content", "")
-        suggestions = request.get("suggestions", [])
-        improvement_prompt = request.get("improvement_prompt", "")
+        original_content = request.original_content
+        suggestions = request.suggestions or []
+        improvement_prompt = request.improvement_prompt or ""
         
         if not original_content:
             raise HTTPException(
@@ -2011,13 +2019,13 @@ async def improve_content_with_ai(original_content: str, suggestions: list, prom
         return original_content
 
 @router.post("/improve-content-suggestion")
-async def improve_content_suggestion(request: dict):
+async def improve_content_suggestion(request: ImproveContentSuggestionRequest):
     """개별 제안사항 적용 API"""
     try:
-        content = request.get("content", "")
-        action = request.get("action", "")
-        suggestion = request.get("suggestion", {})
-        keywords = request.get("keywords", "")
+        content = request.content
+        action = request.action or ""
+        suggestion = request.suggestion or {}
+        keywords = request.keywords or ""
         
         if not content:
             raise HTTPException(
@@ -3226,10 +3234,10 @@ async def get_ai_ethics_stats(db: Session = Depends(get_db)):
         )
 
 @router.post("/posts/generate-from-keyword")
-async def generate_post_from_keyword(keyword_data: dict, db: Session = Depends(get_db)):
+async def generate_post_from_keyword(keyword_data: GenerateFromKeywordRequest, db: Session = Depends(get_db)):
     """키워드에서 포스트 생성"""
     try:
-        keyword_id = keyword_data.get("keyword_id")
+        keyword_id = keyword_data.keyword_id
         keyword = crud.get_keyword(db, keyword_id)
         
         if not keyword:
