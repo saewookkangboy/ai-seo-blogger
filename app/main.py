@@ -23,6 +23,25 @@ import asyncio
 import threading
 import time
 import sys
+import types
+
+# Vercel: comprehensive_logger를 더미로 미리 등록해 읽기 전용 FS에서 크래시 방지
+if os.environ.get("VERCEL") == "1":
+    if "app.services" not in sys.modules:
+        sys.modules["app.services"] = types.ModuleType("app.services")
+    _dummy_cl = types.ModuleType("app.services.comprehensive_logger")
+    class _DummyLogger:
+        def log(self, *args, **kwargs): pass
+        def stop(self): pass
+        def get_logs(self, *args, **kwargs): return []
+        def get_log_stats(self): return {}
+        def get_daily_stats(self, days=7): return {}
+        def export_logs(self, *args, **kwargs): return False
+        def cleanup_old_logs(self, days=7): pass
+    _dummy_cl.comprehensive_logger = _DummyLogger()
+    def _noop(*a, **k): pass
+    _dummy_cl.log_system = _dummy_cl.log_api = _dummy_cl.log_error = _noop
+    sys.modules["app.services.comprehensive_logger"] = _dummy_cl
 
 # 설정 및 유틸리티 임포트
 from .config import settings
