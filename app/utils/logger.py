@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -18,8 +19,8 @@ def setup_logger(name: str, log_file: Optional[str] = None, level=logging.INFO):
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     
-    # 파일 핸들러 (선택사항)
-    if log_file:
+    # 파일 핸들러 (선택사항). Vercel에서는 읽기 전용 파일시스템이므로 스킵
+    if log_file and os.environ.get("VERCEL") != "1":
         log_path = Path("logs")
         log_path.mkdir(exist_ok=True)
         file_handler = logging.FileHandler(log_path / log_file)

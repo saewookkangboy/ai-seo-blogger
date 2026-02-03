@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 import os
 import re
+from pathlib import Path
 from difflib import SequenceMatcher
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import Response
@@ -108,10 +109,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 정적 파일 및 템플릿 설정
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-app.mount("/crawling_stats.json", StaticFiles(html=True, directory="."), name="crawling_stats_json")
-templates = Jinja2Templates(directory="app/templates")
+# 정적 파일 및 템플릿 설정 (경로를 __file__ 기준으로 해서 Vercel 등에서 cwd 독립)
+_BASE_DIR = Path(__file__).resolve().parent.parent
+_STATIC_DIR = _BASE_DIR / "app" / "static"
+_TEMPLATES_DIR = _BASE_DIR / "app" / "templates"
+app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+if _BASE_DIR.exists():
+    app.mount("/crawling_stats.json", StaticFiles(html=True, directory=str(_BASE_DIR)), name="crawling_stats_json")
+templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
 # 라우터 등록
 from app.routers import blog_generator, feature_updates, news_archive, google_drive

@@ -5,14 +5,25 @@ from sqlalchemy.pool import StaticPool
 from .config import settings
 from sqlalchemy import text
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
+# Vercel 서버리스: 파일시스템이 읽기 전용이므로 SQLite는 /tmp 사용
+_database_url = settings.database_url
+if os.environ.get("VERCEL") == "1" and _database_url.startswith("sqlite"):
+    if _database_url.startswith("sqlite:///./") or _database_url == "sqlite:///./blog.db":
+        _database_url = "sqlite:////tmp/blog.db"
+    elif _database_url.startswith("sqlite:///"):
+        _database_url = "sqlite:////tmp/blog.db"
+else:
+    _database_url = settings.database_url
+
 # SQLAlchemy 엔진 생성 (성능 최적화)
-if settings.database_url.startswith("sqlite"):
+if _database_url.startswith("sqlite"):
     # SQLite를 사용할 때의 설정 (성능 최적화)
     engine = create_engine(
-        settings.database_url,
+        _database_url,
         connect_args={
             "check_same_thread": False,
             "timeout": 30,
