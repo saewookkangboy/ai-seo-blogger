@@ -18,6 +18,7 @@
         <div class="tab-content p-4" id="workTabsContent">
             <!-- Tab 1: 타겟 분석 -->
             <div class="tab-pane fade show active" id="tab-target-pane" role="tabpanel" aria-labelledby="tab-target-btn">
+                <p class="text-muted small mb-3">키워드·오디언스·경쟁자를 분석한 뒤, 결과를 새 포스트 작성에 바로 적용할 수 있습니다.</p>
                 <div class="row g-4">
                     <div class="col-md-12">
                         <label for="target_keyword" class="form-label-custom">분석할 타겟 키워드 또는 주제</label>
@@ -61,6 +62,7 @@
             </div>
             <!-- Tab 2: 새 포스트 작성 -->
             <div class="tab-pane fade" id="tab-generate-pane" role="tabpanel" aria-labelledby="tab-generate-btn">
+                <p class="text-muted small mb-3"><i class="bi bi-keyboard me-1"></i> 단축키: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 생성 · <kbd>Esc</kbd> 취소</p>
                 <div id="generator-form">
                     {% include 'components/_generator_form_body.html' %}
                 </div>

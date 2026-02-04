@@ -1,7 +1,8 @@
 # 역할별 업데이트 항목 (Dev Agent Kit)
 
 이 문서는 **각 업무 역할(Agent Role)별로** 이 프로젝트에서 진행·검토할 업데이트 항목을 정리한 것입니다.  
-To-do 상세는 [TODO.md](../TODO.md) 및 [.project-data/todos.json](../.project-data/todos.json)을 참고하세요.
+To-do 상세는 [TODO.md](../TODO.md) 및 [.project-data/todos.json](../.project-data/todos.json)을 참고하세요.  
+**서비스 고도화·차별화** 스펙: [docs/specs/enhancement-differentiation.md](specs/enhancement-differentiation.md)
 
 ---
 

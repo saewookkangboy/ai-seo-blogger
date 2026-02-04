@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-02-03] - 서비스 고도화 및 차별화 (역할 기반)
+
+### Added
+- **유사 서비스 리서치·고도화 스펙**: [docs/specs/enhancement-differentiation.md](docs/specs/enhancement-differentiation.md) — 경쟁 도구 비교, 차별화 포인트, 역할별 고도화 항목.
+- **타겟 분석 → 포스트 작성 연동**: 분석 결과 하단 "포스트 작성에 적용" 버튼으로 키워드·컨텍스트를 새 포스트 탭 주제/문맥 필드에 반영 후 탭 전환.
+- **히어로 차별화 문구**: "SEO · GEO · AIO · AI 윤리·인용 분석을 한 곳에서" 문구 추가.
+- **탭 안내**: 타겟 분석 탭에 분석→적용 플로우 안내, 새 포스트 탭에 키보드 단축키( Ctrl+Enter / Esc ) 안내.
+- **결과물 품질 안내**: 생성 결과 하단에 GEO·AIO·인용 반영 및 "다시 생성" 안내 블록.
+
+### Documentation
+- **enhancement-differentiation.md**: 검증 기준 및 변경 이력 포함.
+
+---
+
 ## [2025-02-03] - 역할별 업데이트 및 서비스 연동 정리 (Dev Agent Kit)
 
 ### Fixed

@@ -72,6 +72,14 @@ function setupEventListeners() {
     if (analyzeTargetBtn) {
         analyzeTargetBtn.addEventListener('click', handleAnalyzeTarget);
     }
+
+    // 포스트 작성에 적용 (동적 버튼 → 이벤트 위임)
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'apply-target-to-post-btn') {
+            e.preventDefault();
+            applyTargetToPost();
+        }
+    });
 }
 
 /**
@@ -232,6 +240,9 @@ function displayResult(data) {
     if (resultContainer && data.content) {
         resultContainer.innerHTML = data.content;
     }
+
+    const qualityHint = $('#result-quality-hint');
+    if (qualityHint) qualityHint.style.display = 'block';
 
     if (copyBtn) {
         copyBtn.classList.remove('d-none');
@@ -940,8 +951,50 @@ function displayTargetAnalysis(data, targetType) {
             </div>
         `;
     }
-    
+
+    // 포스트 작성에 적용 CTA (타겟 분석 → 새 포스트 연동)
+    html += `
+        <div class="mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-primary" id="apply-target-to-post-btn" aria-label="분석 결과를 새 포스트 작성에 적용">
+                <i class="bi bi-pencil-square me-2"></i>포스트 작성에 적용
+            </button>
+            <span class="text-muted small ms-2">분석 키워드·컨텍스트를 새 포스트 탭에 넣습니다.</span>
+        </div>
+    `;
+
     analysisContent.innerHTML = html;
+}
+
+/**
+ * 타겟 분석 결과를 새 포스트 작성 탭에 적용
+ */
+function applyTargetToPost() {
+    const keyword = $('#target_keyword')?.value?.trim() || '';
+    const context = $('#additional_context')?.value?.trim() || '';
+    const textInput = $('#text_input');
+    const generateTab = document.querySelector('#tab-generate-btn');
+    const generatePane = $('#tab-generate-pane');
+
+    if (textInput) {
+        const parts = [keyword].filter(Boolean);
+        if (context) parts.push(context);
+        textInput.value = parts.join('\n\n');
+    }
+
+    if (generateTab) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+            try {
+                const tab = new bootstrap.Tab(generateTab);
+                tab.show();
+            } catch (_) {
+                generateTab.click();
+            }
+        } else {
+            generateTab.click();
+        }
+        generateTab.focus();
+    }
+    showToast('새 포스트 작성 탭에 반영했습니다.', 'success');
 }
 
 /**

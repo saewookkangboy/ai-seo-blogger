@@ -65,6 +65,13 @@
     line-height: var(--line-height-relaxed);
 }
 
+.hero-differentiator {
+    font-size: var(--font-size-sm);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* ========================================
    반응형 디자인
    ======================================== */
