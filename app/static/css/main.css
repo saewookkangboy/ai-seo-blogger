@@ -43,7 +43,7 @@
    ======================================== */
 
 .hero-section {
-    padding: var(--spacing-24) 0 var(--spacing-16);
+    padding: var(--spacing-12) 0 var(--spacing-8);
     text-align: center;
 }
 
@@ -52,7 +52,7 @@
     font-weight: var(--font-weight-extrabold);
     letter-spacing: var(--letter-spacing-tight);
     line-height: var(--line-height-tight);
-    margin-bottom: var(--spacing-6);
+    margin-bottom: var(--spacing-3);
     color: var(--text-primary);
 }
 
@@ -60,7 +60,7 @@
     font-size: var(--font-size-lg);
     color: var(--text-secondary);
     max-width: 540px;
-    margin: 0 auto var(--spacing-10);
+    margin: 0 auto var(--spacing-5);
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-relaxed);
 }
@@ -75,17 +75,17 @@
     }
 
     .hero-section {
-        padding: var(--spacing-12) 0 var(--spacing-8);
+        padding: var(--spacing-6) 0 var(--spacing-4);
     }
 
     .hero-title {
         font-size: var(--font-size-3xl);
-        margin-bottom: var(--spacing-4);
+        margin-bottom: var(--spacing-2);
     }
 
     .hero-subtitle {
         font-size: var(--font-size-base);
-        margin-bottom: var(--spacing-8);
+        margin-bottom: var(--spacing-4);
     }
 
     .card-custom {
