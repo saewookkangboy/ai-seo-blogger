@@ -57,10 +57,43 @@
     transform: scaleX(1);
 }
 
-/* 모바일 메뉴 */
+/* 모바일 메뉴 — 터치 영역 44px 이상, seamless 연동 */
+.navbar-mobile-menu {
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-link-mobile {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--spacing-3) 0 !important;
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-base);
+}
+
+.nav-link-mobile:last-child {
+    border-bottom: none;
+}
+
+.navbar-mobile-menu .btn-custom {
+    min-height: 44px;
+    justify-content: center;
+}
+
 @media (max-width: 767px) {
     .navbar-custom {
         padding: var(--spacing-2) var(--spacing-4);
+    }
+    
+    .navbar-custom .btn[data-bs-toggle="collapse"] {
+        min-width: 44px;
+        min-height: 44px;
+        padding: var(--spacing-2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .mobile-menu-button {
@@ -71,6 +104,8 @@
         font-size: var(--font-size-2xl);
         padding: var(--spacing-2);
         cursor: pointer;
+        min-width: 44px;
+        min-height: 44px;
     }
     
     .mobile-menu {
@@ -92,6 +127,7 @@
         display: block;
         padding: var(--spacing-3) var(--spacing-4);
         border-bottom: 1px solid var(--border-color);
+        min-height: 44px;
     }
     
     .mobile-menu .nav-link-custom:last-child {

@@ -52,7 +52,7 @@
     padding: var(--spacing-3) var(--spacing-4);
 }
 
-/* 모바일에서 텍스트 크기 조정 */
+/* 모바일에서 텍스트 크기 조정 (breakpoint 768px로 통일) */
 @media (max-width: 767px) {
     .text-responsive {
         font-size: var(--font-size-sm);
@@ -68,6 +68,17 @@
     
     .section-title {
         font-size: var(--font-size-xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .card-custom {
+        padding: var(--spacing-5);
+    }
+    
+    .section-title {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-4);
     }
 }
 
@@ -126,10 +137,25 @@
     }
 }
 
-/* 폼 요소 반응형 */
+/* 폼 요소 반응형 — iOS 자동 줌 방지 (16px 이상) */
+@media (max-width: 768px) {
+    .form-control-custom,
+    input.form-control-custom,
+    textarea.form-control-custom {
+        font-size: 16px;
+    }
+    
+    select.form-control-custom,
+    .form-select.form-control-custom {
+        font-size: 16px;
+    }
+}
+
 @media (max-width: 767px) {
-    .form-control-custom {
-        font-size: 16px; /* iOS 줌 방지 */
+    .form-control-custom,
+    input.form-control-custom,
+    textarea.form-control-custom {
+        font-size: 16px;
     }
     
     select.form-control-custom {

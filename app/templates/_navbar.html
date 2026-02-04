@@ -34,16 +34,21 @@
 </nav>
 
 <!-- Mobile Menu -->
-<div class="collapse d-md-none bg-white border-bottom" id="mobileMenu" role="menu" aria-label="모바일 메뉴">
+<div class="collapse d-md-none navbar-mobile-menu" id="mobileMenu" role="menu" aria-label="모바일 메뉴">
   <div class="container-custom py-3 d-flex flex-column gap-2">
     <a class="btn-custom text-decoration-none" href="/" role="menuitem">생성하기</a>
-    <a class="nav-link-custom" href="/history" role="menuitem">기록</a>
-    <a class="nav-link-custom" href="/#target-analyzer" role="menuitem">
+    <a class="nav-link-custom nav-link-mobile" href="/history" role="menuitem">기록</a>
+    <a class="nav-link-custom nav-link-mobile" href="/#target-analyzer" role="menuitem">
       <i class="bi bi-graph-up-arrow me-1"></i>타겟 분석</a>
-    <a class="nav-link-custom" href="/admin" role="menuitem">관리자</a>
-    <a class="nav-link-custom" href="https://gaeo.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
-       aria-label="GAEO AI 검색 최적화 분석 도구 (새 창)">GAEO</a>
-    <a class="nav-link-custom" href="https://prompt.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
+    <a class="nav-link-custom nav-link-mobile" href="/admin" role="menuitem">관리자</a>
+    <a class="nav-link-custom nav-link-mobile" href="https://gaeo.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
+       aria-label="GAEO (새 창)">GAEO</a>
+    <a class="nav-link-custom nav-link-mobile" href="https://prompt.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
        aria-label="프롬프트 메이커 (새 창)">프롬프트</a>
+    {% if request.session and request.session.get('admin_authenticated') %}
+    <a class="nav-link-custom nav-link-mobile" href="/logout" role="menuitem">로그아웃</a>
+    {% else %}
+    <a class="nav-link-custom nav-link-mobile" href="/login" role="menuitem">로그인</a>
+    {% endif %}
   </div>
 </div>

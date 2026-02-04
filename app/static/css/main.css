@@ -91,9 +91,11 @@
    반응형 디자인
    ======================================== */
 
+/* 웹·모바일 seamless 반응형 (breakpoint 768px) */
 @media (max-width: 768px) {
     .container-custom {
         padding: 0 var(--spacing-4);
+        max-width: 100%;
     }
 
     .hero-section {
@@ -103,11 +105,24 @@
     .hero-title {
         font-size: var(--font-size-3xl);
         margin-bottom: var(--spacing-2);
+        line-height: var(--line-height-tight);
+        word-break: keep-all;
     }
 
     .hero-subtitle {
         font-size: var(--font-size-base);
         margin-bottom: var(--spacing-4);
+        max-width: 100%;
+    }
+
+    .hero-differentiator,
+    .hero-related {
+        max-width: 100%;
+        font-size: var(--font-size-xs);
+    }
+
+    .hero-related a {
+        white-space: nowrap;
     }
 
     .card-custom {
@@ -123,6 +138,63 @@
     .btn-outline-custom {
         padding: var(--spacing-2) var(--spacing-5);
         font-size: var(--font-size-sm);
+        min-height: 44px;
+    }
+
+    /* 작업 탭 카드 — 모바일 패딩·탭 터치 영역 */
+    .work-tabs-card .tab-content {
+        padding: var(--spacing-4) !important;
+    }
+
+    .nav-tabs-custom .nav-link {
+        padding: var(--spacing-3) var(--spacing-4);
+        min-height: 44px;
+        font-size: var(--font-size-sm);
+    }
+
+    /* 통합 결과 영역 — 헤더 wrap, 버튼 터치 */
+    #result-wrapper .d-flex.flex-wrap {
+        gap: var(--spacing-2);
+    }
+
+    #result-wrapper #copy-btn,
+    #result-wrapper #download-btn {
+        min-height: 44px;
+        padding: var(--spacing-2) var(--spacing-4) !important;
+    }
+
+    #result-container {
+        max-height: 60vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .analysis-content {
+        max-height: 60vh;
+    }
+
+    /* 모달 — 소형 화면에서 전체 높이 스크롤 */
+    .modal-dialog.modal-xl {
+        margin: var(--spacing-2);
+        max-width: calc(100% - var(--spacing-4));
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 진행 바 — 한 줄 유지 또는 wrap */
+    #progress-container .d-flex.gap-4 {
+        flex-wrap: wrap;
+        gap: var(--spacing-2);
+    }
+
+    /* 생성 폼 버튼 영역 */
+    .d-flex.gap-3 .btn-custom,
+    .d-flex.gap-3 .btn {
+        min-height: 44px;
     }
 }
 
@@ -434,5 +506,62 @@
 .pagination-custom .page-link:hover {
     background: var(--bg-secondary);
     border-color: var(--border-hover);
+}
+
+/* ========================================
+   반응형 — History 페이지
+   ======================================== */
+
+@media (max-width: 768px) {
+    .body-history {
+        padding-bottom: calc(var(--footer-height) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .history-hero {
+        padding: var(--spacing-6) 0 var(--spacing-4);
+    }
+
+    .history-hero .section-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .history-search-card .row {
+        --bs-gutter-y: var(--spacing-3);
+    }
+
+    .history-search-card .row > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .history-post-card .card-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .history-post-card .btn-group .btn {
+        min-height: 44px;
+        padding: var(--spacing-2) var(--spacing-3);
+    }
+
+    .history-footer {
+        padding: var(--spacing-3) var(--spacing-4);
+        padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .history-footer .container-custom {
+        flex-direction: column;
+        gap: var(--spacing-2);
+    }
+}
+
+/* 페이지네이션 터치 영역 */
+@media (max-width: 768px) {
+    .pagination-custom .page-link {
+        min-height: 44px;
+        padding: var(--spacing-2) var(--spacing-3);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
 
