@@ -12,6 +12,8 @@
         <i class="bi bi-graph-up-arrow me-1"></i>타겟 분석</a>
       <a class="nav-link-custom {% if '/admin' in request.path %}active{% endif %}" href="/admin" role="menuitem"
          aria-current="{% if '/admin' in request.path %}page{% endif %}">관리자</a>
+      <a class="nav-link-custom" href="https://gaeo.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
+         aria-label="GAEO AI 검색 최적화 분석 도구 (새 창)">GAEO</a>
 
       {% if request.session and request.session.get('admin_authenticated') %}
       <a class="nav-link-custom" href="/logout" role="menuitem">로그아웃</a>
@@ -37,5 +39,7 @@
     <a class="nav-link-custom" href="/#target-analyzer" role="menuitem">
       <i class="bi bi-graph-up-arrow me-1"></i>타겟 분석</a>
     <a class="nav-link-custom" href="/admin" role="menuitem">관리자</a>
+    <a class="nav-link-custom" href="https://gaeo.allrounder.im/" target="_blank" rel="noopener noreferrer" role="menuitem"
+       aria-label="GAEO AI 검색 최적화 분석 도구 (새 창)">GAEO</a>
   </div>
 </div>

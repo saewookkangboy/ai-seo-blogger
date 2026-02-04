@@ -72,6 +72,21 @@
     margin-right: auto;
 }
 
+.hero-related {
+    font-size: var(--font-size-sm);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-related a {
+    color: var(--text-secondary, #6c757d);
+}
+
+.hero-related a:hover {
+    color: var(--primary, #0d6efd);
+}
+
 /* ========================================
    반응형 디자인
    ======================================== */
