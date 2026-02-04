@@ -344,3 +344,95 @@
     overflow-y: auto;
 }
 
+/* ========================================
+   History 페이지 — 전체 서비스 UI/UX 연동
+   ======================================== */
+
+.body-history {
+    padding-top: var(--header-height);
+    padding-bottom: var(--footer-height);
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+.history-hero {
+    padding: var(--spacing-8) 0 var(--spacing-6);
+    text-align: center;
+}
+
+.history-hero .section-title {
+    margin-bottom: var(--spacing-2);
+}
+
+.history-hero .hero-related {
+    margin-top: var(--spacing-2);
+}
+
+.history-search-card {
+    margin-bottom: var(--spacing-8);
+}
+
+.history-post-card {
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.history-post-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.history-post-card .card-title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-2);
+}
+
+.history-empty {
+    padding: var(--spacing-16) var(--spacing-6);
+    text-align: center;
+}
+
+.history-empty .icon-empty {
+    font-size: 3rem;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-4);
+}
+
+.history-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-4) 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    z-index: var(--z-fixed);
+}
+
+.history-footer a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.history-footer a:hover {
+    text-decoration: underline;
+}
+
+.pagination-custom .page-link {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    background: var(--bg-primary);
+}
+
+.pagination-custom .page-item.active .page-link {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-inverse);
+}
+
+.pagination-custom .page-link:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-hover);
+}
+
