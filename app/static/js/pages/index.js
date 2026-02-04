@@ -12,8 +12,6 @@ import { $, copyToClipboard, downloadFile, formatError } from '../core/utils.js'
 let contentGenerator;
 let formValidator;
 
-const HERO_STORAGE_KEY = 'heroTitle';
-
 /**
  * 페이지 초기화
  */
@@ -27,38 +25,8 @@ export function init() {
         formValidator = new FormValidator(form);
     }
 
-    // 히어로 문구 선택 UI 및 저장값 복원
-    initHeroPhrase();
-
     // 이벤트 리스너 설정
     setupEventListeners();
-}
-
-/**
- * 히어로 문구: localStorage 복원 및 선택 시 적용
- */
-function initHeroPhrase() {
-    const titleEl = document.getElementById('hero-title-text');
-    const saved = localStorage.getItem(HERO_STORAGE_KEY);
-    if (titleEl && saved) {
-        titleEl.textContent = saved;
-    }
-
-    document.getElementById('hero-phrase-options')?.addEventListener('click', (e) => {
-        const option = e.target.closest('.hero-phrase-option');
-        if (!option) return;
-        e.preventDefault();
-        const phrase = option.getAttribute('data-phrase');
-        if (phrase && titleEl) {
-            titleEl.textContent = phrase;
-            localStorage.setItem(HERO_STORAGE_KEY, phrase);
-        }
-        const dropdown = document.querySelector('.hero-phrase-toggle')?.closest('.dropdown');
-        if (dropdown) {
-            const bsDropdown = bootstrap.Dropdown.getInstance(dropdown.querySelector('[data-bs-toggle="dropdown"]'));
-            if (bsDropdown) bsDropdown.hide();
-        }
-    });
 }
 
 /**
