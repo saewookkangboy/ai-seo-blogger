@@ -12,6 +12,29 @@
     transition: all var(--transition-base);
 }
 
+/* PC: 상단 메뉴 여유·정돈 */
+@media (min-width: 768px) {
+    .navbar-custom .container-custom {
+        max-width: 960px;
+        padding-left: var(--spacing-6);
+        padding-right: var(--spacing-6);
+    }
+
+    .navbar-custom .d-flex[role="menubar"] {
+        gap: var(--spacing-5);
+    }
+
+    .navbar-custom .nav-link-custom {
+        padding: var(--spacing-2) var(--spacing-3);
+        font-size: var(--font-size-base);
+    }
+
+    .navbar-custom .btn-custom {
+        padding: var(--spacing-2) var(--spacing-5);
+        font-size: var(--font-size-sm);
+    }
+}
+
 .navbar-brand-custom {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-xl);

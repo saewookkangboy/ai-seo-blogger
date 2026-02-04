@@ -38,6 +38,14 @@
     padding: 0 var(--container-padding);
 }
 
+/* PC: 넓은 컨테이너로 네비·히어로 여유 확보 */
+@media (min-width: 1024px) {
+    .container-custom {
+        max-width: 960px;
+        padding: 0 var(--spacing-6);
+    }
+}
+
 /* ========================================
    히어로 섹션
    ======================================== */
@@ -54,6 +62,13 @@
     line-height: var(--line-height-tight);
     margin-bottom: var(--spacing-3);
     color: var(--text-primary);
+}
+
+/* PC: 히어로 타이틀 한 줄 표시 */
+@media (min-width: 768px) {
+    .hero-title {
+        white-space: nowrap;
+    }
 }
 
 .hero-subtitle {
