@@ -65,6 +65,21 @@
     line-height: var(--line-height-relaxed);
 }
 
+.hero-phrase-picker {
+    text-align: center;
+}
+
+.hero-phrase-picker .btn-sm {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    border-color: var(--border-color);
+}
+
+.hero-phrase-picker .btn-sm:hover {
+    color: var(--text-secondary);
+    border-color: var(--border-hover);
+}
+
 /* ========================================
    반응형 디자인
    ======================================== */
