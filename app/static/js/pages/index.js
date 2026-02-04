@@ -172,9 +172,54 @@ function updateProgress(progress) {
 }
 
 /**
+ * 통합 결과 영역 표시 (타겟 분석 | 생성된 포스트)
+ * @param {'analysis'|'post'} type - 결과 유형
+ */
+function showUnifiedResult(type) {
+    const wrapper = $('#result-wrapper');
+    const badge = $('#result-type-badge');
+    const paneAnalysis = $('#result-pane-analysis');
+    const panePost = $('#result-pane-post');
+    const copyBtn = $('#copy-btn');
+    const downloadBtn = $('#download-btn');
+
+    if (!wrapper) return;
+
+    wrapper.style.display = 'block';
+
+    if (badge) {
+        badge.textContent = type === 'analysis' ? '타겟 분석 결과' : '생성된 포스트';
+        badge.className = 'badge result-type-badge ' + (type === 'analysis' ? 'bg-info' : 'bg-primary');
+    }
+
+    const contentStatus = $('#content-status');
+    if (contentStatus) {
+        contentStatus.textContent = type === 'analysis' ? '분석 완료' : '준비됨';
+    }
+
+    if (paneAnalysis) {
+        paneAnalysis.style.display = type === 'analysis' ? 'block' : 'none';
+    }
+    if (panePost) {
+        panePost.style.display = type === 'post' ? 'block' : 'none';
+    }
+
+    if (copyBtn) {
+        copyBtn.classList.toggle('d-none', type === 'analysis');
+    }
+    if (downloadBtn) {
+        downloadBtn.classList.toggle('d-none', type === 'analysis');
+    }
+
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
  * 결과 표시
  */
 function displayResult(data) {
+    showUnifiedResult('post');
+
     const resultContainer = $('#result-container');
     const progressContainer = $('#progress-container');
     const copyBtn = $('#copy-btn');
@@ -507,42 +552,34 @@ async function handleAnalyzeTarget() {
         return;
     }
     
-    const resultsContainer = $('#target_analysis_results');
     const loadingContainer = $('#target_analysis_loading');
     const analysisContent = $('#target_analysis_content');
-    
-    // UI 업데이트
-    if (resultsContainer) {
-        resultsContainer.style.display = 'none';
-    }
+
     if (loadingContainer) {
         loadingContainer.style.display = 'block';
     }
     if (analysisContent) {
         analysisContent.innerHTML = '';
     }
-    
+
     try {
         const apiClient = new APIClient();
         const useGemini = aiProvider === 'gemini';
-        
+
         const response = await apiClient.post('/api/v1/target/analyze', {
             target_keyword: targetKeyword,
             target_type: targetType,
             additional_context: additionalContext,
             use_gemini: useGemini
         });
-        
+
         if (response.success && response.data) {
             displayTargetAnalysis(response.data, targetType);
-            
-            if (resultsContainer) {
-                resultsContainer.style.display = 'block';
-            }
+            showUnifiedResult('analysis');
+
             if (loadingContainer) {
                 loadingContainer.style.display = 'none';
             }
-            
             showToast('타겟 분석이 완료되었습니다.', 'success');
         } else {
             throw new Error('분석 결과를 받아오지 못했습니다.');
@@ -551,7 +588,6 @@ async function handleAnalyzeTarget() {
         console.error('타겟 분석 오류:', error);
         const friendlyMessage = errorHandler.handleNetworkError(error) || formatError(error);
         showToast(friendlyMessage, 'error');
-        
         if (loadingContainer) {
             loadingContainer.style.display = 'none';
         }

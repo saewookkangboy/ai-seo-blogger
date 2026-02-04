@@ -1,7 +1,10 @@
-<!-- Result Display Component -->
-<div class="card-custom" id="result-wrapper" role="region" aria-label="생성된 콘텐츠 결과">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title mb-0">결과</h2>
+<!-- Result Display Component: 통합 결과 (타겟 분석 | 생성된 포스트) -->
+<div class="card-custom" id="result-wrapper" role="region" aria-label="분석 및 생성 결과" style="display: none;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="section-title mb-0">결과</h2>
+            <span class="badge result-type-badge" id="result-type-badge" aria-live="polite">생성된 포스트</span>
+        </div>
         <div class="d-flex gap-2">
             <span class="badge-custom" id="content-status" aria-live="polite">준비됨</span>
             <button id="copy-btn" class="btn-outline-custom py-1 px-3 d-none"
@@ -11,6 +14,16 @@
         </div>
     </div>
 
+    <!-- 패널: 타겟 분석 결과 (분석 완료 시 표시) -->
+    <div id="result-pane-analysis" class="result-pane mb-0" style="display: none;" aria-live="polite">
+        <div class="p-3 bg-light rounded border">
+            <h5 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>분석 결과</h5>
+            <div id="target_analysis_content" class="analysis-content"></div>
+        </div>
+    </div>
+
+    <!-- 패널: 생성된 포스트 결과 -->
+    <div id="result-pane-post" class="result-pane">
     <!-- Statistics -->
     {% include 'components/_statistics_card.html' %}
 
@@ -234,5 +247,7 @@
         role="article" aria-label="생성된 콘텐츠">
         <p class="text-muted text-center">콘텐츠를 생성하면 여기에 표시됩니다.</p>
     </div>
+    </div>
+    <!-- // result-pane-post -->
 </div>
 
