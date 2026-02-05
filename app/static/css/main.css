@@ -437,7 +437,7 @@
 
 .body-history {
     padding-top: var(--header-height);
-    padding-bottom: var(--footer-height);
+    padding-bottom: 7rem; /* 푸터(연결 서비스·메타) 높이 확보 */
     min-height: 100vh;
     background-color: var(--bg-primary);
 }
@@ -484,28 +484,6 @@
     margin-bottom: var(--spacing-4);
 }
 
-.history-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border-color);
-    padding: var(--spacing-4) 0;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    z-index: var(--z-fixed);
-}
-
-.history-footer a {
-    color: var(--text-primary);
-    text-decoration: none;
-}
-
-.history-footer a:hover {
-    text-decoration: underline;
-}
-
 .pagination-custom .page-link {
     color: var(--text-primary);
     border-color: var(--border-color);
@@ -521,6 +499,154 @@
 .pagination-custom .page-link:hover {
     background: var(--bg-secondary);
     border-color: var(--border-hover);
+}
+
+/* ========================================
+   공통 푸터 (UI/UX 디자인 시스템)
+   ======================================== */
+
+.site-footer {
+    margin-top: var(--spacing-12);
+    padding: var(--spacing-8) 0 var(--spacing-6);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.site-footer__section {
+    margin-bottom: var(--spacing-6);
+}
+
+.site-footer__section:last-child {
+    margin-bottom: 0;
+}
+
+.site-footer__heading {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-3);
+}
+
+.site-footer__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-4) var(--spacing-8);
+}
+
+.site-footer__links li {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.site-footer__link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-base);
+}
+
+.site-footer__link:hover {
+    color: var(--text-secondary);
+}
+
+.site-footer__icon {
+    font-size: 0.75em;
+    margin-left: 0.15em;
+    vertical-align: middle;
+}
+
+.site-footer__desc {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.site-footer__meta {
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.site-footer__copyright {
+    margin-bottom: var(--spacing-2);
+    color: var(--text-secondary);
+}
+
+.site-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3) var(--spacing-5);
+}
+
+.site-footer__nav .site-footer__link {
+    font-weight: var(--font-weight-normal);
+}
+
+/* History 페이지: 푸터 하단 고정 */
+.body-history .site-footer {
+    margin-top: 0;
+    padding: var(--spacing-4) 0;
+    padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-fixed);
+    border-top: 1px solid var(--border-color);
+}
+
+.body-history .site-footer .container-custom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3) var(--spacing-5);
+}
+
+.body-history .site-footer__section {
+    margin-bottom: 0;
+}
+
+.body-history .site-footer__section + .site-footer__section {
+    border-top: none;
+    padding-top: 0;
+}
+
+.body-history .site-footer__services,
+.body-history .site-footer__meta {
+    flex: 0 0 auto;
+}
+
+.body-history .site-footer__links {
+    gap: var(--spacing-3);
+}
+
+.body-history .site-footer__nav {
+    gap: var(--spacing-2) var(--spacing-4);
+}
+
+@media (max-width: 768px) {
+    .site-footer {
+        padding: var(--spacing-6) 0 var(--spacing-5);
+        margin-top: var(--spacing-8);
+    }
+
+    .site-footer__links {
+        flex-direction: column;
+        gap: var(--spacing-2);
+    }
+
+    .site-footer__nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 /* ========================================
@@ -558,12 +684,12 @@
         padding: var(--spacing-2) var(--spacing-3);
     }
 
-    .history-footer {
+    .body-history .site-footer {
         padding: var(--spacing-3) var(--spacing-4);
         padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
     }
 
-    .history-footer .container-custom {
+    .body-history .site-footer .container-custom {
         flex-direction: column;
         gap: var(--spacing-2);
     }
