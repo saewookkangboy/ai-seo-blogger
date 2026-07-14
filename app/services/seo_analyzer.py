@@ -30,6 +30,13 @@ class SEOAnalysisResult:
     recommendations: List[str]
     issues: List[str]
     metrics: Dict[str, Any]
+    # 2026 AI 신호 보강 (gaeoanalysis 포트, 선택)
+    modern_ai_signals: Optional[Dict[str, Any]] = None
+    aio_citation_scores: Optional[Dict[str, int]] = None
+    semantic_relevance: Optional[Dict[str, Any]] = None
+    citation_grounding: Optional[Dict[str, Any]] = None
+    aeo_score: Optional[float] = None
+    geo_score: Optional[float] = None
 
 class AdvancedSEOAnalyzer:
     """고급 SEO 분석기 (개선된 버전)"""
@@ -92,6 +99,30 @@ class AdvancedSEOAnalyzer:
                         image_analysis, readability_analysis, keyword_placement_analysis]:
             recommendations.extend(analysis.get('recommendations', []))
             issues.extend(analysis.get('issues', []))
+
+        # 2026 AI 신호 보강 (modern signals / AIO 인용 확률 / opt-in semantic·grounding)
+        enrichment: Dict[str, Any] = {}
+        try:
+            from app.services.analysis_enrichment import enrich_with_2026_signals
+
+            # overall_score는 구현에 따라 0~1 또는 0~100일 수 있음 → 0~100으로 정규화
+            seo_score_100 = (
+                overall_score * 100 if overall_score <= 1.0 else float(overall_score)
+            )
+            enrichment = await enrich_with_2026_signals(
+                soup,
+                url=url or "",
+                seo_score=seo_score_100,
+            )
+            signals = enrichment.get("modern_ai_signals") or {}
+            if signals.get("blocked_crawlers"):
+                recommendations.append(
+                    f"AI 크롤러 차단 해제 권장: {', '.join(signals['blocked_crawlers'][:5])}"
+                )
+            if signals and not signals.get("has_llms_txt_hint"):
+                recommendations.append("llms.txt를 제공하거나 링크하면 AI 검색 노출에 유리합니다.")
+        except Exception as enrich_err:
+            logger.warning(f"2026 신호 보강 스킵: {enrich_err}")
         
         return SEOAnalysisResult(
             overall_score=overall_score,
@@ -115,7 +146,13 @@ class AdvancedSEOAnalyzer:
                 'total_images': image_analysis.get('total', 0),
                 'readability_score': readability_analysis.get('score', 0),
                 'keyword_placement_score': keyword_placement_analysis.get('score', 0)
-            }
+            },
+            modern_ai_signals=enrichment.get("modern_ai_signals"),
+            aio_citation_scores=enrichment.get("aio_citation_scores"),
+            semantic_relevance=enrichment.get("semantic_relevance"),
+            citation_grounding=enrichment.get("citation_grounding"),
+            aeo_score=enrichment.get("aeo_score"),
+            geo_score=enrichment.get("geo_score"),
         )
     
     def _analyze_title(self, soup: BeautifulSoup) -> Dict[str, Any]:

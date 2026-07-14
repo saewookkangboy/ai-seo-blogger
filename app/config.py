@@ -48,10 +48,15 @@ class Settings(BaseSettings):
     openai_max_tokens: int = 4000
     openai_temperature: float = 0.7
     
-    # Gemini API Settings (2.0 Flash 지원)
+    # Gemini API Settings (2.0 Flash 지원 — 레거시 경로)
+    # 신규 LLM 모듈(app/services/llm)은 models.py 레지스트리 + GEMINI_MODEL_* env를 사용
     gemini_model: str = "gemini-2.0-flash"  # Gemini 2.0 Flash 모델
     gemini_max_tokens: int = 8192  # Gemini 2.0 Flash는 더 큰 토큰 제한
     gemini_temperature: float = 0.7
+
+    # 2026 AI 신호 보강 (옵션 — 비용 발생). gaeoanalysis와 동일한 플래그명
+    enable_semantic_scoring: bool = False
+    enable_citation_grounding: bool = False
     
     # Translation
     default_target_language: str = "KO"
@@ -70,8 +75,10 @@ class Settings(BaseSettings):
     naver_client_secret: Optional[str] = None
     
     # Google Drive API 설정
-    google_drive_client_id: str = "1050278621988-s7bg1k15tm114icvq2ad8aa49ohj2q5t.apps.googleusercontent.com"
-    google_drive_client_secret: str = "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"
+    # 보안: 자격증명은 소스에 하드코딩하지 않고 환경변수에서 읽습니다.
+    # (배포 환경에 GOOGLE_DRIVE_CLIENT_ID / GOOGLE_DRIVE_CLIENT_SECRET 설정 필요)
+    google_drive_client_id: str = os.getenv("GOOGLE_DRIVE_CLIENT_ID", "")
+    google_drive_client_secret: str = os.getenv("GOOGLE_DRIVE_CLIENT_SECRET", "")
     google_drive_credentials_path: str = "credentials.json"
     google_drive_token_path: str = "token.json"
     google_drive_backup_folder: str = "AI_SEO_Blogger_Backups"

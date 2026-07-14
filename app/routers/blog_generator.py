@@ -1505,7 +1505,14 @@ async def analyze_seo(request: dict):
                 "speed_score": round(analysis_result.speed_score * 100, 1),
                 "recommendations": analysis_result.recommendations,
                 "issues": analysis_result.issues,
-                "metrics": analysis_result.metrics
+                "metrics": analysis_result.metrics,
+                # 2026 AI 신호 (gaeoanalysis 포트)
+                "aeo_score": analysis_result.aeo_score,
+                "geo_score": analysis_result.geo_score,
+                "modern_ai_signals": analysis_result.modern_ai_signals,
+                "aio_citation_scores": analysis_result.aio_citation_scores,
+                "semantic_relevance": analysis_result.semantic_relevance,
+                "citation_grounding": analysis_result.citation_grounding,
             }
         }
         
