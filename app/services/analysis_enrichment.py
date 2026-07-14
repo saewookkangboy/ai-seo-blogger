@@ -16,7 +16,10 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 
-from app.services.aio_citation_analyzer import calculate_aio_citation_scores
+from app.services.aio_citation_analyzer import (
+    adjust_scores_with_modern_signals,
+    calculate_aio_citation_scores,
+)
 from app.services.llm.citation_grounding import (
     GroundingInput,
     is_grounding_enabled,
@@ -62,6 +65,8 @@ async def enrich_with_2026_signals(
 ) -> Dict[str, Any]:
     """분석 결과에 붙일 2026 보강 신호를 계산한다 (fail-soft)."""
     enrichment: Dict[str, Any] = {}
+    semantic_obj = None
+    grounding_obj = None
 
     try:
         robots_txt = await _fetch_robots_txt(url) if url else ""
@@ -105,6 +110,7 @@ async def enrich_with_2026_signals(
             queries = [page_title, f"{page_title} 방법", f"{page_title} 란"] if page_title else []
             rel = await compute_semantic_relevance(sections, queries)
             if rel:
+                semantic_obj = rel
                 enrichment["semantic_relevance"] = rel.to_dict()
 
         if (is_grounding_enabled() or _settings_flag("enable_citation_grounding")) and page_title and url:
@@ -115,7 +121,18 @@ async def enrich_with_2026_signals(
                     questions=[page_title, f"{page_title}에 대해 알려줘"],
                 )
             )
+            grounding_obj = grounding
             enrichment["citation_grounding"] = grounding.to_dict()
+
+        # 신호를 실제 인용 점수에 반영 (신호 없으면 값 불변)
+        enrichment["aio_citation_scores"] = adjust_scores_with_modern_signals(
+            aio_scores,
+            blocked_crawlers=modern.blocked_crawlers,
+            topical_coherence=semantic_obj.topical_coherence if semantic_obj else None,
+            query_relevance=semantic_obj.query_relevance if semantic_obj else None,
+            grounding_enabled=bool(grounding_obj and grounding_obj.enabled),
+            target_domain_cited=bool(grounding_obj and grounding_obj.target_domain_cited),
+        )
 
     except Exception as exc:
         logger.warning("2026 AI 신호 보강 중 오류 (계속 진행): %s", exc)

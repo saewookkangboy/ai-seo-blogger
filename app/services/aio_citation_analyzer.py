@@ -65,6 +65,56 @@ def calculate_aio_citation_scores(
     }
 
 
+# 모델별 대표 AI 크롤러 — 차단 시 해당 모델 인용 가능성에 직접 영향.
+MODEL_CRAWLERS: Dict[str, list] = {
+    "chatgpt": ["GPTBot", "OAI-SearchBot", "ChatGPT-User"],
+    "perplexity": ["PerplexityBot", "Perplexity-User"],
+    "gemini": ["Google-Extended"],
+    "claude": ["ClaudeBot", "Claude-Web"],
+    "grok": [],  # xAI는 공개 크롤러 UA가 명확치 않아 크롤러 패널티 제외
+}
+
+
+def _clamp_score(n: float) -> int:
+    return max(0, min(100, round(n)))
+
+
+def adjust_scores_with_modern_signals(
+    scores: AIOCitationScores,
+    *,
+    blocked_crawlers: Optional[list] = None,
+    topical_coherence: Optional[float] = None,
+    query_relevance: Optional[float] = None,
+    grounding_enabled: bool = False,
+    target_domain_cited: bool = False,
+) -> AIOCitationScores:
+    """휴리스틱 인용 점수에 2026 신호를 반영한다 (순수·결정적, gaeoanalysis 포트).
+
+    - 크롤러 차단: 모델별 대표 크롤러가 막히면 (막힌 비율 × 최대 20점) 감점
+    - 의미 신호: 주제 일관성·질의 관련도 평균에 비례해 전 모델 최대 +5점
+    - 그라운딩: 활성 시 대상 도메인 실제 인용 +8, 미인용 −5
+    신호가 없으면 입력 점수를 그대로 반환한다.
+    """
+    blocked = {c.lower() for c in (blocked_crawlers or [])}
+
+    semantic_parts = [v for v in (topical_coherence, query_relevance) if isinstance(v, (int, float))]
+    semantic_boost = (sum(semantic_parts) / len(semantic_parts) / 100 * 5) if semantic_parts else 0.0
+
+    grounding_delta = 0.0
+    if grounding_enabled:
+        grounding_delta = 8.0 if target_domain_cited else -5.0
+
+    adjusted: AIOCitationScores = {}
+    for model, base in scores.items():
+        crawlers = MODEL_CRAWLERS.get(model, [])
+        crawler_penalty = 0.0
+        if crawlers:
+            blocked_count = sum(1 for c in crawlers if c.lower() in blocked)
+            crawler_penalty = blocked_count / len(crawlers) * 20
+        adjusted[model] = _clamp_score(base - crawler_penalty + semantic_boost + grounding_delta)
+    return adjusted
+
+
 def _structured_text(soup: BeautifulSoup) -> str:
     return " ".join(t.get_text(" ", strip=True) for t in soup.select('script[type="application/ld+json"]'))
 

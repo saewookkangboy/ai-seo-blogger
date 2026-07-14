@@ -13,6 +13,9 @@ from typing import List, Optional
 
 from app.services.llm.cache import TTLCache, hash_key
 from app.services.llm.gemini import embed_texts, is_gemini_configured
+from app.utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 _embed_cache: TTLCache[List[float]] = TTLCache(6 * 60 * 60 * 1000, 1000)
 
@@ -109,5 +112,5 @@ async def compute_semantic_relevance(
             query_relevance=query_relevance,
         )
     except Exception as exc:
-        print(f"의미 관련도 계산 실패 — 폴백(None): {exc}")
+        logger.warning("의미 관련도 계산 실패 — 폴백(None): %s", exc)
         return None

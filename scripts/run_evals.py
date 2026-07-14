@@ -26,6 +26,7 @@ from app.services.algorithm_defaults import (
 from app.services.llm.models import EMBEDDING_MODEL, MODEL_FOR_TASK
 from app.services.llm.provider import provider_status
 from app.services.modern_ai_signals import analyze_modern_ai_signals, is_crawler_blocked
+from app.services.aio_citation_analyzer import adjust_scores_with_modern_signals
 
 passed = 0
 failed = 0
@@ -95,6 +96,21 @@ def case_provider_status() -> None:
         assert_true(key in status, f"프로바이더 누락: {key}")
 
 
+def case_signal_adjustment() -> None:
+    base = {"chatgpt": 80, "perplexity": 80, "grok": 80, "gemini": 80, "claude": 80}
+    unchanged = adjust_scores_with_modern_signals(base)
+    assert_true(unchanged == base, "신호 없는데 점수 변함")
+
+    blocked = adjust_scores_with_modern_signals(
+        base, blocked_crawlers=["GPTBot", "OAI-SearchBot", "ChatGPT-User"]
+    )
+    assert_true(blocked["chatgpt"] < base["chatgpt"], "GPTBot 전면 차단인데 chatgpt 감점 없음")
+    assert_true(blocked["perplexity"] == base["perplexity"], "perplexity가 영향받음(오류)")
+
+    cited = adjust_scores_with_modern_signals(base, grounding_enabled=True, target_domain_cited=True)
+    assert_true(cited["gemini"] > base["gemini"], "실제 인용인데 가점 없음")
+
+
 async def case_live_structured() -> None:
     from app.services.llm.gemini import generate_json
 
@@ -119,6 +135,7 @@ def main() -> int:
         ("robots.txt 파서: GPTBot 차단 감지", case_robots_parser),
         ("modern-ai-signals: 기본 신호 점수 계산", case_modern_signals),
         ("프로바이더 상태 스냅샷: 5개 프로바이더 키 존재", case_provider_status),
+        ("신호 반영: 신호 없으면 불변, GPTBot 차단 시 chatgpt 감점", case_signal_adjustment),
     ]
 
     live_on = bool(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
