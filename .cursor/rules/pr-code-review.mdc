@@ -1,0 +1,29 @@
+---
+description: PR 및 코드리뷰 시 dev-agent-kit 7가지 역할 활용
+globs: .github/workflows/*.yml, scripts/pr_review*.py, docs/specs/pr*.md
+alwaysApply: false
+---
+
+# PR 코드리뷰 (Dev Agent Kit 다중 역할)
+
+PR 또는 코드리뷰 요청 시 **모든 Agent Role**을 활용한다:
+
+| Role | 초점 |
+|------|------|
+| PM | 범위·일정·우선순위·리스크, 스펙·To-do 정합성 |
+| Frontend | UI/UX, 접근성, 반응형, 컴포넌트·상태 관리 |
+| Backend | API 설계, 비동기, 보안, 확장성 |
+| Server/DB | 인프라, DB 스키마, 마이그레이션, 성능 |
+| Security | OWASP, 입력 검증, 시크릿, 암호화 |
+| UI/UX | 사용자 플로우, 디자인 시스템, 접근성 |
+| AI Marketing Researcher | SEO, AI SEO, GEO, 인용·신뢰도 |
+
+## 자동화 실행
+
+```bash
+python scripts/pr_review_multi_role.py --post   # PR에 리뷰 코멘트 게시
+python scripts/pr_review_multi_role.py --all    # 전체 서비스 파일 리뷰 (PR 불필요)
+```
+
+- GitHub Actions: PR 생성/업데이트 시 `.github/workflows/pr-review.yml` 자동 실행
+- 상세: `docs/specs/pr-code-review-automation.md`, `.cursor/skills/dev-agent-kit/examples.md` 예시 8

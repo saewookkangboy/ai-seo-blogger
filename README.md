@@ -175,6 +175,7 @@ ai-seo-blogger/
 | **역할별 업데이트** | [docs/ROLE_UPDATES.md](docs/ROLE_UPDATES.md) — PM, Frontend, Backend, Server/DB, Security, UI/UX, AI Marketing 역할별 진행 항목 |
 | **To-do** | [TODO.md](TODO.md), [.project-data/todos.json](.project-data/todos.json) |
 | **Spec (사양)** | [.spec-kit/](.spec-kit/), [docs/specs/](docs/specs/) — 사양 문서 |
+| **전체 역할 고도화** | [docs/specs/service-enhancement-all-roles.md](docs/specs/service-enhancement-all-roles.md) — 7역할 고도화 항목·검증 |
 | **Role (역할)** | [.cursor/skills/dev-agent-kit/reference.md](.cursor/skills/dev-agent-kit/reference.md) — PM, Frontend, Backend, Security, UI/UX, AI Marketing Researcher |
 | **SEO / GEO** | [AI_SEO_AEO_GEO_GUIDELINES_REPORT.md](AI_SEO_AEO_GEO_GUIDELINES_REPORT.md), [.spec-kit/02-seo-geo-aio.md](.spec-kit/02-seo-geo-aio.md) |
 | **상세 템플릿·예시** | [.cursor/skills/dev-agent-kit/reference.md](.cursor/skills/dev-agent-kit/reference.md), [examples.md](.cursor/skills/dev-agent-kit/examples.md) |
@@ -183,6 +184,7 @@ ai-seo-blogger/
 
 ## 📚 추가 문서
 
+- [docs/VERCEL_ENV.md](docs/VERCEL_ENV.md) - Vercel 배포 시 환경 변수 목록
 - [CHANGELOG.md](CHANGELOG.md) - 상세한 변경 이력
 - [HISTORY.md](HISTORY.md) - 프로젝트 주요 업데이트 이력
 - [API_SETUP_GUIDE.md](API_SETUP_GUIDE.md) - API 설정 가이드

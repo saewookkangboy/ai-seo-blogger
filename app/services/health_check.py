@@ -65,6 +65,14 @@ class HealthCheck:
         # 시스템 리소스 체크
         system_health = self.check_system_resources()
         health['checks']['system'] = system_health
+
+        # LLM 프로바이더 설정 상태 (키 존재 여부 — 라이브 호출 없음)
+        try:
+            from app.services.llm.provider import provider_status
+
+            health['checks']['llm_providers'] = provider_status()
+        except Exception as e:
+            health['checks']['llm_providers'] = {'error': str(e)}
         
         return health
     
