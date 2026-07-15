@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-07-14] - gaeoanalysis LLM/분석 2026 업그레이드 이식
+
+### Added
+- **LLM 추상화**: `app/services/llm/` — 모델 레지스트리, Gemini REST(구조화·그라운딩·임베딩), 멀티 프로바이더, TTL 캐시.
+- **2026 AI 신호**: `modern_ai_signals`, `aio_citation_analyzer`(AIO 가중치 재보정), `analysis_enrichment` — SEO 분석에 연결.
+- **방법론 문서**: [docs/METHODOLOGY_2026.md](docs/METHODOLOGY_2026.md)
+- **회귀 evals**: `python scripts/run_evals.py`
+
+### Changed
+- `/api/v1/seo-analysis` 응답에 `modern_ai_signals`, `aio_citation_scores`, (옵션) `semantic_relevance` / `citation_grounding` 추가.
+- `/health`에 `checks.llm_providers` 스냅샷 추가.
+
+---
+
+## [2026-02-03] - Phase 1 정리 및 다음 단계 (스펙·To-do·Vercel 문서)
+
+### Added
+- **스펙·To-do 매핑**: [docs/specs/spec-todo-mapping.md](docs/specs/spec-todo-mapping.md) — AI 윤리·인용·타겟 분석 기능과 스펙·To-do 항목 매핑, 정합성 검증 체크.
+- **Vercel 환경 변수 문서**: [docs/VERCEL_ENV.md](docs/VERCEL_ENV.md) — 배포 시 필수·선택 환경 변수 목록 및 설명.
+
+### Changed
+- **TODO.md**: Phase 1 항목 대부분 완료 처리 (PM, Frontend-1, Backend, Server/DB, Security, UI/UX, AI Marketing-1, Vercel-2).
+- **.project-data/todos.json**: pm-1, pm-2, frontend-1, backend-1, backend-2, server-db-1, security-1, security-2, uiux-1, uiux-2, ai-mkt-1, vercel-2 → `status: "completed"`.
+- **README**: 추가 문서에 VERCEL_ENV.md 링크 추가.
+
+### Documentation
+- Phase 1 남은 항목: frontend-2(a11y·반응형 점검), server-db-2(배포 설정 검토), ai-mkt-2(GEO 스키마 강화), vercel-3(실제 배포·/health 검증).
+
+---
+
+## [2026-02-03] - 역할별 서비스 고도화 자동화 (Dev Agent Kit)
+
+### Added
+- **전체 역할 고도화 스펙**: [docs/specs/service-enhancement-all-roles.md](docs/specs/service-enhancement-all-roles.md) — PM, Frontend, Backend, Server/DB, Security, UI/UX, AI Marketing Researcher 7역할별 고도화 항목·우선순위·검증 기준 정의.
+- **TODO Phase 2**: 역할별 고도화 자동화 항목 추가 (CHANGELOG·README·메타·API·Security·UI/UX·AI Marketing 검토).
+
+### Changed
+- **Security**: `app/services/translator.py`에서 하드코딩된 Gemini API 키 제거 — 환경변수·config만 사용.
+- **Frontend**: 로그인 페이지 메타 description, `role="main"`, `aria-label`(로그인 폼·영역) 추가.
+
+### Documentation
+- **README**: 전체 역할 고도화 스펙 문서 링크 추가.
+- **TODO.md**: Phase 2 "역할별 고도화 자동화" 섹션 및 Phase 2 전 항목 완료 체크 반영.
+- **.project-data/todos.json**: Phase 2 항목(phase2-frontend, phase2-backend, phase2-server, phase2-security, phase2-uiux, phase2-ai-mkt) status `completed`로 업데이트.
+
+---
+
 ## [2025-02-03] - 서비스 고도화 및 차별화 (역할 기반)
 
 ### Added

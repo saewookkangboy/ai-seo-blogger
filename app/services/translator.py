@@ -25,20 +25,13 @@ API_USAGE_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 
 API_USAGE_FILE = os.path.abspath(API_USAGE_FILE)
 API_USAGE_LOCK = threading.Lock()
 
-# Gemini API 설정 (환경변수에서 가져오도록 수정)
-DEFAULT_GEMINI_API_KEY = "AIzaSyDsBBgP9R8NrLaseWWFDcdYFGrrUNbIX9A"
-
+# Gemini API 설정 — 환경변수·설정만 사용 (하드코딩 키 없음)
 def get_gemini_api_key():
-    """Gemini API 키를 안전하게 가져오기"""
-    from ..config import settings
+    """Gemini API 키를 안전하게 가져오기 (환경변수 또는 config만 사용)"""
     api_key = settings.get_gemini_api_key()
     if api_key:
         return api_key
-    # 환경변수에서 직접 가져오기 (하드코딩된 키는 제외)
-    env_key = os.getenv('GEMINI_API_KEY')
-    if env_key and env_key != DEFAULT_GEMINI_API_KEY:
-        return env_key
-    return DEFAULT_GEMINI_API_KEY
+    return os.getenv('GEMINI_API_KEY')
 
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="
 
